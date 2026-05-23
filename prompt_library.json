@@ -31,6 +31,24 @@
     "emoji": "🧑",
     "items": [
       {
+        "title": "Чб",
+        "prompt": "Нельзя менять лицо, черты лица и цвет волос. Очень худая девушка Фотореалистичный чёрно-белый fashion portrait на открытом воздухе, девушка стоит вполоборота спиной к камере, лицо повернуто в сторону, глаза закрыты, спокойное мечтательное выражение. На ней свободная белая рубашка oversize, заправленная в джинсы с высокой посадкой. Волосы естественно развеваются ветром, мягкие пряди вокруг лица. Размытый природный фон, ощущение морского побережья, лёгкий винтажный стиль 90-х, плёночное зерно, мягкий контраст, естественная кожа. ultra realistic 8K, hyper-detailed, sharp focus, shallow depth of field, natural bokeh, HDR lighting, cinematic color grading, lens 85mm, aperture f/1.8, soft shadows, clean white balance, natural skin texture, glossy highlights.",
+        "example_url": "https://iili.io/CHUTdej.jpg",
+        "added_at": "2026-05-23T10:00:00"
+      },
+      {
+        "title": "На бордюре",
+        "prompt": "Создай изображение,сохрани внешность и черты лица Стильная молодая девушка с немного загорелой кожей сидит, скрестив ноги, на городском тротуаре рядом с пешеходным переходом. На ней светло-розовая рубашка на пуговицах, розовые шорты в тон, серо-розовый клетчатый пиджак, накинутый на плечи, розовая бейсболка с темным логотипом, розово-черные кроссовки с белыми носками и маленькие овальные солнцезащитные очки. В левой руке она держит белую кофейную чашку с надписью «улыбайтесь, вам так идет» и нарисовано сердечко. написанной черным шрифтом, а на пальцах она носит несколько серебряных колец. Ее правая рука прижимает смартфон к уху, как будто она разговаривает по телефону. Она украшена многочисленными серебряными ожерельями разной длины, серебряными браслетами на обоих запястьях и большими замысловатыми серебряно-розовыми серьгами с подвесками. Ее губы слегка приоткрыты, а выражение лица расслабленное и шикарное. На заднем плане изображена обсаженная деревьями улица с темно-зеленой листвой и размытыми красно-коричневыми кирпичными зданиями, что наводит на мысль о городской среде. Освещение — естественный дневной свет, отбрасывающий мягкие тени, а в общей цветовой палитре преобладают розовые, серые и темно-зеленые оттенки с серебряными акцентами. Стиль — модная фотография с упором на уличный стиль и аксессуары. Настроение уверенное, непринужденное и модное. Высокое разрешение, детальные текстуры, четкая фокусировка на объекте, фон боке.",
+        "example_url": "https://iili.io/CHUzA8J.jpg",
+        "added_at": "2026-05-22T10:00:00"
+      },
+      {
+        "title": "Мурмур",
+        "prompt": "ultra realistic 8K, hyper-detailed, sharp focus; shallow depth of field, natural bokeh; HDR lighting; cinematic color grading; lens 85mm; aperture f/1.8–f/2.2; key light at 45°, soft shadows; rim/back light for separation; clean white balance; natural skin texture with visible pores, glossy highlights. cinematic high-fashion editorial shot outdoors, young woman in a cornfield at golden hour, vertical 9:16, centered slightly right, medium shot, camera slightly low from left. pose: three-quarter body, arms crossed hugging herself, head tilted back, eyes closed, calm expression. white semi-sheer off-shoulder dress with voluminous ruffled sleeves and corset lacing, refined silhouette. large sunflower in lower right, diagonal stem. lighting more dramatic: stronger contrast, defined highlights and deeper shadows, sculpted light across face and collarbones, subtle rim light. color grading: Vogue editorial — cooler shadows, warm highlights, reduced greens, high micro-contrast, matte blacks, crisp tones. texture: fine grain, subtle film sharpness, clean but cinematic. mood: luxury, editorial, bold elegance. Negative: text, watermark, blur, plastic skin, distortion.",
+        "example_url": "https://iili.io/CHSLVkl.jpg",
+        "added_at": "2026-05-21T10:00:00"
+      },
+      {
         "title": "Чувственное фото",
         "prompt": "Не меняй лицо! Не меняй черты лица! Не меняй пропорции тела, глаза цвет не меняй! Размер 9:16 стиль vogue Макияж с акцентом на глаза, стрелки cat на верхнем веке, нюдовая матовая помада пыльная роза очерченная карандашом для губ на тон темнее помады мокрый хайлайтер. Крупный план женского лица, фрагмент правой половины, акцент на глубоком цвете глазе с длинными ресницами и чёткой крылатой подводкой, пухлые глянцевые губы с лёгким показом зубов и язычка, аккуратный французский маникюр пальца, прикасающегося к губам, тонкая прядь волос на лице, золотое блестящее кольцо-серьга тёплый золотистый боковой свет «золотого часа», мягкие контрастные тени, яркие спекулы на губах и серьгах, натуральная сияющая кожа с видимой текстурой и порами, интимное чувственное настроение, стиль модной beauty-фотографии, гиперреализм, ultra-detailed, высокое разрешение; композиция: экстремальный кроп, лицо занимает весь кадр, фокус на глазу и губах, фон тёмный и кремово размытый, правило третей; освещение: боковой softbox/золотой рефлектор, тёплый цветовой баланс; камера/параметры: средне-телеобъектив 85mm, диафрагма f/1.4–f/1.8 для низкой глубины резкости, ISO 100, выдержка 1/160s, мягкое кремовое боке, естественная ретушь с сохранением текстур. Фон темно-серый с теплой мягкой подсветкой Фото 9:16",
         "example_url": "https://i.ibb.co/wht7Y68V/import.jpg"
@@ -80,26 +98,10 @@
         "prompt": "Создай изображение,сохрани внешность и черты лица\nфото с прямой вспышкой, съёмка в помещении, ракурс на уровне груди, кадр по пояс, объектив 26–28mm, средняя глубина резкости. Фигура стоит вплотную к светлой стене, корпус развернут фронтально, руки пальцы в карманах джинс, поза уверенная и статичная. Голова слегка наклонена в сторону, взгляд направлен мимо камеры, выражение делает поцелуйчик губами, смотрит в сторону вверх глазами.\nОбраз: минималистичный комплект — структурированный топ без бретелей черного оттенка, плотная матовая ткань с чёткой формой; талия очень узкая, тёмные джинсы с низкой посадкой, очень оверсайз\nДевушка слегка загорелая. \nАксессуары: маленькие узкие очки солнцезащитные с  тонкой оправой.\nминималистичный интерьер с глубоко бордовой  стеной и мягкими тенями.\nжёсткая фронтальная вспышка canon g7x создаёт яркие хайлайты на коже и ткани, выраженные тени по контуру фигуры, подчёркивает форму и текстуру, даёт характерный контрастный эффект.\nвысокая детализация. 3:4\nЕё сфоткали на уровне глаз \nВолосы не лежат на плечах, она прижата к стене.Гиперреализм.",
         "example_url": "https://i.ibb.co/Pzjbfp5x/zveno-result.jpg"
       },
-      
       {
         "title": "Поле цветов",
         "prompt": "Нельзя менять лицо, черты лица и цвет волос. Фотореалистичный яркий весенний кадр в огромном поле тюльпанов, длинные цветочные ряды уходят к горизонту. Девушка идёт между рядами цветов, держит в руках небольшой букет красных тюльпанов. На ней нежно-розовая рубашка с коротким рукавом, белая объёмная мини-юбка, белые прямоугольные солнцезащитные очки, маленькая белая сумка. Солнечный день, голубое небо с облаками, насыщенные цвета, туристический lifestyle кадр, естественная поза, живой момент. ultra realistic 8K, hyper-detailed, sharp focus, shallow depth of field, natural bokeh, HDR lighting, cinematic color grading, lens 35mm, aperture f/2.8, clean white balance, natural skin texture. Формат 4:5.",
         "example_url": "https://iili.io/CHSL2dx.jpg"
-      },
-      {
-        "title": "Мурмур",
-        "prompt": "ultra realistic 8K, hyper-detailed, sharp focus; shallow depth of field, natural bokeh; HDR lighting; cinematic color grading; lens 85mm; aperture f/1.8–f/2.2; key light at 45°, soft shadows; rim/back light for separation; clean white balance; natural skin texture with visible pores, glossy highlights. cinematic high-fashion editorial shot outdoors, young woman in a cornfield at golden hour, vertical 9:16, centered slightly right, medium shot, camera slightly low from left. pose: three-quarter body, arms crossed hugging herself, head tilted back, eyes closed, calm expression. white semi-sheer off-shoulder dress with voluminous ruffled sleeves and corset lacing, refined silhouette. large sunflower in lower right, diagonal stem. lighting more dramatic: stronger contrast, defined highlights and deeper shadows, sculpted light across face and collarbones, subtle rim light. color grading: Vogue editorial — cooler shadows, warm highlights, reduced greens, high micro-contrast, matte blacks, crisp tones. texture: fine grain, subtle film sharpness, clean but cinematic. mood: luxury, editorial, bold elegance. Negative: text, watermark, blur, plastic skin, distortion.",
-        "example_url": "https://iili.io/CHSLVkl.jpg"
-      },
-      {
-        "title": "На бордюре",
-        "prompt": "Создай изображение,сохрани внешность и черты лица Стильная молодая девушка с немного загорелой кожей сидит, скрестив ноги, на городском тротуаре рядом с пешеходным переходом. На ней светло-розовая рубашка на пуговицах, розовые шорты в тон, серо-розовый клетчатый пиджак, накинутый на плечи, розовая бейсболка с темным логотипом, розово-черные кроссовки с белыми носками и маленькие овальные солнцезащитные очки. В левой руке она держит белую кофейную чашку с надписью «улыбайтесь, вам так идет» и нарисовано сердечко. написанной черным шрифтом, а на пальцах она носит несколько серебряных колец. Ее правая рука прижимает смартфон к уху, как будто она разговаривает по телефону. Она украшена многочисленными серебряными ожерельями разной длины, серебряными браслетами на обоих запястьях и большими замысловатыми серебряно-розовыми серьгами с подвесками. Ее губы слегка приоткрыты, а выражение лица расслабленное и шикарное. На заднем плане изображена обсаженная деревьями улица с темно-зеленой листвой и размытыми красно-коричневыми кирпичными зданиями, что наводит на мысль о городской среде. Освещение — естественный дневной свет, отбрасывающий мягкие тени, а в общей цветовой палитре преобладают розовые, серые и темно-зеленые оттенки с серебряными акцентами. Стиль — модная фотография с упором на уличный стиль и аксессуары. Настроение уверенное, непринужденное и модное. Высокое разрешение, детальные текстуры, четкая фокусировка на объекте, фон боке.",
-        "example_url": "https://iili.io/CHUzA8J.jpg"
-      },
-      {
-        "title": "Чб",
-        "prompt": "Нельзя менять лицо, черты лица и цвет волос. Очень худая девушка Фотореалистичный чёрно-белый fashion portrait на открытом воздухе, девушка стоит вполоборота спиной к камере, лицо повернуто в сторону, глаза закрыты, спокойное мечтательное выражение. На ней свободная белая рубашка oversize, заправленная в джинсы с высокой посадкой. Волосы естественно развеваются ветром, мягкие пряди вокруг лица. Размытый природный фон, ощущение морского побережья, лёгкий винтажный стиль 90-х, плёночное зерно, мягкий контраст, естественная кожа. ultra realistic 8K, hyper-detailed, sharp focus, shallow depth of field, natural bokeh, HDR lighting, cinematic color grading, lens 85mm, aperture f/1.8, soft shadows, clean white balance, natural skin texture, glossy highlights.",
-        "example_url": "https://iili.io/CHUTdej.jpg"
       }
     ]
   },
@@ -130,7 +132,6 @@
       }
     ]
   },
-  
   {
     "title": "Мужские",
     "emoji": "📁",
