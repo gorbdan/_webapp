@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10131f" />
+    <title>Библиотека промптов</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">SirNike AI</p>
+          <h1>Библиотека промптов</h1>
+        </div>
+        <button class="icon-button" id="themeToggle" type="button" aria-label="Переключить тему" title="Тема">
+          <span aria-hidden="true">◐</span>
+        </button>
+      </header>
+
+      <main>
+        <section class="toolbar" aria-label="Фильтры библиотеки">
+          <label class="search">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Поиск по названию или промпту" autocomplete="off" />
+          </label>
+          <div class="segmented" role="group" aria-label="Тип шаблонов">
+            <button class="segment active" type="button" data-filter="all">Все</button>
+            <button class="segment" type="button" data-filter="new">🆕 Новинки</button>
+            <button class="segment" type="button" data-filter="photo">Фото</button>
+            <button class="segment" type="button" data-filter="video">Видео</button>
+            <button class="segment" type="button" data-filter="favorites">Избранное</button>
+          </div>
+        </section>
+
+        <section class="stats" id="stats" aria-label="Статистика библиотеки"></section>
+        <nav class="chips" id="categories" aria-label="Категории"></nav>
+
+        <section class="grid" id="cards" aria-live="polite"></section>
+        <div class="empty hidden" id="empty"></div>
+      </main>
+    </div>
+
+    <div class="toast hidden" id="toast" role="status"></div>
+
+    <dialog class="modal" id="detailsModal">
+      <div class="modal-shell">
+        <button class="icon-button modal-close" id="modalClose" type="button" aria-label="Закрыть" title="Закрыть">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="modal-media" id="modalMedia"></div>
+        <div class="modal-body">
+          <p class="eyebrow" id="modalMeta"></p>
+          <h2 id="modalTitle"></h2>
+          <pre id="modalPrompt"></pre>
+          <div class="modal-actions">
+            <button class="ghost-btn" id="modalCopy" type="button">Копировать</button>
+            <button class="primary-btn" id="modalUse" type="button">Использовать</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="./app.js?v=20260523v1"></script>
+  </body>
+</html>
