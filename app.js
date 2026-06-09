@@ -365,17 +365,14 @@ function makeCard(item) {
     const head = document.createElement("div");
     head.className = "card-head";
 
-    const title = document.createElement("h3");
-    title.className = "title";
-    title.textContent = item.title || "Без названия";
-
     const category = document.createElement("span");
     category.className = "category-label";
     category.textContent = `${item._categoryEmoji} ${item._categoryTitle}`;
 
+    const previewText = item.description || item.hint || "";
     const prompt = document.createElement("p");
     prompt.className = "prompt-preview";
-    prompt.textContent = item.description || item.hint || "";
+    prompt.textContent = previewText || (item.prompt || "").substring(0, 120).trim() + "…";
 
     const actions = document.createElement("div");
     actions.className = "card-actions";
@@ -394,7 +391,12 @@ function makeCard(item) {
 
     if (isNewItem(item)) card.classList.add("card--new");
 
-    head.appendChild(title);
+    if (item.title) {
+      const title = document.createElement("h3");
+      title.className = "title";
+      title.textContent = item.title;
+      head.appendChild(title);
+    }
     head.appendChild(category);
     actions.appendChild(detailsBtn);
     actions.appendChild(useBtn);
@@ -449,7 +451,8 @@ function openDetails(item) {
   modalMedia.innerHTML = "";
   modalMedia.appendChild(createPreview(item));
   modalMeta.textContent = `${item._categoryEmoji} ${item._categoryTitle} · ${isVideoItem(item) ? "Видео" : "Фото"}`;
-  modalTitle.textContent = item.title || "Без названия";
+  modalTitle.textContent = item.title || "";
+  modalTitle.style.display = item.title ? "" : "none";
   const uploadHint = item.upload_hint || item.what_to_upload || "";
   modalPrompt.textContent = (item.description || item.hint || "") + (uploadHint ? `\n\n📎 Что загрузить: ${uploadHint}` : "");
 
