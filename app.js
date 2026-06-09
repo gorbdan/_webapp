@@ -65,6 +65,12 @@ function normalizeUrl(value) {
   }
 }
 
+function thumbUrl(url, width = 400) {
+  const raw = normalizeUrl(url);
+  if (!raw || raw.includes("dummyimage.com")) return raw;
+  return `https://wsrv.nl/?url=${encodeURIComponent(raw)}&w=${width}&output=webp&q=80&fit=cover`;
+}
+
 function isNewItem(item) {
   const raw = item?.added_at;
   if (!raw) return false;
@@ -263,10 +269,13 @@ function createImagePreview(item) {
   image.className = "preview";
   image.loading = "lazy";
   image.alt = item.title || "Пример";
-  image.src = normalizeUrl(item.example_url || item.poster_url) || FALLBACK_IMAGE;
+  const rawUrl = item.example_url || item.poster_url;
+  image.src = rawUrl ? thumbUrl(rawUrl) : FALLBACK_IMAGE;
   image.onload = () => markLoaded(image);
   image.onerror = () => {
-    image.src = FALLBACK_IMAGE;
+    const orig = normalizeUrl(rawUrl);
+    if (image.src !== orig && orig) image.src = orig;
+    else image.src = FALLBACK_IMAGE;
   };
   return image;
 }
@@ -324,6 +333,16 @@ function createVideoPreview(item) {
 
 function createPreview(item) {
   return isVideoItem(item) ? createVideoPreview(item) : createImagePreview(item);
+}
+
+function createFullPreview(item) {
+  if (isVideoItem(item)) return createVideoPreview(item);
+  const image = document.createElement("img");
+  image.className = "preview loaded";
+  image.alt = item.title || "Пример";
+  image.src = normalizeUrl(item.example_url || item.poster_url) || FALLBACK_IMAGE;
+  image.onerror = () => { image.src = FALLBACK_IMAGE; };
+  return image;
 }
 
 function createPreviewBlock(item) {
@@ -457,7 +476,7 @@ function openDetails(item) {
   selectedItem = item;
   selectedButton = null;
   modalMedia.innerHTML = "";
-  modalMedia.appendChild(createPreview(item));
+  modalMedia.appendChild(createFullPreview(item));
   modalMeta.textContent = `${item._categoryEmoji} ${item._categoryTitle} · ${isVideoItem(item) ? "Видео" : "Фото"}`;
   modalTitle.textContent = item.title || "";
   modalTitle.style.display = item.title ? "" : "none";
