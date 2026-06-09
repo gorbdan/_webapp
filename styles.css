@@ -270,7 +270,19 @@ h1 {
   position: relative;
   height: clamp(230px, 31vw, 350px);
   overflow: hidden;
+  background: linear-gradient(90deg, var(--surface) 25%, color-mix(in srgb, var(--line) 40%, var(--surface)) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.preview-wrap.loaded {
+  animation: none;
   background: color-mix(in srgb, var(--line) 50%, var(--surface));
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .preview {
@@ -279,6 +291,12 @@ h1 {
   height: 100%;
   object-fit: contain;
   object-position: center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.preview.loaded {
+  opacity: 1;
 }
 
 .type-badge,

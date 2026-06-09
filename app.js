@@ -252,12 +252,19 @@ function showToast(text) {
   showToast.timer = setTimeout(() => toastEl.classList.add("hidden"), 2600);
 }
 
+function markLoaded(el) {
+  el.classList.add("loaded");
+  const wrap = el.closest(".preview-wrap");
+  if (wrap) wrap.classList.add("loaded");
+}
+
 function createImagePreview(item) {
   const image = document.createElement("img");
   image.className = "preview";
   image.loading = "lazy";
   image.alt = item.title || "Пример";
   image.src = normalizeUrl(item.example_url || item.poster_url) || FALLBACK_IMAGE;
+  image.onload = () => markLoaded(image);
   image.onerror = () => {
     image.src = FALLBACK_IMAGE;
   };
@@ -298,7 +305,8 @@ function createVideoPreview(item) {
     },
     { once: true }
   );
-  video.addEventListener("seeked", () => video.pause(), { once: true });
+  video.addEventListener("seeked", () => { video.pause(); markLoaded(video); }, { once: true });
+  video.addEventListener("loadeddata", () => markLoaded(video), { once: true });
   video.addEventListener("mouseenter", () => video.play().catch(() => {}));
   video.addEventListener("mouseleave", () => {
     video.pause();
