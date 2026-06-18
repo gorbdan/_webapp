@@ -270,12 +270,20 @@ function createImagePreview(item) {
   image.loading = "lazy";
   image.alt = item.title || "Пример";
   const rawUrl = item.example_url || item.poster_url;
-  image.src = rawUrl ? thumbUrl(rawUrl) : FALLBACK_IMAGE;
-  image.onload = () => markLoaded(image);
+  const orig = normalizeUrl(rawUrl);
+  const proxied = rawUrl ? thumbUrl(rawUrl) : "";
+  image.src = proxied || orig || FALLBACK_IMAGE;
+
+  image.onload = () => {
+    if (image.naturalWidth < 10 && image.src !== orig && orig) {
+      image.src = orig;
+      return;
+    }
+    markLoaded(image);
+  };
   image.onerror = () => {
-    const orig = normalizeUrl(rawUrl);
     if (image.src !== orig && orig) image.src = orig;
-    else image.src = FALLBACK_IMAGE;
+    else if (image.src !== FALLBACK_IMAGE) image.src = FALLBACK_IMAGE;
   };
   return image;
 }
