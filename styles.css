@@ -294,10 +294,6 @@ h1 {
 }
 
 .card {
-  display: flex;
-  min-width: 0;
-  min-height: 100%;
-  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -318,7 +314,7 @@ h1 {
 
 .preview-wrap {
   position: relative;
-  height: clamp(230px, 31vw, 350px);
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: linear-gradient(90deg, var(--surface) 25%, color-mix(in srgb, var(--line) 40%, var(--surface)) 50%, var(--surface) 75%);
   background-size: 200% 100%;
@@ -398,48 +394,6 @@ h1 {
   background: color-mix(in srgb, var(--brand) 85%, #000);
 }
 
-.card-body {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-}
-
-.card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.title {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.25;
-}
-
-.category-label {
-  flex: 0 0 auto;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.prompt-preview {
-  display: -webkit-box;
-  min-height: 58px;
-  margin: 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.48;
-}
-
-.card-actions,
 .modal-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -617,7 +571,7 @@ h1 {
 .new-badge {
   position: absolute;
   z-index: 3;
-  bottom: 10px;
+  top: 42px;
   left: 10px;
   border-radius: 999px;
   padding: 4px 9px;
@@ -644,6 +598,44 @@ h1 {
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* ── Оверлей и бейджи ────────────────────── */
+
+.card-overlay {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 40px 12px 10px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.overlay-title {
+  width: 100%;
+  margin: 0;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.popular-badge {
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
 }
 
 @media (max-width: 920px) {
@@ -687,11 +679,32 @@ h1 {
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
-  .preview-wrap {
-    height: min(74vw, 310px);
+  .overlay-title {
+    font-size: 11px;
+  }
+
+  .popular-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+
+  .new-badge {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+
+  .type-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .favorite {
+    width: 36px;
+    height: 36px;
   }
 
   .modal-shell {

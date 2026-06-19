@@ -395,37 +395,6 @@ function createPreviewBlock(item) {
 function makeCard(item) {
     const card = document.createElement("article");
     card.className = "card";
-
-    const body = document.createElement("div");
-    body.className = "card-body";
-
-    const head = document.createElement("div");
-    head.className = "card-head";
-
-    const category = document.createElement("span");
-    category.className = "category-label";
-    category.textContent = `${item._categoryEmoji} ${item._categoryTitle}`;
-
-    const previewText = item.description || item.hint || "";
-    const prompt = document.createElement("p");
-    prompt.className = "prompt-preview";
-    prompt.textContent = previewText || (item.prompt || "").substring(0, 120).trim() + "…";
-
-    const actions = document.createElement("div");
-    actions.className = "card-actions";
-
-    const detailsBtn = document.createElement("button");
-    detailsBtn.className = "ghost-btn";
-    detailsBtn.type = "button";
-    detailsBtn.textContent = "Инструкция";
-    detailsBtn.onclick = () => openDetails(item);
-
-    const useBtn = document.createElement("button");
-    useBtn.className = "primary-btn";
-    useBtn.type = "button";
-    useBtn.textContent = "Использовать";
-    useBtn.onclick = () => sendPrompt(item, useBtn);
-
     if (isNewItem(item)) card.classList.add("card--new");
 
     card.addEventListener("click", (e) => {
@@ -433,20 +402,29 @@ function makeCard(item) {
       openDetails(item);
     });
 
-    if (item.title) {
-      const title = document.createElement("h3");
-      title.className = "title";
-      title.textContent = item.title;
-      head.appendChild(title);
+    const previewBlock = createPreviewBlock(item);
+    const hasTitle = Boolean(item.title);
+    const isPopular = Boolean(item.popular);
+
+    if (hasTitle || isPopular) {
+      const overlay = document.createElement("div");
+      overlay.className = "card-overlay";
+      if (isPopular) {
+        const badge = document.createElement("span");
+        badge.className = "popular-badge";
+        badge.textContent = "Популярное";
+        overlay.appendChild(badge);
+      }
+      if (hasTitle) {
+        const title = document.createElement("h3");
+        title.className = "overlay-title";
+        title.textContent = item.title;
+        overlay.appendChild(title);
+      }
+      previewBlock.appendChild(overlay);
     }
-    head.appendChild(category);
-    actions.appendChild(detailsBtn);
-    actions.appendChild(useBtn);
-    body.appendChild(head);
-    body.appendChild(prompt);
-    body.appendChild(actions);
-    card.appendChild(createPreviewBlock(item));
-    card.appendChild(body);
+
+    card.appendChild(previewBlock);
     return card;
 }
 
