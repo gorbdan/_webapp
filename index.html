@@ -15,12 +15,19 @@
           <p class="eyebrow">SirNike AI</p>
           <h1>Библиотека промптов</h1>
         </div>
-        <button class="icon-button" id="themeToggle" type="button" aria-label="Переключить тему" title="Тема">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
+        <div class="topbar-actions">
+          <button class="balance-pill" id="balancePill" type="button" title="Пополнить баланс">
+            <svg class="balance-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="var(--accent)"/><ellipse cx="10" cy="9.5" rx="3" ry="2" fill="rgba(255,255,255,0.25)" transform="rotate(-25 10 9.5)"/></svg>
+            <span id="balanceCount">0</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <button class="icon-button" id="themeToggle" type="button" aria-label="Переключить тему" title="Тема">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
       </header>
 
-      <main>
+      <main id="pageKatalog" class="tab-page">
         <section class="toolbar" aria-label="Фильтры библиотеки">
           <label class="search">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -41,7 +48,72 @@
         <section class="grid" id="cards" aria-live="polite"></section>
         <div class="empty hidden" id="empty"></div>
       </main>
+
+      <div id="pageHistory" class="tab-page hidden">
+        <div class="page-header">
+          <h2>История генераций</h2>
+          <p class="page-hint">История хранится 7 дней. Вы можете удалить генерацию из истории в любое время.</p>
+        </div>
+        <div class="empty-state">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <p>У вас ещё нет генераций</p>
+          <button class="ghost-btn" type="button" id="historyToCatalog">Перейти в каталог</button>
+        </div>
+      </div>
+
+      <div id="pageTopup" class="tab-page hidden">
+        <div class="page-header">
+          <h2>Пополнить баланс</h2>
+        </div>
+        <div class="balance-card">
+          <p class="balance-label">Ваш баланс</p>
+          <div class="balance-big">
+            <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="var(--accent)"/><ellipse cx="10" cy="9.5" rx="3" ry="2" fill="rgba(255,255,255,0.25)" transform="rotate(-25 10 9.5)"/></svg>
+            <span id="balanceDisplay">0</span>
+            <span class="balance-unit" id="balanceUnit">изюминок</span>
+          </div>
+        </div>
+        <div class="packages">
+          <button class="package" type="button" data-amount="10">
+            <div class="package-info">
+              <span class="package-amount">10 изюминок</span>
+              <span class="package-price">99 ₽</span>
+            </div>
+            <span class="primary-btn package-btn">Купить</span>
+          </button>
+          <button class="package package--accent" type="button" data-amount="50">
+            <span class="package-tag">Выгодно</span>
+            <div class="package-info">
+              <span class="package-amount">50 изюминок</span>
+              <span class="package-price">399 ₽</span>
+            </div>
+            <span class="primary-btn package-btn">Купить</span>
+          </button>
+          <button class="package" type="button" data-amount="100">
+            <div class="package-info">
+              <span class="package-amount">100 изюминок</span>
+              <span class="package-price">699 ₽</span>
+            </div>
+            <span class="primary-btn package-btn">Купить</span>
+          </button>
+        </div>
+      </div>
     </div>
+
+    <nav class="tab-bar" id="tabBar">
+      <button class="tab active" type="button" data-tab="katalog">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Каталог</span>
+      </button>
+      <button class="tab" type="button" data-tab="history">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>История</span>
+      </button>
+      <button class="tab" type="button" data-tab="topup">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>Пополнить</span>
+      </button>
+    </nav>
 
     <div class="toast hidden" id="toast" role="status"></div>
 
@@ -63,6 +135,6 @@
       </div>
     </dialog>
 
-    <script src="./app.js?v=20260619v1"></script>
+    <script src="./app.js?v=20260619v4"></script>
   </body>
 </html>

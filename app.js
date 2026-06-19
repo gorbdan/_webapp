@@ -25,6 +25,11 @@ const modalTitle = document.getElementById("modalTitle");
 const modalPrompt = document.getElementById("modalPrompt");
 const modalCopy = document.getElementById("modalCopy");
 const modalUse = document.getElementById("modalUse");
+const tabBar = document.getElementById("tabBar");
+const balancePill = document.getElementById("balancePill");
+const balanceCount = document.getElementById("balanceCount");
+const balanceDisplay = document.getElementById("balanceDisplay");
+const historyToCatalog = document.getElementById("historyToCatalog");
 
 let library = [];
 let activeCategory = "all";
@@ -514,6 +519,22 @@ detailsModal.addEventListener("click", (event) => {
 });
 modalCopy.addEventListener("click", () => copyPrompt(selectedItem));
 modalUse.addEventListener("click", () => sendPrompt(selectedItem, selectedButton));
+
+function switchTab(tabName) {
+  document.querySelectorAll(".tab-page").forEach((p) => p.classList.add("hidden"));
+  const target = document.getElementById("page" + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+  if (target) target.classList.remove("hidden");
+  tabBar.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === tabName));
+}
+
+tabBar.addEventListener("click", (e) => {
+  const tab = e.target.closest(".tab");
+  if (!tab) return;
+  switchTab(tab.dataset.tab);
+});
+
+balancePill.addEventListener("click", () => switchTab("topup"));
+if (historyToCatalog) historyToCatalog.addEventListener("click", () => switchTab("katalog"));
 
 (async function init() {
   applyTheme(getTheme());
