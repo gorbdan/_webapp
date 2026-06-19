@@ -536,8 +536,43 @@ tabBar.addEventListener("click", (e) => {
 balancePill.addEventListener("click", () => switchTab("topup"));
 if (historyToCatalog) historyToCatalog.addEventListener("click", () => switchTab("katalog"));
 
+function readBalanceFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const val = parseInt(params.get("balance"), 10);
+    return Number.isFinite(val) && val >= 0 ? val : 0;
+  } catch { return 0; }
+}
+
+function setBalance(val) {
+  const n = Math.max(0, Math.floor(val));
+  if (balanceCount) balanceCount.textContent = n;
+  if (balanceDisplay) balanceDisplay.textContent = n;
+  if (document.getElementById("balanceUnit")) {
+    const last2 = n % 100;
+    const last1 = n % 10;
+    let word = "изюминок";
+    if (last2 >= 11 && last2 <= 19) word = "изюминок";
+    else if (last1 === 1) word = "изюминка";
+    else if (last1 >= 2 && last1 <= 4) word = "изюминки";
+    document.getElementById("balanceUnit").textContent = word;
+  }
+}
+
+document.getElementById("packages").addEventListener("click", (e) => {
+  const pkg = e.target.closest(".package");
+  if (!pkg) return;
+  if (!tg) {
+    showToast("Открой библиотеку внутри Telegram, чтобы купить изюминки.");
+    return;
+  }
+  tg.sendData(JSON.stringify({ action: "topup", v: APP_VERSION }));
+  setTimeout(() => tg.close(), 600);
+});
+
 (async function init() {
   applyTheme(getTheme());
+  setBalance(readBalanceFromUrl());
   await loadLibrary();
   if (!library.length) {
     emptyEl.textContent = "Не удалось загрузить библиотеку. Проверь prompt_library.json.";

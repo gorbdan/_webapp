@@ -52,11 +52,11 @@
       <div id="pageHistory" class="tab-page hidden">
         <div class="page-header">
           <h2>История генераций</h2>
-          <p class="page-hint">История хранится 7 дней. Вы можете удалить генерацию из истории в любое время.</p>
+          <p class="page-hint">Здесь будут ваши генерации. Пока история доступна в боте.</p>
         </div>
         <div class="empty-state">
           <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <p>У вас ещё нет генераций</p>
+          <p>История генераций доступна в боте</p>
           <button class="ghost-btn" type="button" id="historyToCatalog">Перейти в каталог</button>
         </div>
       </div>
@@ -73,26 +73,40 @@
             <span class="balance-unit" id="balanceUnit">изюминок</span>
           </div>
         </div>
-        <div class="packages">
-          <button class="package" type="button" data-amount="10">
+        <div class="packages" id="packages">
+          <button class="package" type="button" data-amount="10" data-price="60">
             <div class="package-info">
               <span class="package-amount">10 изюминок</span>
-              <span class="package-price">99 ₽</span>
+              <span class="package-price">60 ₽</span>
             </div>
             <span class="primary-btn package-btn">Купить</span>
           </button>
-          <button class="package package--accent" type="button" data-amount="50">
+          <button class="package" type="button" data-amount="20" data-price="100">
+            <div class="package-info">
+              <span class="package-amount">20 изюминок</span>
+              <span class="package-price">100 ₽</span>
+            </div>
+            <span class="primary-btn package-btn">Купить</span>
+          </button>
+          <button class="package package--accent" type="button" data-amount="50" data-price="250">
             <span class="package-tag">Выгодно</span>
             <div class="package-info">
               <span class="package-amount">50 изюминок</span>
-              <span class="package-price">399 ₽</span>
+              <span class="package-price">250 ₽</span>
             </div>
             <span class="primary-btn package-btn">Купить</span>
           </button>
-          <button class="package" type="button" data-amount="100">
+          <button class="package" type="button" data-amount="120" data-price="600">
             <div class="package-info">
-              <span class="package-amount">100 изюминок</span>
-              <span class="package-price">699 ₽</span>
+              <span class="package-amount">120 изюминок</span>
+              <span class="package-price">600 ₽</span>
+            </div>
+            <span class="primary-btn package-btn">Купить</span>
+          </button>
+          <button class="package" type="button" data-amount="300" data-price="1500">
+            <div class="package-info">
+              <span class="package-amount">300 изюминок</span>
+              <span class="package-price">1 500 ₽</span>
             </div>
             <span class="primary-btn package-btn">Купить</span>
           </button>
@@ -135,6 +149,6 @@
       </div>
     </dialog>
 
-    <script src="./app.js?v=20260619v4"></script>
+    <script src="./app.js?v=20260619v5"></script>
   </body>
 </html>
