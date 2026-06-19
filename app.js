@@ -559,6 +559,67 @@ function setBalance(val) {
   }
 }
 
+function readHistoryFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("h");
+    if (!raw) return [];
+    const json = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const arr = JSON.parse(json);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+
+function formatDate(iso) {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    const day = String(d.getDate()).padStart(2, "0");
+    const mon = String(d.getMonth() + 1).padStart(2, "0");
+    const hrs = String(d.getHours()).padStart(2, "0");
+    const min = String(d.getMinutes()).padStart(2, "0");
+    return `${day}.${mon} ${hrs}:${min}`;
+  } catch { return ""; }
+}
+
+function renderHistory() {
+  const grid = document.getElementById("historyGrid");
+  const empty = document.getElementById("historyEmpty");
+  const items = readHistoryFromUrl();
+  if (!items.length) {
+    grid.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  grid.innerHTML = "";
+  for (const item of items) {
+    const card = document.createElement("div");
+    card.className = "history-card";
+    const imgWrap = document.createElement("div");
+    imgWrap.className = "history-card-img";
+    const img = document.createElement("img");
+    img.src = item.u || FALLBACK_IMAGE;
+    img.alt = item.p || "Генерация";
+    img.loading = "lazy";
+    img.onerror = () => { img.src = FALLBACK_IMAGE; };
+    imgWrap.appendChild(img);
+    card.appendChild(imgWrap);
+    const body = document.createElement("div");
+    body.className = "history-card-body";
+    const prompt = document.createElement("p");
+    prompt.className = "history-card-prompt";
+    prompt.textContent = item.p || "Без описания";
+    body.appendChild(prompt);
+    const date = document.createElement("p");
+    date.className = "history-card-date";
+    date.textContent = formatDate(item.t);
+    body.appendChild(date);
+    card.appendChild(body);
+    grid.appendChild(card);
+  }
+}
+
 document.getElementById("packages").addEventListener("click", (e) => {
   const pkg = e.target.closest(".package");
   if (!pkg) return;
@@ -573,6 +634,7 @@ document.getElementById("packages").addEventListener("click", (e) => {
 (async function init() {
   applyTheme(getTheme());
   setBalance(readBalanceFromUrl());
+  renderHistory();
   await loadLibrary();
   if (!library.length) {
     emptyEl.textContent = "Не удалось загрузить библиотеку. Проверь prompt_library.json.";

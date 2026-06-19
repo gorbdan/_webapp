@@ -52,11 +52,12 @@
       <div id="pageHistory" class="tab-page hidden">
         <div class="page-header">
           <h2>История генераций</h2>
-          <p class="page-hint">Здесь будут ваши генерации. Пока история доступна в боте.</p>
+          <p class="page-hint">Последние 10 генераций</p>
         </div>
-        <div class="empty-state">
+        <div class="history-grid" id="historyGrid"></div>
+        <div class="empty-state" id="historyEmpty">
           <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <p>История генераций доступна в боте</p>
+          <p>У вас ещё нет генераций</p>
           <button class="ghost-btn" type="button" id="historyToCatalog">Перейти в каталог</button>
         </div>
       </div>
@@ -149,6 +150,6 @@
       </div>
     </dialog>
 
-    <script src="./app.js?v=20260619v5"></script>
+    <script src="./app.js?v=20260619v6"></script>
   </body>
 </html>
