@@ -101,6 +101,16 @@
         "type": "video",
         "poster_url": "",
         "added_at": "2026-06-20T12:00:00.000000+00:00"
+      },
+      {
+        "title": "Бой с самим собой",
+        "description": "Мотивационная сцена: молодой ты vs будущий ты — три кинематографичных кадра в темноте с лучами света сверху.",
+        "upload_hint": "Фото «молодого себя» + фото «старшего себя» (отдельно)",
+        "video_url": "https://sirnike.pages.dev/videos/Бой с самим собой.mp4",
+        "prompt": "A cinematic, high-contrast motivational scene in THREE shots, pure black background, dramatic single-source overhead lighting, moody film-grain look,\n4K, shallow depth of field.\nCHARACTERS:\n• YOUNG SELF: the person in @image1 .\nemotional expression.\n• OLDER SELF: the person in @image2 | Standing confidently.\nSHOT 1(0-5s): Tight close-up of the\nYOUNG SELF, one hard light from above against total darkness. Looks slightly upward, breathing heavily, sweat catching the light, raw and intense.\nSHOT 2 (5-8s): Over-the-shoulder shot from BEHIND the YOUNG SELF — his back and head fill the left\nforeground. He faces the OLDER SELF, who stands small and distant across a pitch-black void. Tense, still. SHOT 3 (8-10s): Wide protile two-shot, camera pulled far back. The YOUNG SELF stands on the left and the OLDER SELF on the right, both in profile on a sloped dark earthy mound, each inside their own vertical beam of light from above.\nStyle: epic, emotional, sports-documentary edit. Slow subtle motion, no fast cuts. Keep both faces clearly resembling the reference photos throughout.",
+        "type": "video",
+        "poster_url": "",
+        "added_at": "2026-06-20T12:05:00.000000+00:00"
       }
     ]
   },
