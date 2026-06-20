@@ -215,12 +215,14 @@ function sendPrompt(item, button) {
   }
 
   try {
-    let rawPayload = JSON.stringify({
+    const baseObj = {
       action: payload.action,
       title: payload.title,
       prompt: payload.prompt,
       v: APP_VERSION,
-    });
+    };
+    if (item.image_prompt) baseObj.image_prompt = item.image_prompt;
+    let rawPayload = JSON.stringify(baseObj);
     if (rawPayload.length > 3900) {
       rawPayload = JSON.stringify({
         action: itemIsVideo ? "set_video_prompt_ref" : "set_prompt_ref",
