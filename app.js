@@ -566,7 +566,12 @@ function readHistoryFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const raw = params.get("h");
     if (!raw) return [];
-    const json = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    // Бэкенд кодирует JSON в UTF-8 → base64. atob даёт байтовую строку,
+    // поэтому декодируем именно как UTF-8, иначе кириллица превращается
+    // в кракозябры (Ð´ÐµÐ²Ñ...).
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const json = new TextDecoder("utf-8").decode(bytes);
     const arr = JSON.parse(json);
     return Array.isArray(arr) ? arr : [];
   } catch { return []; }
