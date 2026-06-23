@@ -316,13 +316,6 @@
         "added_at": "2026-06-22T00:23:45.619712+00:00"
       },
       {
-        "description": "Сгенерированный low-key портрет в тёмной студии: один источник тёплого света сбоку, объёмная светотень, новая поза.",
-        "upload_hint": "Фото лица",
-        "prompt": "Create a dramatic low-key portrait in a dark studio, fully preserving the face and skin tone.\nA single warm light source from the side (Rembrandt lighting), deep soft shadows, black background fading into darkness, sculpted chiaroscuro on the face.\nOutfit: a plain dark turtleneck or shirt.\nPose: turned half toward the light, gazing into the camera from the shadow, shoulders slightly angled.\nSubtle film grain, faint haze in the light beam, restrained cinematic color grade. Shot on 85mm, shallow depth of field.",
-        "example_url": "https://iili.io/CTt88hP.jpg",
-        "added_at": "2026-06-22T00:23:45.619712+00:00"
-      },
-      {
         "description": "Драматичный low-key женский портрет: мягкий тёплый свет сбоку, объёмная светотень по скулам, элегантный образ. Кинематографичная студия.",
         "upload_hint": "Фото лица",
         "prompt": "Create a dramatic low-key female portrait, fully preserving the face, expression and features.\nA single soft warm light source from the side (Rembrandt lighting), deep gentle shadows, sculpted chiaroscuro that flatters the cheekbones, black background fading into darkness.\nOutfit: an elegant dark top or a silk blouse, delicate jewelry catching the light.\nPose: turned half toward the light, a calm magnetic gaze into the camera, soft loose hair with a few strands lit by the rim light.\nSubtle film grain, faint haze in the light beam, refined cinematic color grade (warm highlights, deep shadows). Shot on 85mm, shallow depth of field.",
@@ -421,6 +414,13 @@
     "title": "Мужские",
     "emoji": "👨",
     "items": [
+      {
+        "description": "Сгенерированный low-key портрет в тёмной студии: один источник тёплого света сбоку, объёмная светотень, новая поза.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a dramatic low-key portrait in a dark studio, fully preserving the face and skin tone.\nA single warm light source from the side (Rembrandt lighting), deep soft shadows, black background fading into darkness, sculpted chiaroscuro on the face.\nOutfit: a plain dark turtleneck or shirt.\nPose: turned half toward the light, gazing into the camera from the shadow, shoulders slightly angled.\nSubtle film grain, faint haze in the light beam, restrained cinematic color grade. Shot on 85mm, shallow depth of field.",
+        "example_url": "https://iili.io/CTt88hP.jpg",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
       {
         "description": "Обложка мужского глянца уровня GQ: костюм, студийный свет, логотип и заголовки. Премиальный редакторский вид.",
         "upload_hint": "Фото в полный рост",
