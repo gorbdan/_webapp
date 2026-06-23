@@ -286,6 +286,38 @@
         "upload_hint": "Фото лица",
         "prompt": "Создай изображение,сохрани внешность и черты лица\nфото с прямой вспышкой, съёмка в помещении, ракурс на уровне груди, кадр по пояс, объектив 26–28mm, средняя глубина резкости. Фигура стоит вплотную к светлой стене, корпус развернут фронтально, руки пальцы в карманах джинс, поза уверенная и статичная. Голова слегка наклонена в сторону, взгляд направлен мимо камеры, выражение делает поцелуйчик губами, смотрит в сторону вверх глазами.\nОбраз: минималистичный комплект — структурированный топ без бретелей черного оттенка, плотная матовая ткань с чёткой формой; талия очень узкая, тёмные джинсы с низкой посадкой, очень оверсайз\nДевушка слегка загорелая. \nАксессуары: маленькие узкие очки солнцезащитные с  тонкой оправой.\nминималистичный интерьер с глубоко бордовой  стеной и мягкими тенями.\nжёсткая фронтальная вспышка canon g7x создаёт яркие хайлайты на коже и ткани, выраженные тени по контуру фигуры, подчёркивает форму и текстуру, даёт характерный контрастный эффект.\nвысокая детализация. 3:4\nЕё сфоткали на уровне глаз \nВолосы не лежат на плечах, она прижата к стене.Гиперреализм.",
         "example_url": "https://i.ibb.co/Pzjbfp5x/zveno-result.jpg"
+      },
+      {
+        "title": "Дождь и неон",
+        "description": "Кинематографичный ночной портрет под дождём в свете неона и фар. Новая сцена, мокрые волосы, кожаный тренч.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a cinematic evening portrait, keeping the facial features unchanged.\nA woman stands on a night city street in light rain: wet strands of hair, droplets on the skin, faint breath visible in the cold air.\nOutfit: a black leather trench coat over a simple top.\nLighting: cold neon signage behind her + warm car headlights from the side, blurred bokeh of lights, reflections on the wet asphalt.\nPose: looking straight into the camera, calm confidence, chin slightly raised.\nShot on 85mm, shallow depth of field, rich cinematic color grade.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
+      {
+        "title": "Свой постер",
+        "description": "Драматичный постер инди-фильма с твоим портретом: кинотени, типографика названия, цитаты критиков.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a dramatic indie movie poster based on this portrait, preserving the facial features.\nCinematic shadows, subtle film grain, moody color grade.\nElegant title typography centered at the bottom, small critic-style review quotes, film festival laurels.\nComposition like a real movie poster: large portrait, atmospheric background, deliberate negative space for the text.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
+      {
+        "title": "Тёмный кинопортрет",
+        "description": "Сгенерированный low-key портрет в тёмной студии: один источник тёплого света сбоку, объёмная светотень, новая поза.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a dramatic low-key portrait in a dark studio, fully preserving the face and skin tone.\nA single warm light source from the side (Rembrandt lighting), deep soft shadows, black background fading into darkness, sculpted chiaroscuro on the face.\nOutfit: a plain dark turtleneck or shirt.\nPose: turned half toward the light, gazing into the camera from the shadow, shoulders slightly angled.\nSubtle film grain, faint haze in the light beam, restrained cinematic color grade. Shot on 85mm, shallow depth of field.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
+      {
+        "title": "Женский кинопортрет",
+        "description": "Драматичный low-key женский портрет: мягкий тёплый свет сбоку, объёмная светотень по скулам, элегантный образ. Кинематографичная студия.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a dramatic low-key female portrait, fully preserving the face, expression and features.\nA single soft warm light source from the side (Rembrandt lighting), deep gentle shadows, sculpted chiaroscuro that flatters the cheekbones, black background fading into darkness.\nOutfit: an elegant dark top or a silk blouse, delicate jewelry catching the light.\nPose: turned half toward the light, a calm magnetic gaze into the camera, soft loose hair with a few strands lit by the rim light.\nSubtle film grain, faint haze in the light beam, refined cinematic color grade (warm highlights, deep shadows). Shot on 85mm, shallow depth of field.",
+        "example_url": "",
+        "added_at": "2026-06-22T19:32:32.000370+00:00"
       }
     ]
   },
@@ -344,12 +376,59 @@
         "upload_hint": "Фото мамы + фото ребёнка",
         "prompt": "realistic close-up selfie, woman with braid and child, keep the same gender as reference image, preserve original facial features, do not feminize or masculinize the child, indoor cozy place, direct camera flash, slightly overexposed highlights, natural skin, detailed eyes, brown leather jacket and hoodie, child with blue eyes, natural hairstyle, neutral clothing, both looking at camera, calm expression, slight tilt angle, candid photo, soft background blur, film grain, iphone photo style, high detail",
         "example_url": "https://i.ibb.co/Z6WHRWgV/import.jpg"
+      },
+      {
+        "title": "Детский кинопортрет",
+        "description": "Тёплый нежный детский кинопортрет: мягкий боковой свет, уютное свечение на щеках, искра восторга в глазах. Кинематографично, без жёстких теней.",
+        "upload_hint": "Фото лица ребёнка",
+        "prompt": "Create a warm, gentle cinematic portrait of a child, fully preserving the face and expression.\nSoft directional light from the side (gentle Rembrandt lighting), smooth rounded shadows, a cozy glow on the cheeks, a dark softly graded background that keeps all attention on the face.\nA spark of wonder and a faint natural smile in the eyes.\nOutfit: a simple cozy knit sweater.\nSubtle warm film grain, dreamy soft haze, tender cinematic color grade (honey-warm highlights, soft shadows). Shot on 85mm, shallow depth of field, framed at the child's eye level.",
+        "example_url": "",
+        "added_at": "2026-06-22T19:32:32.000370+00:00"
       }
     ]
   },
   {
     "title": "Мужские",
     "emoji": "👨",
-    "items": []
+    "items": [
+      {
+        "title": "Брутальный кинопортрет",
+        "description": "Low-key мужской портрет: холодный боковой свет, глубокие тени, фактура кожи и щетины. Стиль криминального триллера.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a dramatic low-key male portrait, fully preserving the face, expression and shape.\nA single cold light source from the side, deep shadows, sharp chiaroscuro, emphasized skin and stubble texture.\nDark background, subtle film grain, restrained high-contrast color grade (cold shadows, steel highlights).\nThe mood of a gritty crime-thriller frame — a sense of strength and restraint.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
+      {
+        "title": "Постер боевика",
+        "description": "Драматичный постер боевика с мужским портретом: искры и дым на фоне, сине-оранжевый цветокор, брутальная типографика.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a dramatic action-movie poster based on this male portrait, preserving the facial features.\nHard cinematic shadows, a smoldering background (sparks, smoke, night city), cold teal-and-orange color grade.\nLarge hero portrait, elegant bold title typography at the bottom, small critic quotes, festival laurels.\nComposition of a real movie poster with space reserved for the text.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
+      {
+        "title": "GQ-обложка",
+        "description": "Обложка мужского глянца уровня GQ: костюм, студийный свет, логотип и заголовки. Премиальный редакторский вид.",
+        "upload_hint": "Фото в полный рост",
+        "prompt": "Turn the photo into a men's glossy magazine cover at the level of GQ, preserving the facial features.\nAn expensive suit or a stylish casual outfit, flawless studio lighting with soft volumetric fill, clean background.\nMagazine masthead: large logo at the top, headlines and subheadings on the sides, a barcode at the bottom.\nPremium editorial look, sharp detail, natural skin.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      }
+    ]
+  },
+  {
+    "title": "Фигурки",
+    "emoji": "🧸",
+    "items": [
+      {
+        "title": "Экшн-фигурка",
+        "description": "Превращение в коллекционную экшн-фигурку в блистерной упаковке. Самый расшариваемый тренд 2026.",
+        "upload_hint": "Фото в полный рост",
+        "prompt": "Turn the person into a collectible action figure, keeping the face recognizable.\nGlossy plastic, slightly stylized proportions, miniature accessories included.\nThe figure sits inside branded blister packaging with clear plastic and a cardboard backing with a name and logo at the top.\nStudio lighting, soft highlights on the plastic, realistic shadows, premium retail look. Framed like a product photo for a marketplace.",
+        "example_url": "",
+        "added_at": "2026-06-22T00:23:45.619712+00:00"
+      }
+    ]
   }
 ]
