@@ -276,20 +276,25 @@
         "example_url": "https://i.ibb.co/CKK2nvtM/import.jpg"
       },
       {
-        "title": "Золотой час, стрит",
         "description": "Кэжуал-портрет в тёплом свете заката на старинной улочке: контровой свет, блики, эдиториал.",
         "upload_hint": "Фото лица",
         "prompt": "Create a candid street-style portrait of this person in the warm golden light of late afternoon, preserving their face. Walking through a sunlit European old town, soft lens flare, glowing rim light on the hair, warm blurred bokeh behind. Effortless editorial fashion vibe, shot on 50mm film, rich golden grade.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSLKu.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
       },
       {
-        "title": "Фэнтези-героиня",
         "description": "Эпичная фэнтези-героиня: гравированные латы, плащ, замок на закате, искры. AAA key-art.",
         "upload_hint": "Фото лица",
         "prompt": "Reimagine this person as an epic fantasy heroine, preserving their real facial identity. Ornate engraved armor with leather and gold details, a flowing cloak, a dramatic mountain-fortress backdrop at dusk, embers in the air, cinematic rim light. Painterly realism, AAA game key-art quality.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSmNV.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "description": "Фэшн-эдиториал: серьёзное модельное лицо среди сотни пушистых щенков.",
+        "upload_hint": "Фото в полный рост",
+        "prompt": "High-fashion editorial photo of this person, preserving their exact face, sitting elegantly with a serious model expression while surrounded by a sea of dozens of fluffy golden retriever puppies filling the entire frame. Studio backdrop, glossy magazine lighting, absurd-but-chic viral aesthetic, hyper-detailed.",
+        "example_url": "https://iili.io/CTt2ONV.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
   },
@@ -304,7 +309,6 @@
         "example_url": "https://i.ibb.co/Pzjbfp5x/zveno-result.jpg"
       },
       {
-        "title": "Дождь и неон",
         "description": "Кинематографичный ночной портрет под дождём в свете неона и фар. Новая сцена, мокрые волосы, кожаный тренч.",
         "upload_hint": "Фото лица",
         "prompt": "Create a cinematic evening portrait, keeping the facial features unchanged.\nA woman stands on a night city street in light rain: wet strands of hair, droplets on the skin, faint breath visible in the cold air.\nOutfit: a black leather trench coat over a simple top.\nLighting: cold neon signage behind her + warm car headlights from the side, blurred bokeh of lights, reflections on the wet asphalt.\nPose: looking straight into the camera, calm confidence, chin slightly raised.\nShot on 85mm, shallow depth of field, rich cinematic color grade.",
@@ -312,36 +316,46 @@
         "added_at": "2026-06-22T00:23:45.619712+00:00"
       },
       {
-        "title": "Свой постер",
         "description": "Драматичный постер инди-фильма с твоим портретом: кинотени, типографика названия, цитаты критиков.",
         "upload_hint": "Фото лица",
         "prompt": "Create a dramatic indie movie poster based on this portrait, preserving the facial features.\nCinematic shadows, subtle film grain, moody color grade.\nElegant title typography centered at the bottom, small critic-style review quotes, film festival laurels.\nComposition like a real movie poster: large portrait, atmospheric background, deliberate negative space for the text.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTt8epV.jpg",
         "added_at": "2026-06-22T00:23:45.619712+00:00"
       },
       {
-        "title": "Тёмный кинопортрет",
         "description": "Сгенерированный low-key портрет в тёмной студии: один источник тёплого света сбоку, объёмная светотень, новая поза.",
         "upload_hint": "Фото лица",
         "prompt": "Create a dramatic low-key portrait in a dark studio, fully preserving the face and skin tone.\nA single warm light source from the side (Rembrandt lighting), deep soft shadows, black background fading into darkness, sculpted chiaroscuro on the face.\nOutfit: a plain dark turtleneck or shirt.\nPose: turned half toward the light, gazing into the camera from the shadow, shoulders slightly angled.\nSubtle film grain, faint haze in the light beam, restrained cinematic color grade. Shot on 85mm, shallow depth of field.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTt88hP.jpg",
         "added_at": "2026-06-22T00:23:45.619712+00:00"
       },
       {
-        "title": "Женский кинопортрет",
         "description": "Драматичный low-key женский портрет: мягкий тёплый свет сбоку, объёмная светотень по скулам, элегантный образ. Кинематографичная студия.",
         "upload_hint": "Фото лица",
         "prompt": "Create a dramatic low-key female portrait, fully preserving the face, expression and features.\nA single soft warm light source from the side (Rembrandt lighting), deep gentle shadows, sculpted chiaroscuro that flatters the cheekbones, black background fading into darkness.\nOutfit: an elegant dark top or a silk blouse, delicate jewelry catching the light.\nPose: turned half toward the light, a calm magnetic gaze into the camera, soft loose hair with a few strands lit by the rim light.\nSubtle film grain, faint haze in the light beam, refined cinematic color grade (warm highlights, deep shadows). Shot on 85mm, shallow depth of field.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTt844a.jpg",
         "added_at": "2026-06-22T19:32:32.000370+00:00"
       },
       {
-        "title": "Профи-хедшот",
         "description": "Студийный профессиональный хедшот: серый фон, мягкий свет, деловой образ. Для LinkedIn/резюме.",
         "upload_hint": "Фото лица",
         "prompt": "Create a polished professional studio headshot of this person, preserving their exact face. Clean neutral grey backdrop, soft three-point studio lighting, sharp eyes, natural confident expression, smart business-casual outfit. Corporate/LinkedIn quality, crisp detail, natural skin.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtS6o7.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "description": "Сетка 3×3: примерь разные причёски и цвета волос, лицо неизменно.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a 3x3 grid of photo-booth portraits of this person, keeping their exact face in every cell. Each cell shows a different hairstyle and hair color - blonde bob, curtain bangs, long waves, pastel pink, slicked-back, braids, copper, jet-black, short crop. Consistent identity, soft studio lighting, clean neutral background, realistic salon-reference quality.",
+        "example_url": "https://iili.io/CTtUTfn.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
+      },
+      {
+        "description": "9 портретов в разных локациях и образах — как идеальная лента.",
+        "upload_hint": "Фото лица",
+        "prompt": "Using this person's face (kept consistent), generate a 9-panel grid of half-length lifestyle portraits. Each panel: a different pose, outfit and setting - cafe, neon street, rooftop, beach, cozy room. Vibrant colourful, candid Gen-Z energy, like a curated Instagram feed.",
+        "example_url": "https://iili.io/CTtU45v.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
   },
@@ -371,11 +385,10 @@
         "example_url": "https://i.ibb.co/9kcWsJhC/library-example.jpg"
       },
       {
-        "title": "Киберпанк-неон",
         "description": "Дождливый киберпанк-город ночью: неон, голограммы, мокрый асфальт, техвер. Blade Runner.",
         "upload_hint": "Фото лица",
         "prompt": "Place this person in a rain-soaked cyberpunk city at night, preserving their real face. Towering neon signs in pink, blue and purple, holographic ads, wet reflective streets, light haze. Outfit: a sleek techwear jacket with subtle glowing accents. Cinematic 85mm, shallow depth of field, blade-runner atmosphere.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSvSf.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
       }
     ]
@@ -410,11 +423,10 @@
         "example_url": "https://i.ibb.co/Z6WHRWgV/import.jpg"
       },
       {
-        "title": "Детский кинопортрет",
         "description": "Тёплый нежный детский кинопортрет: мягкий боковой свет, уютное свечение на щеках, искра восторга в глазах. Кинематографично, без жёстких теней.",
         "upload_hint": "Фото лица ребёнка",
         "prompt": "Create a warm, gentle cinematic portrait of a child, fully preserving the face and expression.\nSoft directional light from the side (gentle Rembrandt lighting), smooth rounded shadows, a cozy glow on the cheeks, a dark softly graded background that keeps all attention on the face.\nA spark of wonder and a faint natural smile in the eyes.\nOutfit: a simple cozy knit sweater.\nSubtle warm film grain, dreamy soft haze, tender cinematic color grade (honey-warm highlights, soft shadows). Shot on 85mm, shallow depth of field, framed at the child's eye level.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTt8mCX.jpg",
         "added_at": "2026-06-22T19:32:32.000370+00:00"
       }
     ]
@@ -424,27 +436,10 @@
     "emoji": "👨",
     "items": [
       {
-        "title": "Брутальный кинопортрет",
-        "description": "Low-key мужской портрет: холодный боковой свет, глубокие тени, фактура кожи и щетины. Стиль криминального триллера.",
-        "upload_hint": "Фото лица",
-        "prompt": "Create a dramatic low-key male portrait, fully preserving the face, expression and shape.\nA single cold light source from the side, deep shadows, sharp chiaroscuro, emphasized skin and stubble texture.\nDark background, subtle film grain, restrained high-contrast color grade (cold shadows, steel highlights).\nThe mood of a gritty crime-thriller frame — a sense of strength and restraint.",
-        "example_url": "",
-        "added_at": "2026-06-22T00:23:45.619712+00:00"
-      },
-      {
-        "title": "Постер боевика",
-        "description": "Драматичный постер боевика с мужским портретом: искры и дым на фоне, сине-оранжевый цветокор, брутальная типографика.",
-        "upload_hint": "Фото лица",
-        "prompt": "Create a dramatic action-movie poster based on this male portrait, preserving the facial features.\nHard cinematic shadows, a smoldering background (sparks, smoke, night city), cold teal-and-orange color grade.\nLarge hero portrait, elegant bold title typography at the bottom, small critic quotes, festival laurels.\nComposition of a real movie poster with space reserved for the text.",
-        "example_url": "",
-        "added_at": "2026-06-22T00:23:45.619712+00:00"
-      },
-      {
-        "title": "GQ-обложка",
         "description": "Обложка мужского глянца уровня GQ: костюм, студийный свет, логотип и заголовки. Премиальный редакторский вид.",
         "upload_hint": "Фото в полный рост",
         "prompt": "Turn the photo into a men's glossy magazine cover at the level of GQ, preserving the facial features.\nAn expensive suit or a stylish casual outfit, flawless studio lighting with soft volumetric fill, clean background.\nMagazine masthead: large logo at the top, headlines and subheadings on the sides, a barcode at the bottom.\nPremium editorial look, sharp detail, natural skin.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTt8iYv.jpg",
         "added_at": "2026-06-22T00:23:45.619712+00:00"
       }
     ]
@@ -454,12 +449,25 @@
     "emoji": "🧸",
     "items": [
       {
-        "title": "Экшн-фигурка",
         "description": "Превращение в коллекционную экшн-фигурку в блистерной упаковке. Самый расшариваемый тренд 2026.",
         "upload_hint": "Фото в полный рост",
         "prompt": "Turn the person into a collectible action figure, keeping the face recognizable.\nGlossy plastic, slightly stylized proportions, miniature accessories included.\nThe figure sits inside branded blister packaging with clear plastic and a cardboard backing with a name and logo at the top.\nStudio lighting, soft highlights on the plastic, realistic shadows, premium retail look. Framed like a product photo for a marketplace.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTt8ZTN.jpg",
         "added_at": "2026-06-22T00:23:45.619712+00:00"
+      },
+      {
+        "description": "Вязаная крючком кукла-чиби тебя в руках — уютный hand-made.",
+        "upload_hint": "Фото в полный рост",
+        "prompt": "A close-up professional photo of a hand-crocheted yarn doll held gently in two hands. The chunky knitted doll is a cute chibi version of the person in the photo - same hairstyle, outfit colors and vibe - rounded soft shape, visible yarn texture, vivid colors. Cozy warm lighting, shallow depth of field, adorable handmade look.",
+        "example_url": "https://iili.io/CTtU7R4.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
+      },
+      {
+        "description": "Чиби Funko Pop-фигурка тебя в фирменной коробке.",
+        "upload_hint": "Фото в полный рост",
+        "prompt": "Create a photorealistic 3D render of a chibi Funko Pop figure of this person, based on their photo - big head, small body, signature black dot eyes, matching hairstyle and outfit. Displayed in its window box packaging with a logo and the person's name on top. Studio lighting, glossy vinyl texture, collectible toy look.",
+        "example_url": "https://iili.io/CTtUab2.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
   },
@@ -468,36 +476,52 @@
     "emoji": "🖼",
     "items": [
       {
-        "title": "Ренессанс-портрет",
+        "description": "Лист-референс персонажа: модель считывает твой стиль и одежду с фото — образы, ракурсы, выражения, чиби, палитра.",
+        "upload_hint": "Фото в полный рост",
+        "prompt": "Create a character reference sheet of the person in the reference photo.\nFIRST analyze the reference and pull everything from it: the real face, hairstyle and body type, and - most importantly - their actual personal style: the exact clothing, colors, accessories, and the overall vibe/personality the photo gives off (calm, bold, soft, edgy, etc.). Build the ENTIRE sheet around their real look. Do not invent a generic outfit - reproduce and extend their own style.\nLayout on a clean off-white sketchbook background:\n- Center: a full-body turnaround in the exact outfit from the reference - front, 3/4 and back views - face and clothing kept faithful and consistent.\n- A row of 3-4 facial expressions that match the personality read from the photo.\n- A small chibi version of the person in the same outfit.\n- Close-up call-outs of their key items taken from the reference (shoes, bag, jewelry, prints, hair detail).\n- A color-palette strip with swatches sampled from their actual clothing.\n- Short handwritten-style notes describing their character and style in keywords, with little arrows and doodles.\nCohesive modern character-design sheet, neat labels, the same recognizable person throughout.",
+        "example_url": "https://iili.io/CTtUJiF.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
+      },
+      {
         "description": "Портрет в стиле классической масляной живописи: тёмный фон, бархат, свеча, золочёная рама.",
         "upload_hint": "Фото лица",
         "prompt": "Repaint this person as a Renaissance oil portrait, preserving their real facial features and likeness. Classical three-quarter pose against a dark chiaroscuro background, rich visible brushstroke texture, cracked-varnish patina, warm candle-like light on the face, period velvet clothing with an embroidered collar. Museum oil-painting look with a gilded frame edge. The face stays recognizable.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSFu2.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
       },
       {
-        "title": "Мраморная статуя",
         "description": "Превращение в классическую мраморную статую в музейном зале: тога, прожилки камня, пьедестал.",
         "upload_hint": "Фото лица",
         "prompt": "Transform this person into a classical white marble statue, keeping the face recognizable. Smooth carved marble skin with subtle veining, a draped toga over one shoulder, polished sculptural detail, displayed in a museum hall with soft directional light. Pedestal base, faint age on the stone. Photorealistic sculpture, not a drawing.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSn6u.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
       },
       {
-        "title": "Двойная экспозиция",
         "description": "Двойная экспозиция: портрет, слитый с туманным лесом и стаей птиц на рассвете. Fine-art.",
         "upload_hint": "Фото лица в профиль",
         "prompt": "Create a cinematic double-exposure portrait, preserving the person's facial features as the base. Their portrait is blended with a misty pine forest and a flock of birds rising at dawn. Monochrome base with a subtle warm tint, fine-art aesthetic, clean negative space, gallery quality.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSc6g.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
       },
       {
-        "title": "Студия Гибли",
         "description": "Аниме-портрет в стиле студии Гибли: акварельные тона, зелёный луг, облака, ностальгия.",
         "upload_hint": "Фото лица",
         "prompt": "Reimagine this person as a Studio Ghibli-style hand-painted character, keeping their recognizable features. Soft watercolor tones, expressive eyes, gentle cel-shading, standing in a peaceful green countryside with big fluffy clouds. Warm nostalgic mood, anime film still.",
-        "example_url": "",
+        "example_url": "https://iili.io/CTtSVup.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
+      }
+    ]
+  },
+  {
+    "title": "Стикеры",
+    "emoji": "💬",
+    "items": [
+      {
+        "description": "Набор чиби-стикеров с эмоциями — готовый стикерпак для Telegram.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a cute chibi sticker pack of this person, keeping their recognizable look. A set of 6 expressive stickers on transparent background: winking with a peace sign, crying with trembling lips, blowing a heart kiss, thumbs up, laughing, sleepy. Bold clean outlines, vivid colors, glossy messenger-sticker style.",
+        "example_url": "https://iili.io/CTtUVUb.jpg",
+        "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
   }
