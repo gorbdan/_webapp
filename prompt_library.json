@@ -342,13 +342,6 @@
         "prompt": "Create a 3x3 grid of photo-booth portraits of this person, keeping their exact face in every cell. Each cell shows a different hairstyle and hair color - blonde bob, curtain bangs, long waves, pastel pink, slicked-back, braids, copper, jet-black, short crop. Consistent identity, soft studio lighting, clean neutral background, realistic salon-reference quality.",
         "example_url": "https://iili.io/CTtUTfn.jpg",
         "added_at": "2026-06-23T06:02:44.128948+00:00"
-      },
-      {
-        "description": "9 портретов в разных локациях и образах — как идеальная лента.",
-        "upload_hint": "Фото лица",
-        "prompt": "Using this person's face (kept consistent), generate a 9-panel grid of half-length lifestyle portraits. Each panel: a different pose, outfit and setting - cafe, neon street, rooftop, beach, cozy room. Vibrant colourful, candid Gen-Z energy, like a curated Instagram feed.",
-        "example_url": "https://iili.io/CTtU45v.jpg",
-        "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
   },
