@@ -274,6 +274,22 @@
         "upload_hint": "Фото лица",
         "prompt": "Создай изображение,сохрани внешность и черты лица Крупно-полуобрезанный портрет модной женщины-модели в студии, три четверти по фигуре, уверенная поза — правая рука на бедре, левая локтем опирается на прожекторе и держит маленькие солнцезащитные очки у лица, смотрит влево вдаль, длинные волнистые волосы спадом на плечи, ярко-красные ногти; одежда: приталённый чёрный пиджак с глубоким V-вырезом и контрастными белыми кружевными манжетами и треугольным кружевным подолом, прозрачные тёмные кружевные колготки с цветочным узором; рядом слева в кадре винтажный металлический студийный прожектор на стойке как реквизит; минималистичный нейтральный серый фон; драматический, но мягкий студийный свет с ключевой софитной подсветкой слева, лёгким контровым бликом по краю волос и тонкими мягкими тенями для глубины и текстуры — киношное, гламурное и элегантное настроение; стиль высокой моды, ретушь с мягкой контрастностью и приглушёнными тонами, акцент на текстуре кружева и блеске волос; камера: 50mm, апертура f/1.8 для мелкой глубины резкости и мягкого боке, ISO 100, выдержка 1/125, низкий угол съёмки чуть ниже уровня глаз для подчёркивания силуэта.",
         "example_url": "https://i.ibb.co/CKK2nvtM/import.jpg"
+      },
+      {
+        "title": "Золотой час, стрит",
+        "description": "Кэжуал-портрет в тёплом свете заката на старинной улочке: контровой свет, блики, эдиториал.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a candid street-style portrait of this person in the warm golden light of late afternoon, preserving their face. Walking through a sunlit European old town, soft lens flare, glowing rim light on the hair, warm blurred bokeh behind. Effortless editorial fashion vibe, shot on 50mm film, rich golden grade.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "title": "Фэнтези-героиня",
+        "description": "Эпичная фэнтези-героиня: гравированные латы, плащ, замок на закате, искры. AAA key-art.",
+        "upload_hint": "Фото лица",
+        "prompt": "Reimagine this person as an epic fantasy heroine, preserving their real facial identity. Ornate engraved armor with leather and gold details, a flowing cloak, a dramatic mountain-fortress backdrop at dusk, embers in the air, cinematic rim light. Painterly realism, AAA game key-art quality.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
       }
     ]
   },
@@ -318,6 +334,14 @@
         "prompt": "Create a dramatic low-key female portrait, fully preserving the face, expression and features.\nA single soft warm light source from the side (Rembrandt lighting), deep gentle shadows, sculpted chiaroscuro that flatters the cheekbones, black background fading into darkness.\nOutfit: an elegant dark top or a silk blouse, delicate jewelry catching the light.\nPose: turned half toward the light, a calm magnetic gaze into the camera, soft loose hair with a few strands lit by the rim light.\nSubtle film grain, faint haze in the light beam, refined cinematic color grade (warm highlights, deep shadows). Shot on 85mm, shallow depth of field.",
         "example_url": "",
         "added_at": "2026-06-22T19:32:32.000370+00:00"
+      },
+      {
+        "title": "Профи-хедшот",
+        "description": "Студийный профессиональный хедшот: серый фон, мягкий свет, деловой образ. Для LinkedIn/резюме.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a polished professional studio headshot of this person, preserving their exact face. Clean neutral grey backdrop, soft three-point studio lighting, sharp eyes, natural confident expression, smart business-casual outfit. Corporate/LinkedIn quality, crisp detail, natural skin.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
       }
     ]
   },
@@ -345,6 +369,14 @@
         "upload_hint": "Фото лица",
         "prompt": "Создай изображение,сохрани внешность и черты лица\nБлизкий кадр девушки\nКинематографический эффект с добавлением зерна.\nНе меняй черты лица\nВ кадре девушка сидит за столиком в ресторане под водой. Это очень дорогой ресторан под водой. Все остеклено и видно подводный мир, плавают рыбы большие и маленькие, видно кораллы, вода прозрачная, пол так же стеклянный и видео воду \nОна одета в элегантное платье коричневого цвета по фигуре. Длинная юбка с высоким разрезом сбоку, вверх с длинными рукавами, по середине круглый разрез видно её накаченный пресс \nВолосы распущенные прямые длинные \nНа руке золотой браслет  \nЭффектный макияж с сиянием накрашеные ресницы \nГубы с матовой помадой с контуром \nХайлайтер \nДевушка сидит за столом засервированый дорогой посудой перед ней тарелка с морскими ежами во льду\nОна держит в руках бокал с шампанским \nФормат 9:16",
         "example_url": "https://i.ibb.co/9kcWsJhC/library-example.jpg"
+      },
+      {
+        "title": "Киберпанк-неон",
+        "description": "Дождливый киберпанк-город ночью: неон, голограммы, мокрый асфальт, техвер. Blade Runner.",
+        "upload_hint": "Фото лица",
+        "prompt": "Place this person in a rain-soaked cyberpunk city at night, preserving their real face. Towering neon signs in pink, blue and purple, holographic ads, wet reflective streets, light haze. Outfit: a sleek techwear jacket with subtle glowing accents. Cinematic 85mm, shallow depth of field, blade-runner atmosphere.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
       }
     ]
   },
@@ -428,6 +460,44 @@
         "prompt": "Turn the person into a collectible action figure, keeping the face recognizable.\nGlossy plastic, slightly stylized proportions, miniature accessories included.\nThe figure sits inside branded blister packaging with clear plastic and a cardboard backing with a name and logo at the top.\nStudio lighting, soft highlights on the plastic, realistic shadows, premium retail look. Framed like a product photo for a marketplace.",
         "example_url": "",
         "added_at": "2026-06-22T00:23:45.619712+00:00"
+      }
+    ]
+  },
+  {
+    "title": "Арт",
+    "emoji": "🖼",
+    "items": [
+      {
+        "title": "Ренессанс-портрет",
+        "description": "Портрет в стиле классической масляной живописи: тёмный фон, бархат, свеча, золочёная рама.",
+        "upload_hint": "Фото лица",
+        "prompt": "Repaint this person as a Renaissance oil portrait, preserving their real facial features and likeness. Classical three-quarter pose against a dark chiaroscuro background, rich visible brushstroke texture, cracked-varnish patina, warm candle-like light on the face, period velvet clothing with an embroidered collar. Museum oil-painting look with a gilded frame edge. The face stays recognizable.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "title": "Мраморная статуя",
+        "description": "Превращение в классическую мраморную статую в музейном зале: тога, прожилки камня, пьедестал.",
+        "upload_hint": "Фото лица",
+        "prompt": "Transform this person into a classical white marble statue, keeping the face recognizable. Smooth carved marble skin with subtle veining, a draped toga over one shoulder, polished sculptural detail, displayed in a museum hall with soft directional light. Pedestal base, faint age on the stone. Photorealistic sculpture, not a drawing.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "title": "Двойная экспозиция",
+        "description": "Двойная экспозиция: портрет, слитый с туманным лесом и стаей птиц на рассвете. Fine-art.",
+        "upload_hint": "Фото лица в профиль",
+        "prompt": "Create a cinematic double-exposure portrait, preserving the person's facial features as the base. Their portrait is blended with a misty pine forest and a flock of birds rising at dawn. Monochrome base with a subtle warm tint, fine-art aesthetic, clean negative space, gallery quality.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "title": "Студия Гибли",
+        "description": "Аниме-портрет в стиле студии Гибли: акварельные тона, зелёный луг, облака, ностальгия.",
+        "upload_hint": "Фото лица",
+        "prompt": "Reimagine this person as a Studio Ghibli-style hand-painted character, keeping their recognizable features. Soft watercolor tones, expressive eyes, gentle cel-shading, standing in a peaceful green countryside with big fluffy clouds. Warm nostalgic mood, anime film still.",
+        "example_url": "",
+        "added_at": "2026-06-23T04:01:45.124182+00:00"
       }
     ]
   }
