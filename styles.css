@@ -918,10 +918,17 @@ h1 {
 }
 
 .page-hint {
-  margin: 0;
+  margin: 0 0 14px;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.package-hint {
+  margin-top: 3px;
+  color: var(--brand-2);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .empty-state {

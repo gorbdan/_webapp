@@ -521,11 +521,29 @@ categorySheet?.addEventListener("click", (event) => {
   if (event.target === categorySheet) closeCategorySheet();
 });
 
+const APP_TITLES = { katalog: "Библиотека", history: "История", topup: "Пополнить" };
+
 function switchTab(tabName) {
   document.querySelectorAll(".tab-page").forEach((p) => p.classList.add("hidden"));
   const target = document.getElementById("page" + tabName.charAt(0).toUpperCase() + tabName.slice(1));
   if (target) target.classList.remove("hidden");
   tabBar.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === tabName));
+  const titleEl = document.getElementById("appTitle");
+  if (titleEl && APP_TITLES[tabName]) titleEl.textContent = APP_TITLES[tabName];
+}
+
+function decoratePackages() {
+  const COST_PER_PHOTO = 5;
+  document.querySelectorAll("#packages .package").forEach((pkg) => {
+    const info = pkg.querySelector(".package-info");
+    if (!info || info.querySelector(".package-hint")) return;
+    const amount = parseInt(pkg.dataset.amount, 10) || 0;
+    const photos = Math.max(1, Math.floor(amount / COST_PER_PHOTO));
+    const hint = document.createElement("span");
+    hint.className = "package-hint";
+    hint.textContent = `≈ ${photos} фото`;
+    info.appendChild(hint);
+  });
 }
 
 tabBar.addEventListener("click", (e) => {
@@ -640,6 +658,7 @@ document.getElementById("packages").addEventListener("click", (e) => {
 (async function init() {
   applyTheme(getTheme());
   setBalance(readBalanceFromUrl());
+  decoratePackages();
   renderHistory();
   await loadLibrary();
   if (!library.length) {
