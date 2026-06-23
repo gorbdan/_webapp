@@ -29,6 +29,10 @@ const balancePill = document.getElementById("balancePill");
 const balanceCount = document.getElementById("balanceCount");
 const balanceDisplay = document.getElementById("balanceDisplay");
 const historyToCatalog = document.getElementById("historyToCatalog");
+const categoryTrigger = document.getElementById("categoryTrigger");
+const categoryTriggerLabel = document.getElementById("categoryTriggerLabel");
+const categorySheet = document.getElementById("categorySheet");
+const categorySheetClose = document.getElementById("categorySheetClose");
 
 let library = [];
 let activeCategory = "all";
@@ -144,22 +148,49 @@ function makeChip(label, count, value, emoji = "") {
   button.type = "button";
   button.innerHTML = `<span>${emoji} ${label}</span><span class="chip-count">${count}</span>`;
   button.onclick = () => {
-    // повторный тап по активной категории снимает выбор → снова все
-    activeCategory = activeCategory === value ? "all" : value;
+    activeCategory = value;
+    closeCategorySheet();
     render();
   };
   return button;
 }
 
 function renderCategories() {
-  // Только реальные категории. «Все»/«Новинки» живут в ряду типов (сегментах),
-  // чтобы не дублировать фильтры. Пустые категории не показываем.
+  // Категории живут в выезжающей шторке. «Все»/«Новинки» по типу — в сегментах.
+  // Пустые категории не показываем.
   categoriesEl.innerHTML = "";
+  categoriesEl.appendChild(makeChip("Все категории", flattenLibrary().length, "all", "📁"));
   library.forEach((cat, idx) => {
     const count = Array.isArray(cat?.items) ? cat.items.length : 0;
     if (!count) return;
     categoriesEl.appendChild(makeChip(cat.title || "Категория", count, idx, cat.emoji || "□"));
   });
+  updateCategoryTrigger();
+}
+
+function updateCategoryTrigger() {
+  if (!categoryTriggerLabel) return;
+  if (activeCategory === "all") {
+    categoryTriggerLabel.textContent = "Все категории";
+  } else {
+    const cat = library[activeCategory];
+    categoryTriggerLabel.textContent = cat
+      ? `${cat.emoji || ""} ${cat.title || "Категория"}`.trim()
+      : "Все категории";
+  }
+  categoryTrigger?.classList.toggle("cat-trigger--active", activeCategory !== "all");
+}
+
+function openCategorySheet() {
+  if (!categorySheet) return;
+  if (typeof categorySheet.showModal === "function") categorySheet.showModal();
+  else categorySheet.setAttribute("open", "");
+}
+
+function closeCategorySheet() {
+  if (!categorySheet) return;
+  if (typeof categorySheet.close === "function" && categorySheet.open) categorySheet.close();
+  else categorySheet.removeAttribute("open");
 }
 
 function sendPrompt(item, button) {
@@ -483,6 +514,12 @@ detailsModal.addEventListener("click", (event) => {
 });
 modalCopy.addEventListener("click", () => copyPrompt(selectedItem));
 modalUse.addEventListener("click", () => sendPrompt(selectedItem, selectedButton));
+
+categoryTrigger?.addEventListener("click", openCategorySheet);
+categorySheetClose?.addEventListener("click", closeCategorySheet);
+categorySheet?.addEventListener("click", (event) => {
+  if (event.target === categorySheet) closeCategorySheet();
+});
 
 function switchTab(tabName) {
   document.querySelectorAll(".tab-page").forEach((p) => p.classList.add("hidden"));

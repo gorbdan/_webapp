@@ -293,6 +293,93 @@ h1 {
   color: #fff;
 }
 
+.cat-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  margin-bottom: 14px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.cat-trigger #categoryTriggerLabel {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-trigger .cat-trigger-chev {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.cat-trigger:hover {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+
+.cat-trigger--active {
+  border-color: transparent;
+  background: var(--brand);
+  color: #fff;
+}
+
+.cat-trigger--active .cat-trigger-chev {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sheet {
+  width: min(560px, 100%);
+  max-height: 82vh;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px 18px 0 0;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.sheet::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.sheet-shell {
+  padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sheet-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.chips--sheet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
