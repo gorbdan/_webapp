@@ -488,6 +488,13 @@
         "prompt": "Reimagine this person as a Studio Ghibli-style hand-painted character, keeping their recognizable features. Soft watercolor tones, expressive eyes, gentle cel-shading, standing in a peaceful green countryside with big fluffy clouds. Warm nostalgic mood, anime film still.",
         "example_url": "https://iili.io/CTtSVup.jpg",
         "added_at": "2026-06-23T04:01:45.124182+00:00"
+      },
+      {
+        "description": "Эстетичный Pinterest-коллаж/дневник: полароиды, washi-tape, дудлы, сухоцветы, рукописные заметки.",
+        "upload_hint": "Несколько фото (можно разные ракурсы/моменты)",
+        "prompt": "Create a Pinterest-style aesthetic collage page featuring this person, preserving their real face. Lay it out like a scanned personal diary / moodboard: a few polaroid-framed portraits of them in different candid moments, torn paper edges, strips of washi tape, handwritten notes and quotes, little doodles and arrows, pressed flowers and small stickers, soft muted pastel tones. Cozy, intimate, hand-made scrapbook vibe, slightly overlapping layers, clean but warm composition.",
+        "example_url": "https://iili.io/CunaHg9.jpg",
+        "added_at": "2026-06-23T17:46:06.982529+00:00"
       }
     ]
   },
