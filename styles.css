@@ -98,8 +98,10 @@ p {
 
 h1 {
   margin: 0;
-  font-size: clamp(27px, 5vw, 46px);
-  line-height: 1.1;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .icon-button {
@@ -169,31 +171,34 @@ h1 {
 }
 
 .segmented {
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.segmented::-webkit-scrollbar {
+  display: none;
 }
 
 .segment {
-  min-height: 42px;
-  border: 0;
-  border-radius: 6px;
-  padding: 0 11px;
-  background: transparent;
+  flex: 0 0 auto;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 15px;
+  background: var(--surface);
   color: var(--muted);
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
 }
 
 .segment:hover:not(.active) {
-  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
 }
 
 .segment:active {
@@ -203,6 +208,7 @@ h1 {
 .segment.active {
   background: var(--text);
   color: var(--bg);
+  border-color: var(--text);
 }
 
 .stats {
