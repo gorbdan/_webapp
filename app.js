@@ -533,15 +533,19 @@ function switchTab(tabName) {
 }
 
 function decoratePackages() {
+  // Должно совпадать с ботом: 1 фото = 5 изюминок, 1 видео 10 сек = 70.
   const COST_PER_PHOTO = 5;
+  const COST_PER_VIDEO = 70;
   document.querySelectorAll("#packages .package").forEach((pkg) => {
     const info = pkg.querySelector(".package-info");
     if (!info || info.querySelector(".package-hint")) return;
     const amount = parseInt(pkg.dataset.amount, 10) || 0;
     const photos = Math.max(1, Math.floor(amount / COST_PER_PHOTO));
+    const videos = Math.floor(amount / COST_PER_VIDEO);
     const hint = document.createElement("span");
     hint.className = "package-hint";
-    hint.textContent = `≈ ${photos} фото`;
+    // Акцент на видео: 🎬 первым, где пакета хватает на видео.
+    hint.textContent = videos > 0 ? `🎬 ${videos} · 📸 ${photos}` : `📸 ${photos}`;
     info.appendChild(hint);
   });
 }
