@@ -342,6 +342,13 @@
         "prompt": "Create a 3x3 grid of photo-booth portraits of this person, keeping their exact face in every cell. Each cell shows a different hairstyle and hair color - blonde bob, curtain bangs, long waves, pastel pink, slicked-back, braids, copper, jet-black, short crop. Consistent identity, soft studio lighting, clean neutral background, realistic salon-reference quality.",
         "example_url": "https://iili.io/CTtUTfn.jpg",
         "added_at": "2026-06-23T06:02:44.128948+00:00"
+      },
+      {
+        "description": "Уютный контент в стиле quiet luxury: кофе у окна кафе, кардиган, книга — спокойная осознанная эстетика.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a cozy quiet-luxury content photo of this person, preserving their exact face, sitting by a cafe window with a coffee cup, wearing a soft cardigan and tailored trousers, glasses, muted warm tones, a book and a notebook on the table, soft natural window light, calm intentional aesthetic, editorial-lifestyle photo quality.",
+        "example_url": "",
+        "added_at": "2026-07-02T04:33:20.228879+00:00"
       }
     ]
   },
