@@ -217,6 +217,10 @@ function sendPrompt(item, button) {
       action: payload.action,
       title: payload.title,
       prompt: payload.prompt,
+      // Индексы шлём всегда: бот по ним резолвит label/upload_hint из своей
+      // копии библиотеки (важно для фото-стилей, у которых title нет намеренно).
+      cat_idx: Number(item._categoryIndex),
+      item_idx: Number(item._itemIndex),
       v: APP_VERSION,
     };
     if (item.image_prompt) baseObj.image_prompt = item.image_prompt;
