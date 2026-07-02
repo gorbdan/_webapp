@@ -3,7 +3,7 @@ if (tg) {
   tg.ready();
   tg.expand();
 }
-const APP_VERSION = "2026-05-23-webapp-novinki-v1";
+const APP_VERSION = "2026-07-02-payload-title-v1";
 const NEW_DAYS_THRESHOLD = 7;
 
 const FALLBACK_IMAGE = "https://dummyimage.com/960x1200/f1e8dc/6d6472&text=No+Preview";
@@ -196,9 +196,12 @@ function closeCategorySheet() {
 function sendPrompt(item, button) {
   const fallbackPrompt = (item.title || "").trim();
   const itemIsVideo = isVideoItem(item);
+  // title обязателен по контракту: без него бот показывает «Шаблон «шаблон»»
+  // и ломается статистика. Фолбэк — категория, но у всех items title заполнен.
+  const payloadTitle = (item.title || "").trim() || (item._categoryTitle || "").trim() || "Стиль из библиотеки";
   const payload = {
     action: itemIsVideo ? "set_video_prompt" : "set_prompt",
-    title: item.title || "Шаблон",
+    title: payloadTitle,
     prompt: (item.prompt || "").trim() || fallbackPrompt,
     v: APP_VERSION,
   };
