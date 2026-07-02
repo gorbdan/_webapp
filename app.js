@@ -3,7 +3,7 @@ if (tg) {
   tg.ready();
   tg.expand();
 }
-const APP_VERSION = "2026-05-23-webapp-novinki-v1";
+const APP_VERSION = "2026-07-02-payload-title-v1";
 const NEW_DAYS_THRESHOLD = 7;
 
 const FALLBACK_IMAGE = "https://dummyimage.com/960x1200/f1e8dc/6d6472&text=No+Preview";
@@ -196,9 +196,13 @@ function closeCategorySheet() {
 function sendPrompt(item, button) {
   const fallbackPrompt = (item.title || "").trim();
   const itemIsVideo = isVideoItem(item);
+  // У фото-стилей title в JSON нет НАМЕРЕННО (решение Ани — карточка без подписи).
+  // Но в payload title обязателен, иначе бот показывает «Шаблон «шаблон»» —
+  // поэтому для фото шлём название категории.
+  const payloadTitle = (item.title || "").trim() || (item._categoryTitle || "").trim() || "Стиль из библиотеки";
   const payload = {
     action: itemIsVideo ? "set_video_prompt" : "set_prompt",
-    title: item.title || "Шаблон",
+    title: payloadTitle,
     prompt: (item.prompt || "").trim() || fallbackPrompt,
     v: APP_VERSION,
   };
@@ -213,6 +217,10 @@ function sendPrompt(item, button) {
       action: payload.action,
       title: payload.title,
       prompt: payload.prompt,
+      // Индексы шлём всегда: бот по ним резолвит label/upload_hint из своей
+      // копии библиотеки (важно для фото-стилей, у которых title нет намеренно).
+      cat_idx: Number(item._categoryIndex),
+      item_idx: Number(item._itemIndex),
       v: APP_VERSION,
     };
     if (item.image_prompt) baseObj.image_prompt = item.image_prompt;
