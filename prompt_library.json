@@ -349,6 +349,27 @@
         "prompt": "Create a cozy quiet-luxury content photo of this person, preserving their exact face, sitting by a cafe window with a coffee cup, wearing a soft cardigan and tailored trousers, glasses, muted warm tones, a book and a notebook on the table, soft natural window light, calm intentional aesthetic, editorial-lifestyle photo quality.",
         "example_url": "https://iili.io/C7DlNee.jpg",
         "added_at": "2026-07-02T04:33:20.228879+00:00"
+      },
+      {
+        "description": "Ballet Core: грациозный стретчинг в солнечной комнате, вязаные гетры — тренд весны 2026.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a ballet-core content photo of this person stretching in a sunlit aesthetic room, preserving their exact face. Soft knit leg warmers and a wrap top, wooden floor, warm golden window light, graceful natural pose, delicate glowing skin, calm romantic everyday-life mood, realistic lifestyle-photo quality.",
+        "example_url": "https://iili.io/C7DO7nI.jpg",
+        "added_at": "2026-07-02T04:43:35.935100+00:00"
+      },
+      {
+        "description": "Пикник для контента: плед в парке, плетёная корзина, полевые цветы, книга и чай.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create an aesthetic picnic content photo of this person sitting on a blanket in a sunlit park, preserving their exact face. A small basket, wildflowers, an open book and a ceramic cup nearby, soft dappled sunlight through leaves, relaxed candid pose, warm romantic slow-living mood, realistic lifestyle-photo quality.",
+        "example_url": "https://iili.io/C7DO0as.jpg",
+        "added_at": "2026-07-02T04:43:35.935100+00:00"
+      },
+      {
+        "description": "Скинкер-рутина: glass skin у зеркала ванной, уходовые средства на полке — бьюти-тренд.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a glowing skincare-routine content photo of this person at a bathroom vanity, preserving their exact face. Fresh dewy \"glass skin\" look, soft skincare products neatly arranged on the counter, warm soft lighting, hair in a loose towel or clip, calm self-care mood, realistic close-up beauty-content quality.",
+        "example_url": "https://iili.io/C7DOG9f.jpg",
+        "added_at": "2026-07-02T04:43:35.935100+00:00"
       }
     ]
   },
