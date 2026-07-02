@@ -196,8 +196,9 @@ function closeCategorySheet() {
 function sendPrompt(item, button) {
   const fallbackPrompt = (item.title || "").trim();
   const itemIsVideo = isVideoItem(item);
-  // title обязателен по контракту: без него бот показывает «Шаблон «шаблон»»
-  // и ломается статистика. Фолбэк — категория, но у всех items title заполнен.
+  // У фото-стилей title в JSON нет НАМЕРЕННО (решение Ани — карточка без подписи).
+  // Но в payload title обязателен, иначе бот показывает «Шаблон «шаблон»» —
+  // поэтому для фото шлём название категории.
   const payloadTitle = (item.title || "").trim() || (item._categoryTitle || "").trim() || "Стиль из библиотеки";
   const payload = {
     action: itemIsVideo ? "set_video_prompt" : "set_prompt",
