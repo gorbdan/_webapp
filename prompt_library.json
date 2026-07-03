@@ -587,5 +587,19 @@
         "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
+  },
+  {
+    "title": "Руферы",
+    "emoji": "🗽",
+    "items": [
+      {
+        "title": "Кошка на шпиле",
+        "prompt": "Wide-angle photo shot from about 2 meters above and slightly in front of the subject, camera tilted down at roughly 45 degrees — like taken by another climber standing higher on the antenna tower. The person from the reference photo stands on a steel-grate maintenance platform at the very top of the Empire State Building spire: same face and same hair color exactly as in the reference photo, identity fully consistent. Full body visible in frame from head to boots: head in the upper third, HEAD TILTED BACK with chin raised up toward the camera, face fully open to the lens. Expression: relaxed haughty supermodel arrogance — heavy half-lowered eyelids, completely relaxed facial muscles, lips softly closed with NO smile, slightly bored unbothered \"I own this city\" attitude, vogue editorial gaze, strong smoky eye makeup, groomed brows. Hair: voluminous, airy and effortless — soft tousled waves gently lifted by the high-altitude breeze, loose strands falling from under the balaclava over the shoulders and chest, catching the warm sunlight, full of light movement and body, NOT flat, NOT slicked down. Headwear: an oversized loose-knit black CAT-EAR BALACLAVA in chunky ribbed knit, worn slouchy and effortless — a wide relaxed face opening that shows the chin and jawline, soft draped folds bunched around the neck like a snood, two soft knitted cat ears on top; NOT tight, NOT childish, NOT hugging the face. Outfit strictly all black: fitted BLACK ribbed cropped tank top, black cargo pants, black leather fingerless gloves, a watch on the wrist, small black crossbody belt bag, chunky black boots. On the grate: two red aviation warning lamps and a black backpack. CRITICAL: the platform is 443 meters up — the entire Manhattan skyline spreads out far below all around the subject, even the tallest towers are beneath the platform, warm hazy morning light, pale glowing sky. Realistic iPhone photo, natural skin texture, slight fisheye distortion at the edges, viral rooftopping aesthetic. NOT an extreme top-down angle, the face must not be oversized, NOT a low rooftop, NOT gray overcast, NOT smiling, NOT cute.",
+        "description": "Руфер-фотка на вершине шпиля Эмпайр-стейт: кошачья балаклава, тотал-блэк, пафосный взгляд, весь Манхэттен под ногами. По вирусному тренду руферов (июль 2026). Внешность берётся из фото пользователя.",
+        "upload_hint": "Фото лица",
+        "added_at": "2026-07-03T00:00:00.000000",
+        "popular": true
+      }
+    ]
   }
 ]
