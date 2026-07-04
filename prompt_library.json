@@ -132,6 +132,16 @@
         "video_url": "https://sirnike.pages.dev/videos/Предложение с задержанием.mp4",
         "poster_url": "",
         "added_at": "2026-07-04T03:10:38.536485+00:00"
+      },
+      {
+        "title": "Бунтари на шпиле",
+        "description": "Документальная аэросъёмка со шпиля небоскрёба: пара в чёрных авангардных образах и масках держит огромный баннер «WE GENERATE IN @SIRNIKEBOT», камера облетает по дуге.",
+        "upload_hint": "Фото лица девушки + фото лица мужчины (отдельно)",
+        "prompt": "Ultra-realistic eyewitness video, vertical 9:16 smartphone format, looks like raw breaking-news footage filmed from a small aircraft circling a skyscraper spire. A dramatic distant aerial shot of two young rebels standing confidently on a tiny metal platform near the very top of a tall building spire / industrial rooftop mast, extremely high above the city. The scene feels dangerous, real, unplanned, like news footage of people who climbed where they should not be.\n\nThe camera starts at a medium-distant aerial angle and slowly pulls farther away while flying around them in a smooth 120-150 degree arc, like a plane or news helicopter passing around the spire. Long telephoto lens, compressed perspective, slight aircraft vibration, realistic handheld instability, subtle zoom changes, natural motion blur. The city skyline and sky are visible far below and behind them, creating a huge sense of height and scale.\n\nOn the small platform stand the same two fashion rebels from the reference: one man and one woman, both wearing all-black avant-garde outfits and black face masks. The man wears a black sleeveless top, black pants, black cap, black gloves. The woman wears a black asymmetrical cropped top, loose black pants, long black gloves, black face mask. They look calm, confident, free and fearless. The man gently puts his arm around the woman's waist while they stand close together near the metal railing. The woman holds the pole or lightly grips the banner rope, posing naturally in the wind. Their body language is confident and rebellious, not scared.\n\nA huge black fabric banner is attached to the spire and blows powerfully in the wind. The banner stays visible during the aircraft orbit. On the banner, large bold condensed white capital letters clearly read: \"WE GENERATE IN @SIRNIKEBOT\". The text must be perfectly readable, centered, high contrast, printed on realistic moving fabric, no misspellings.\n\nRealistic daylight, slightly hazy atmosphere, documentary news footage aesthetic, authentic viral eyewitness video, no cinematic perfection, no CGI look. The wind moves their clothes and the banner naturally. The metal spire, platform, railings, cables and bolts look real and weathered. The shot feels like a real aerial news clip capturing two masked fashion rebels on top of a skyscraper spire.\n\nNEGATIVE PROMPT:\nCGI, 3D render, cartoon, staged studio shot, close-up only, static camera, drone-commercial smoothness, unreadable wrong text, misspelled words, distorted letters, blurry banner, cropped banner, extra people, duplicated bodies, extra limbs",
+        "type": "video",
+        "video_url": "https://sirnike.pages.dev/videos/Бунтари на шпиле.mp4",
+        "poster_url": "",
+        "added_at": "2026-07-04T03:15:52.730443+00:00"
       }
     ]
   },
