@@ -3,7 +3,7 @@ if (tg) {
   tg.ready();
   tg.expand();
 }
-const APP_VERSION = "2026-07-02-payload-title-v1";
+const APP_VERSION = "2026-07-15-payload-ref-v1";
 const NEW_DAYS_THRESHOLD = 7;
 
 const FALLBACK_IMAGE = "https://dummyimage.com/960x1200/f1e8dc/6d6472&text=No+Preview";
@@ -194,23 +194,68 @@ function closeCategorySheet() {
   else categorySheet.removeAttribute("open");
 }
 
-function sendPrompt(item, button) {
-  const fallbackPrompt = (item.title || "").trim();
+// Лимит Telegram.WebApp.sendData — 4096 БАЙТ (не символов: кириллица в UTF-8
+// занимает 2 байта на символ). Держим запас — ТЗ docs/specs/2026-07-12_webapp_payload.md.
+const PAYLOAD_BYTE_LIMIT = 3500;
+
+function payloadBytes(str) {
+  try {
+    return new TextEncoder().encode(str).length;
+  } catch {
+    return str.length * 2;
+  }
+}
+
+function buildUsePayload(item, userNote) {
   const itemIsVideo = isVideoItem(item);
-  // Свободный текст «свои пожелания» — виден только когда у item есть
-  // input_hint (поле показано в openDetails). Бот подставит его в промт сам,
-  // тут просто читаем текущее значение инпута.
-  const userNote = item.input_hint && modalNote ? modalNote.value.trim() : "";
-  // У фото-стилей title в JSON нет НАМЕРЕННО (решение Ани — карточка без подписи).
-  // Но в payload title обязателен, иначе бот показывает «Шаблон «шаблон»» —
-  // поэтому для фото шлём название категории.
+  const catIdx = Number(item._categoryIndex);
+  const itemIdx = Number(item._itemIndex);
+  // Индексы — АБСОЛЮТНЫЕ позиции в полном prompt_library.json (flattenLibrary
+  // проставляет их до любых фильтров/поиска). Перед отправкой сверяем с библиотекой.
+  const idxValid =
+    Number.isInteger(catIdx) && catIdx >= 0 && catIdx < library.length &&
+    Number.isInteger(itemIdx) && itemIdx >= 0 &&
+    itemIdx < (Array.isArray(library[catIdx]?.items) ? library[catIdx].items.length : 0);
+
+  if (idxValid) {
+    // Штатный путь по контракту: только индексы, без prompt/title — бот резолвит
+    // промт, title, image_prompt и upload_hint из своей копии библиотеки.
+    // Так payload не упирается в лимит и не бывает обрезанного посередине промта.
+    const refObj = {
+      action: itemIsVideo ? "set_video_prompt_ref" : "set_prompt_ref",
+      cat_idx: catIdx,
+      item_idx: itemIdx,
+      v: APP_VERSION,
+    };
+    if (userNote) refObj.note = userNote;
+    return JSON.stringify(refObj);
+  }
+
+  // Защитный fallback (в норме недостижим): индексов нет — шлём полный payload.
+  // У фото-стилей title в JSON нет намеренно (решение Ани) — шлём название категории.
   const payloadTitle = (item.title || "").trim() || (item._categoryTitle || "").trim() || "Стиль из библиотеки";
-  const payload = {
+  const fullObj = {
     action: itemIsVideo ? "set_video_prompt" : "set_prompt",
     title: payloadTitle,
-    prompt: (item.prompt || "").trim() || fallbackPrompt,
+    prompt: (item.prompt || "").trim() || payloadTitle,
     v: APP_VERSION,
   };
+  if (item.image_prompt) fullObj.image_prompt = item.image_prompt;
+  if (userNote) fullObj.note = userNote;
+  const raw = JSON.stringify(fullObj);
+  // Резать prompt посередине НЕЛЬЗЯ (бот получит текст, не совпадающий
+  // с библиотекой, и потеряет title/upload_hint) — только предупреждаем.
+  if (payloadBytes(raw) > PAYLOAD_BYTE_LIMIT) {
+    console.warn("Use-payload превышает лимит и не имеет индексов", payloadBytes(raw));
+  }
+  return raw;
+}
+
+function sendPrompt(item, button) {
+  // Свободный текст «свои пожелания» — виден только когда у item есть
+  // input_hint (поле показано в openDetails). Бот подставит его в промт сам,
+  // тут просто читаем текущее значение инпута (maxlength=300 в разметке).
+  const userNote = item.input_hint && modalNote ? modalNote.value.trim() : "";
 
   if (!tg) {
     showToast("Открой библиотеку внутри Telegram, чтобы применить шаблон.");
@@ -218,31 +263,7 @@ function sendPrompt(item, button) {
   }
 
   try {
-    const baseObj = {
-      action: payload.action,
-      title: payload.title,
-      prompt: payload.prompt,
-      // Индексы шлём всегда: бот по ним резолвит label/upload_hint из своей
-      // копии библиотеки (важно для фото-стилей, у которых title нет намеренно).
-      cat_idx: Number(item._categoryIndex),
-      item_idx: Number(item._itemIndex),
-      v: APP_VERSION,
-    };
-    if (item.image_prompt) baseObj.image_prompt = item.image_prompt;
-    if (userNote) baseObj.note = userNote;
-    let rawPayload = JSON.stringify(baseObj);
-    if (rawPayload.length > 3900) {
-      const refObj = {
-        action: itemIsVideo ? "set_video_prompt_ref" : "set_prompt_ref",
-        title: payload.title,
-        cat_idx: Number(item._categoryIndex),
-        item_idx: Number(item._itemIndex),
-        v: APP_VERSION,
-      };
-      if (userNote) refObj.note = userNote;
-      rawPayload = JSON.stringify(refObj);
-    }
-    tg.sendData(rawPayload);
+    tg.sendData(buildUsePayload(item, userNote));
     if (button) {
       button.disabled = true;
       button.textContent = "Применено";
