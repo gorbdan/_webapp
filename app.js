@@ -3,7 +3,7 @@ if (tg) {
   tg.ready();
   tg.expand();
 }
-const APP_VERSION = "2026-07-15-payload-ref-v1";
+const APP_VERSION = "2026-07-16-inline-1tap-v1";
 const NEW_DAYS_THRESHOLD = 7;
 
 const FALLBACK_IMAGE = "https://dummyimage.com/960x1200/f1e8dc/6d6472&text=No+Preview";
@@ -206,16 +206,21 @@ function payloadBytes(str) {
   }
 }
 
-function buildUsePayload(item, userNote) {
-  const itemIsVideo = isVideoItem(item);
+function resolveLibraryIndices(item) {
   const catIdx = Number(item._categoryIndex);
   const itemIdx = Number(item._itemIndex);
   // Индексы — АБСОЛЮТНЫЕ позиции в полном prompt_library.json (flattenLibrary
   // проставляет их до любых фильтров/поиска). Перед отправкой сверяем с библиотекой.
-  const idxValid =
+  const valid =
     Number.isInteger(catIdx) && catIdx >= 0 && catIdx < library.length &&
     Number.isInteger(itemIdx) && itemIdx >= 0 &&
     itemIdx < (Array.isArray(library[catIdx]?.items) ? library[catIdx].items.length : 0);
+  return { catIdx, itemIdx, valid };
+}
+
+function buildUsePayload(item, userNote) {
+  const itemIsVideo = isVideoItem(item);
+  const { catIdx, itemIdx, valid: idxValid } = resolveLibraryIndices(item);
 
   if (idxValid) {
     // Штатный путь по контракту: только индексы, без prompt/title — бот резолвит
@@ -251,6 +256,53 @@ function buildUsePayload(item, userNote) {
   return raw;
 }
 
+// Telegram.WebApp.sendData() работает ТОЛЬКО для вебаппа, открытого с
+// reply-клавиатуры. Если вебапп открыт с инлайн-кнопки бота, в initData
+// присутствует query_id — тогда доставить выбор можно только через
+// answerWebAppQuery (см. docs/BOT_CONTRACT.md в репо бота, раздел
+// «Инлайн-путь «Использовать» в 1 тап»).
+function isOpenedViaInlineButton() {
+  return Boolean(tg?.initDataUnsafe?.query_id);
+}
+
+const ANSWER_WEBAPP_QUERY_ENDPOINT = "/answer-webapp-query";
+
+async function sendPromptViaAnswerWebAppQuery(item, userNote, button) {
+  const { catIdx, itemIdx, valid: idxValid } = resolveLibraryIndices(item);
+  if (!idxValid) {
+    // 1-тап путь работает только по индексам (контракт) — полный prompt/title
+    // тут не поддержан. В норме недостижимо (см. buildUsePayload).
+    showToast("Не получилось передать выбор. Открой библиотеку из меню внизу и попробуй снова.");
+    return;
+  }
+
+  try {
+    const res = await fetch(ANSWER_WEBAPP_QUERY_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        init_data: tg.initData,
+        cat_idx: catIdx,
+        item_idx: itemIdx,
+        note: userNote || "",
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json().catch(() => ({}));
+    if (!data.ok) throw new Error(data.error || "answerWebAppQuery failed");
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Применено";
+    }
+    tg.close();
+  } catch (e) {
+    console.error("answerWebAppQuery failed", e);
+    // НЕ звать tg.close() при ошибке — юзер не должен терять вебапп молча.
+    showToast("Не получилось применить шаблон. Попробуй еще раз.");
+  }
+}
+
 function sendPrompt(item, button) {
   // Свободный текст «свои пожелания» — виден только когда у item есть
   // input_hint (поле показано в openDetails). Бот подставит его в промт сам,
@@ -259,6 +311,11 @@ function sendPrompt(item, button) {
 
   if (!tg) {
     showToast("Открой библиотеку внутри Telegram, чтобы применить шаблон.");
+    return;
+  }
+
+  if (isOpenedViaInlineButton()) {
+    sendPromptViaAnswerWebAppQuery(item, userNote, button);
     return;
   }
 
