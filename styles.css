@@ -626,6 +626,10 @@ h1 {
 
 .modal-media .preview {
   aspect-ratio: auto;
+  /* Contain, не cover: это главное фото-доказательство стиля в деталях —
+     в отличие от карточек в сетке, тут нельзя терять часть кадра (голову
+     сверху) под фиксированную высоту контейнера. */
+  object-fit: contain;
 }
 
 /* Пруф «было» — маленький инсет поверх основного превью в деталях стиля.
@@ -686,8 +690,6 @@ h1 {
 }
 
 .modal-body pre {
-  flex: 1;
-  min-height: 230px;
   margin: 0;
   overflow: auto;
   white-space: pre-wrap;
