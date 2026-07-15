@@ -634,6 +634,10 @@ h1 {
   gap: 12px;
   max-height: calc(100vh - 24px);
   padding: 22px;
+  /* Поле «свои пожелания» (input_hint) удлиняет карточку — без прокрутки
+     кнопки «Копировать»/«Использовать» уезжали за край и обрезались
+     родительским overflow:hidden, до них было не дотянуться. */
+  overflow-y: auto;
 }
 
 .modal-body h2 {
@@ -653,6 +657,18 @@ h1 {
   font-family: inherit;
   font-size: 14px;
   line-height: 1.55;
+}
+
+.modal-hint {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .modal-note {
@@ -710,6 +726,51 @@ h1 {
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* ── Ряды категорий (домашний экран каталога) ──────────── */
+
+.category-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.category-row-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 2px 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.category-row-count {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.category-row-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 2px 6px;
+  margin: 0 -2px;
+}
+
+.category-row-track::-webkit-scrollbar {
+  display: none;
+}
+
+.category-row-track .card {
+  flex: 0 0 auto;
+  width: min(42vw, 220px);
 }
 
 /* ── Оверлей и бейджи ────────────────────── */

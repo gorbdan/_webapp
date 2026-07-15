@@ -22,6 +22,7 @@ const modalMedia = document.getElementById("modalMedia");
 const modalMeta = document.getElementById("modalMeta");
 const modalTitle = document.getElementById("modalTitle");
 const modalPrompt = document.getElementById("modalPrompt");
+const modalUploadHint = document.getElementById("modalUploadHint");
 const modalNote = document.getElementById("modalNote");
 const modalCopy = document.getElementById("modalCopy");
 const modalUse = document.getElementById("modalUse");
@@ -530,9 +531,82 @@ function makeSectionHeader(text) {
   return header;
 }
 
+// Новее — раньше. У item без added_at даты нет — считаем их более старыми
+// (в конец сортировки), а не мешаем в случайном порядке с датированными.
+function sortNewestFirst(items) {
+  return [...items].sort((a, b) => {
+    const at = a.added_at ? new Date(a.added_at).getTime() : NaN;
+    const bt = b.added_at ? new Date(b.added_at).getTime() : NaN;
+    const aValid = Number.isFinite(at);
+    const bValid = Number.isFinite(bt);
+    if (aValid && bValid) return bt - at;
+    if (aValid) return -1;
+    if (bValid) return 1;
+    return 0;
+  });
+}
+
+// Ряд категории: горизонтальная прокрутка, читается справа налево — самая
+// новая карточка видна сразу без скролла (dir=rtl ставит "начало" списка,
+// т.е. первый элемент в DOM, у правого края), листание уходит к старым.
+// Сама карточка внутри — dir=ltr, чтобы текст не переворачивался.
+function makeCategoryRow(emoji, title, items) {
+  const section = document.createElement("section");
+  section.className = "category-row";
+
+  const header = document.createElement("div");
+  header.className = "category-row-header";
+  header.innerHTML = `<span>${emoji} ${title}</span><span class="category-row-count">${items.length}</span>`;
+  section.appendChild(header);
+
+  const track = document.createElement("div");
+  track.className = "category-row-track";
+  track.dir = "rtl";
+  for (const item of sortNewestFirst(items)) {
+    const card = makeCard(item);
+    card.dir = "ltr";
+    track.appendChild(card);
+  }
+  section.appendChild(track);
+
+  return section;
+}
+
+// Домашний экран каталога (категория «Все», без фильтра/поиска): ряды по
+// категориям вместо плоской сетки, порядок категорий — как в
+// prompt_library.json (обратный порядок пробовали, не понравилось, вернули
+// обычный). Виртуальный ряд «Новинки» — над всеми, если есть свежие позиции
+// хоть в одной категории.
+function renderCategoryRows() {
+  const allItems = flattenLibrary();
+
+  const newItems = allItems.filter(isNewItem);
+  if (newItems.length > 0) {
+    cardsEl.appendChild(makeCategoryRow("🆕", "Новинки", newItems));
+  }
+
+  library.forEach((cat, idx) => {
+    const items = allItems.filter((item) => item._categoryIndex === idx);
+    if (!items.length) return;
+    cardsEl.appendChild(makeCategoryRow(cat?.emoji || "□", cat?.title || "Категория", items));
+  });
+}
+
 function renderCards() {
   cardsEl.innerHTML = "";
   emptyEl.classList.add("hidden");
+
+  // Домашний экран («Все категории», без фильтра/поиска) — горизонтальные
+  // ряды по категориям вместо плоской сетки. Любой активный фильтр, поиск
+  // или выбранная категория — обычная сетка ниже (без изменений).
+  if (activeCategory === "all" && activeFilter === "all" && !query.trim()) {
+    renderCategoryRows();
+    if (!cardsEl.children.length) {
+      emptyEl.textContent = "В этом разделе пока нет шаблонов.";
+      emptyEl.classList.remove("hidden");
+    }
+    return;
+  }
 
   const items = getVisibleItems();
   if (!items.length) {
@@ -568,8 +642,21 @@ function openDetails(item) {
   modalMeta.textContent = `${item._categoryEmoji} ${item._categoryTitle} · ${isVideoItem(item) ? "Видео" : "Фото"}`;
   modalTitle.textContent = item.title || "";
   modalTitle.style.display = item.title ? "" : "none";
+  modalPrompt.textContent = item.description || item.hint || "";
+
+  // «Что загрузить» — отдельный заметный блок над кнопками, а не хвост
+  // длинного описания: юзер должен увидеть требование к фото ДО того,
+  // как нажмёт «Использовать», а не пропустить его при скролле текста.
   const uploadHint = item.upload_hint || item.what_to_upload || "";
-  modalPrompt.textContent = (item.description || item.hint || "") + (uploadHint ? `\n\n📎 Что загрузить: ${uploadHint}` : "");
+  if (modalUploadHint) {
+    if (uploadHint) {
+      modalUploadHint.textContent = `📎 Что загрузить: ${uploadHint}`;
+      modalUploadHint.classList.remove("hidden");
+    } else {
+      modalUploadHint.textContent = "";
+      modalUploadHint.classList.add("hidden");
+    }
+  }
 
   if (modalNote) {
     if (item.input_hint) {
