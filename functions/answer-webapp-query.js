@@ -19,6 +19,25 @@ function bytesToHex(bytes) {
   return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// callback_data — жёсткий лимит Telegram 64 БАЙТА на всё поле, лишнее Telegram
+// молча отклонит целиком (кнопка не появится). Бюджет на note — ~30 байт
+// сырого UTF-8 ДО base64 (см. docs/specs/2026-07-17_inline_note_passthrough.md,
+// репо бота) — режем по границе символа, не разрывая multi-byte UTF-8.
+function encodeNoteForCallback(note) {
+  const trimmed = String(note || "").trim();
+  if (!trimmed) return "";
+  const bytes = new TextEncoder().encode(trimmed);
+  let truncated = bytes;
+  if (bytes.length > 30) {
+    let end = 30;
+    while (end > 0 && (bytes[end] & 0xc0) === 0x80) end--;
+    truncated = bytes.slice(0, end);
+  }
+  let bin = "";
+  for (const b of truncated) bin += String.fromCharCode(b);
+  return btoa(bin).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+
 async function hmacSha256(keyBytes, msgBytes) {
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
@@ -85,14 +104,14 @@ export async function onRequestPost(context) {
     return jsonResponse({ ok: false, error: "invalid_init_data" }, 401);
   }
 
-  // callback_data — уже штатный формат, который button_handler в SirNike.py
-  // обрабатывает веткой pl_use_ (тот же путь, что у инлайн-каталога библиотеки
-  // внутри бота). Дублировать логику применения стиля не нужно.
-  const callbackData = `pl_use_${catIdx}_${itemIdx}`;
-  // note НЕ помещается в callback_data (лимит Telegram — 64 байта) — если он
-  // заполнен, этот 1-тап путь его не доставит. Принятое ограничение: у
-  // input_hint-стилей (редкий случай) есть обычный 2-таповый путь через
-  // reply-клавиатуру, где note доставляется полностью через set_prompt_ref.
+  // callback_data — штатный формат, который button_handler в SirNike.py уже
+  // умеет разбирать: pl_use_{cat}_{item} без пожелания, pl_usen_{cat}_{item}_{note_b64}
+  // с ним (докладка бэкенда — docs/specs/2026-07-17_inline_note_passthrough.md,
+  // репо бота). Дублировать логику применения стиля не нужно.
+  const noteB64 = encodeNoteForCallback(body?.note);
+  const callbackData = noteB64
+    ? `pl_usen_${catIdx}_${itemIdx}_${noteB64}`
+    : `pl_use_${catIdx}_${itemIdx}`;
 
   const answerPayload = {
     web_app_query_id: verified.queryId,
