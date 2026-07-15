@@ -728,6 +728,51 @@ h1 {
   text-transform: uppercase;
 }
 
+/* ── Ряды категорий (домашний экран каталога) ──────────── */
+
+.category-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.category-row-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 2px 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.category-row-count {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.category-row-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 2px 6px;
+  margin: 0 -2px;
+}
+
+.category-row-track::-webkit-scrollbar {
+  display: none;
+}
+
+.category-row-track .card {
+  flex: 0 0 auto;
+  width: min(42vw, 220px);
+}
+
 /* ── Оверлей и бейджи ────────────────────── */
 
 .card-overlay {
