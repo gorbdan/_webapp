@@ -659,6 +659,18 @@ h1 {
   line-height: 1.55;
 }
 
+.modal-hint {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .modal-note {
   resize: none;
   width: 100%;

@@ -22,6 +22,7 @@ const modalMedia = document.getElementById("modalMedia");
 const modalMeta = document.getElementById("modalMeta");
 const modalTitle = document.getElementById("modalTitle");
 const modalPrompt = document.getElementById("modalPrompt");
+const modalUploadHint = document.getElementById("modalUploadHint");
 const modalNote = document.getElementById("modalNote");
 const modalCopy = document.getElementById("modalCopy");
 const modalUse = document.getElementById("modalUse");
@@ -568,8 +569,21 @@ function openDetails(item) {
   modalMeta.textContent = `${item._categoryEmoji} ${item._categoryTitle} · ${isVideoItem(item) ? "Видео" : "Фото"}`;
   modalTitle.textContent = item.title || "";
   modalTitle.style.display = item.title ? "" : "none";
+  modalPrompt.textContent = item.description || item.hint || "";
+
+  // «Что загрузить» — отдельный заметный блок над кнопками, а не хвост
+  // длинного описания: юзер должен увидеть требование к фото ДО того,
+  // как нажмёт «Использовать», а не пропустить его при скролле текста.
   const uploadHint = item.upload_hint || item.what_to_upload || "";
-  modalPrompt.textContent = (item.description || item.hint || "") + (uploadHint ? `\n\n📎 Что загрузить: ${uploadHint}` : "");
+  if (modalUploadHint) {
+    if (uploadHint) {
+      modalUploadHint.textContent = `📎 Что загрузить: ${uploadHint}`;
+      modalUploadHint.classList.remove("hidden");
+    } else {
+      modalUploadHint.textContent = "";
+      modalUploadHint.classList.add("hidden");
+    }
+  }
 
   if (modalNote) {
     if (item.input_hint) {
