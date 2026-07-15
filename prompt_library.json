@@ -650,5 +650,35 @@
         "added_at": "2026-06-23T06:02:44.128948+00:00"
       }
     ]
+  },
+  {
+    "title": "Бьюти",
+    "emoji": "💄",
+    "items": [
+      {
+        "description": "Примерка причёски и цвета волос — каре с карамельным балаяжем на своём лице, без похода в салон.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a close-up beauty portrait of this exact person, preserving their identical facial features, skin tone and identity — face fully recognizable, no reshaping of features. Change only the hairstyle and hair color: a jaw-length bob haircut with soft face-framing layers and a warm caramel-blonde balayage color, natural-looking hair texture, shine and movement, styled as if freshly done at a salon. Soft flattering studio or natural window light, neutral clean background, close crop from shoulders up. Realistic photo quality, natural skin texture, no plastic smoothing — a true new generation of the hairstyle, not a filter or edit over the original photo.",
+        "added_at": "2026-07-15T00:18:31.492034+00:00"
+      },
+      {
+        "description": "Мягкий глэм-макияж — тёплые смоки, сияющая кожа, глянцевые губы. Результат «после визажиста».",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a close-up beauty portrait of this exact person after a professional makeup transformation, preserving their exact facial features, bone structure and identity — face fully recognizable, no reshaping. Soft glam makeup: dewy glowing skin, subtle contour, warm bronze eyeshadow with a soft smoky effect, fluffy defined brows, glossy nude-pink lips, natural full lashes. Hair softly styled, left close to the original. Neutral soft studio lighting, plain light background, close crop from shoulders up, like a professional makeup artist's after-photo. Realistic skin texture, no plastic smoothing, no filter over the original photo.",
+        "added_at": "2026-07-15T00:18:31.492034+00:00"
+      },
+      {
+        "description": "Свадебный образ: причёска и макияж невесты — нежная укладка, деликатный мейк.",
+        "upload_hint": "Фото лица",
+        "prompt": "Create a close-up bridal beauty portrait of this exact person, preserving their exact facial features and identity — face fully recognizable, no reshaping. Bridal hairstyle: a soft romantic low updo with face-framing loose strands, delicate hairpins, a thin sheer veil attached at the back of the head. Bridal makeup: soft dewy skin, subtle rosy blush, elegant neutral eyeshadow, defined natural lashes, glossy nude-pink lips. Soft natural window light, romantic neutral background (softly blurred greenery or light drapery), close crop from shoulders up. Realistic, elegant, editorial bridal-magazine quality, natural skin texture, no plastic smoothing.",
+        "added_at": "2026-07-15T00:18:31.492034+00:00"
+      },
+      {
+        "description": "Примерь образ с референса — причёску и макияж со звёздного/блогерского фото переносим на своё лицо.",
+        "upload_hint": "Фото своего лица + фото-референс желаемого образа (найденное в интернете/у блогера)",
+        "prompt": "Using the first reference photo for the exact face, facial features, skin tone and identity — fully preserved, no changes to the face — recreate on this person the hairstyle, hair color and makeup look shown in the second reference photo: same haircut shape and length, same hair color and styling, same makeup style (eyes, lips, contour). Realistic salon-quality result, natural flattering light, close crop from shoulders up, photorealistic skin texture, no plastic smoothing, no filter — a true new generation combining the person's identity with the referenced style.",
+        "added_at": "2026-07-15T00:18:31.492034+00:00"
+      }
+    ]
   }
 ]
