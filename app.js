@@ -573,10 +573,10 @@ function makeCategoryRow(emoji, title, items) {
 }
 
 // Домашний экран каталога (категория «Все», без фильтра/поиска): ряды по
-// категориям вместо плоской сетки. Категории — в обратном порядке массива
-// библиотеки, «снизу вверх» — последняя категория JSON оказывается первой
-// (верхней) на странице. Виртуальный ряд «Новинки» — над всеми, если есть
-// свежие позиции хоть в одной категории.
+// категориям вместо плоской сетки, порядок категорий — как в
+// prompt_library.json (обратный порядок пробовали, не понравилось, вернули
+// обычный). Виртуальный ряд «Новинки» — над всеми, если есть свежие позиции
+// хоть в одной категории.
 function renderCategoryRows() {
   const allItems = flattenLibrary();
 
@@ -585,12 +585,11 @@ function renderCategoryRows() {
     cardsEl.appendChild(makeCategoryRow("🆕", "Новинки", newItems));
   }
 
-  const categoriesReversed = [...library].map((cat, idx) => ({ cat, idx })).reverse();
-  for (const { cat, idx } of categoriesReversed) {
+  library.forEach((cat, idx) => {
     const items = allItems.filter((item) => item._categoryIndex === idx);
-    if (!items.length) continue;
+    if (!items.length) return;
     cardsEl.appendChild(makeCategoryRow(cat?.emoji || "□", cat?.title || "Категория", items));
-  }
+  });
 }
 
 function renderCards() {
