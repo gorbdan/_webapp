@@ -546,10 +546,12 @@ function sortNewestFirst(items) {
   });
 }
 
-// Ряд категории: горизонтальная прокрутка, читается справа налево — самая
-// новая карточка видна сразу без скролла (dir=rtl ставит "начало" списка,
-// т.е. первый элемент в DOM, у правого края), листание уходит к старым.
-// Сама карточка внутри — dir=ltr, чтобы текст не переворачивался.
+// Ряд категории: горизонтальная прокрутка, обычный порядок слева направо
+// (как читаем) — новая карточка первая и видна сразу без скролла, скролл
+// вправо уводит к более старым. Раньше пробовали dir=rtl + скролл к
+// правому краю, чтобы имитировать то же самое, но с обратным физическим
+// направлением скролла — оказалось нелогично и ненадёжно в WebView
+// Телеграма. Простой LTR-порядок не нуждается ни в каких трюках.
 function makeCategoryRow(emoji, title, items) {
   const section = document.createElement("section");
   section.className = "category-row";
@@ -561,11 +563,8 @@ function makeCategoryRow(emoji, title, items) {
 
   const track = document.createElement("div");
   track.className = "category-row-track";
-  track.dir = "rtl";
   for (const item of sortNewestFirst(items)) {
-    const card = makeCard(item);
-    card.dir = "ltr";
-    track.appendChild(card);
+    track.appendChild(makeCard(item));
   }
   section.appendChild(track);
 
