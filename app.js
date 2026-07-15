@@ -639,6 +639,26 @@ function openDetails(item) {
   selectedButton = null;
   modalMedia.innerHTML = "";
   modalMedia.appendChild(createFullPreview(item));
+
+  // Пруф «было → стало» — только в деталях, НЕ в карточке каталога (решение
+  // Ани 2026-07-16: в сетке карточка продаёт одной яркой картинкой, сравнение
+  // добавляет шум и отвлекает от результата). Маленький инсет поверх основного
+  // превью, показывается только если у стиля есть before_url.
+  const beforeUrl = normalizeUrl(item.before_url);
+  if (beforeUrl) {
+    const badge = document.createElement("div");
+    badge.className = "modal-before-badge";
+    const img = document.createElement("img");
+    img.src = beforeUrl;
+    img.alt = "Фото до";
+    img.loading = "lazy";
+    badge.appendChild(img);
+    const label = document.createElement("span");
+    label.textContent = "До";
+    badge.appendChild(label);
+    modalMedia.appendChild(badge);
+  }
+
   modalMeta.textContent = `${item._categoryEmoji} ${item._categoryTitle} · ${isVideoItem(item) ? "Видео" : "Фото"}`;
   modalTitle.textContent = item.title || "";
   modalTitle.style.display = item.title ? "" : "none";
