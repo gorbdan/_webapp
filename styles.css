@@ -655,6 +655,25 @@ h1 {
   line-height: 1.55;
 }
 
+.modal-note {
+  resize: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-note:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .hidden {
   display: none !important;
 }

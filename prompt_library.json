@@ -659,7 +659,8 @@
         "description": "Примерка причёски и цвета волос — каре с карамельным балаяжем на своём лице, без похода в салон.",
         "upload_hint": "Фото лица",
         "prompt": "Create a close-up beauty portrait of this exact person, preserving their identical facial features, skin tone and identity — face fully recognizable, no reshaping of features. Change only the hairstyle and hair color: a jaw-length bob haircut with soft face-framing layers and a warm caramel-blonde balayage color, natural-looking hair texture, shine and movement, styled as if freshly done at a salon. Soft flattering studio or natural window light, neutral clean background, close crop from shoulders up. Realistic photo quality, natural skin texture, no plastic smoothing — a true new generation of the hairstyle, not a filter or edit over the original photo.",
-        "added_at": "2026-07-15T00:24:17.532034+00:00"
+        "added_at": "2026-07-15T00:24:17.532034+00:00",
+        "input_hint": "Опиши, какую причёску и цвет хочешь (необязательно)"
       },
       {
         "description": "Сетка 3×3: примерь разные причёски и цвета волос, лицо неизменно.",
@@ -672,7 +673,8 @@
         "description": "Мягкий глэм-макияж — тёплые смоки, сияющая кожа, глянцевые губы. Результат «после визажиста».",
         "upload_hint": "Фото лица",
         "prompt": "Create a close-up beauty portrait of this exact person after a professional makeup transformation, preserving their exact facial features, bone structure and identity — face fully recognizable, no reshaping. Soft glam makeup: dewy glowing skin, subtle contour, warm bronze eyeshadow with a soft smoky effect, fluffy defined brows, glossy nude-pink lips, natural full lashes. Hair softly styled, left close to the original. Neutral soft studio lighting, plain light background, close crop from shoulders up, like a professional makeup artist's after-photo. Realistic skin texture, no plastic smoothing, no filter over the original photo.",
-        "added_at": "2026-07-15T00:18:31.492034+00:00"
+        "added_at": "2026-07-15T00:18:31.492034+00:00",
+        "input_hint": "Опиши желаемый макияж (необязательно)"
       },
       {
         "description": "Свадебный образ: причёска и макияж невесты — нежная укладка, деликатный мейк.",

@@ -22,6 +22,7 @@ const modalMedia = document.getElementById("modalMedia");
 const modalMeta = document.getElementById("modalMeta");
 const modalTitle = document.getElementById("modalTitle");
 const modalPrompt = document.getElementById("modalPrompt");
+const modalNote = document.getElementById("modalNote");
 const modalCopy = document.getElementById("modalCopy");
 const modalUse = document.getElementById("modalUse");
 const tabBar = document.getElementById("tabBar");
@@ -196,6 +197,10 @@ function closeCategorySheet() {
 function sendPrompt(item, button) {
   const fallbackPrompt = (item.title || "").trim();
   const itemIsVideo = isVideoItem(item);
+  // Свободный текст «свои пожелания» — виден только когда у item есть
+  // input_hint (поле показано в openDetails). Бот подставит его в промт сам,
+  // тут просто читаем текущее значение инпута.
+  const userNote = item.input_hint && modalNote ? modalNote.value.trim() : "";
   // У фото-стилей title в JSON нет НАМЕРЕННО (решение Ани — карточка без подписи).
   // Но в payload title обязателен, иначе бот показывает «Шаблон «шаблон»» —
   // поэтому для фото шлём название категории.
@@ -224,15 +229,18 @@ function sendPrompt(item, button) {
       v: APP_VERSION,
     };
     if (item.image_prompt) baseObj.image_prompt = item.image_prompt;
+    if (userNote) baseObj.note = userNote;
     let rawPayload = JSON.stringify(baseObj);
     if (rawPayload.length > 3900) {
-      rawPayload = JSON.stringify({
+      const refObj = {
         action: itemIsVideo ? "set_video_prompt_ref" : "set_prompt_ref",
         title: payload.title,
         cat_idx: Number(item._categoryIndex),
         item_idx: Number(item._itemIndex),
         v: APP_VERSION,
-      });
+      };
+      if (userNote) refObj.note = userNote;
+      rawPayload = JSON.stringify(refObj);
     }
     tg.sendData(rawPayload);
     if (button) {
@@ -484,6 +492,17 @@ function openDetails(item) {
   modalTitle.style.display = item.title ? "" : "none";
   const uploadHint = item.upload_hint || item.what_to_upload || "";
   modalPrompt.textContent = (item.description || item.hint || "") + (uploadHint ? `\n\n📎 Что загрузить: ${uploadHint}` : "");
+
+  if (modalNote) {
+    if (item.input_hint) {
+      modalNote.value = "";
+      modalNote.placeholder = item.input_hint;
+      modalNote.classList.remove("hidden");
+    } else {
+      modalNote.value = "";
+      modalNote.classList.add("hidden");
+    }
+  }
 
   if (typeof detailsModal.showModal === "function") {
     detailsModal.showModal();
