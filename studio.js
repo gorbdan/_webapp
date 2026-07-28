@@ -6,22 +6,39 @@
 
 const STUDIO_API = "/api/studio/";
 
+// Живой баг 2026-07-28 (Аня, подтверждено debug_reason=empty_init_data):
+// tg.initData физически пуст в момент первого запроса студии — на Telegram
+// Desktop плагин доставляет initData в вебвью не мгновенно (отдельный IPC до
+// хоста), а мы стучимся на сервер сразу при открытии таба. Ждём реального
+// появления initData (до 3с, шаг 100мс) вместо мгновенной проверки —
+// устраняет гонку в корне, а не только маскирует её на фоновом поллинге.
+async function waitForInitData(timeoutMs = 3000) {
+  if (tg?.initData) return tg.initData;
+  const step = 100;
+  let waited = 0;
+  while (waited < timeoutMs) {
+    await new Promise((r) => setTimeout(r, step));
+    waited += step;
+    if (tg?.initData) return tg.initData;
+  }
+  return tg?.initData || "";
+}
+
 async function studioCall(action, body = {}, { silent = false } = {}) {
   if (!tg) {
     if (!silent) showToast("Открой студию внутри Telegram.");
     return null;
   }
-  // Живой баг 2026-07-28: во время долгой генерации клипа (минуты) телефон
-  // может свернуть/заблокировать экран — WebView иногда на миг отдаёт пустой
-  // tg.initData при возврате. Фоновый 4с-поллинг (silent: true, см.
-  // refreshStudioProject) в этот момент не должен пугать юзера тостом "сессия
-  // устарела" — тихо пропускаем тик, initData восстановится сам к следующему.
-  if (silent && !tg.initData) return null;
+  const initData = await waitForInitData();
+  // Не дождались даже после ожидания — на фоновом поллинге тихо пропускаем
+  // тик (initData восстановится сам), на явном действии юзера — это уже
+  // реально нештатная ситуация, дальше сработает обычная проверка сервера.
+  if (silent && !initData) return null;
   try {
     const res = await fetch(STUDIO_API + action, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ init_data: tg.initData, ...body }),
+      body: JSON.stringify({ init_data: initData, ...body }),
     });
     const data = await res.json().catch(() => ({}));
     if (!data.ok) {
