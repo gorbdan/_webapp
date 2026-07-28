@@ -764,23 +764,37 @@ document.getElementById("sceneDeleteBtn").addEventListener("click", async () => 
   const scene = findStudioScene(studioState.sceneModalId);
   if (!scene || !studioState.project) return;
   const data = await studioCall("scene.delete", { project_id: studioState.project.id, scene_id: scene.id });
-  document.getElementById("sceneModal").close();
+  closeSceneModal();
   if (data && data.ok) await refreshStudioProject();
 });
 
-document.getElementById("sceneModalClose").addEventListener("click", () => document.getElementById("sceneModal").close());
+// Живой баг Ани (проверено на стенде с реальным вебвью): событие `close` у
+// <dialog> в вебвью НЕ приходит вообще — showModal()+close() закрывают
+// модалку, но close-листенер молчит. Первый фикс (renderStudioBoard в
+// close-листенере) из-за этого не работал: корзина внизу оставалась
+// «Итого: 0» с залоченной «Сгенерить» после правки промтов в модалке
+// (blur-сохранение мутирует сцену в studioState.scenes по ссылке, но
+// пересчёт корзины живёт только в renderStudioBoard). Решение — не
+// зависеть от события: единая closeSceneModal() с явным пересчётом,
+// зовётся из всех трёх мест закрытия (крестик, клик по фону, удаление).
+function closeSceneModal() {
+  const modal = document.getElementById("sceneModal");
+  try {
+    modal.close();
+  } catch {
+    modal.removeAttribute("open");
+  }
+  studioState.sceneModalId = null;
+  if (studioState.project && studioState.view === "board") renderStudioBoard();
+}
+
+document.getElementById("sceneModalClose").addEventListener("click", closeSceneModal);
 document.getElementById("sceneModal").addEventListener("click", (e) => {
-  if (e.target.id === "sceneModal") document.getElementById("sceneModal").close();
+  if (e.target.id === "sceneModal") closeSceneModal();
 });
+// Оставляем и на событие (браузеры, где оно работает: Esc-закрытие и т.п.)
 document.getElementById("sceneModal").addEventListener("close", () => {
   studioState.sceneModalId = null;
-  // Живой баг Ани: правка frame_prompt/video_prompt в модалке (blur-сохранение)
-  // мутирует объект сцены в studioState.scenes напрямую (findStudioScene
-  // возвращает ссылку, не копию) — но корзина (renderStudioCart) пересчитывалась
-  // только внутри renderStudioBoard, а её никто не звал при закрытии модалки.
-  // Нижняя кнопка «Сгенерить» оставалась залоченной со старым «Итого: 0»,
-  // даже когда юзер только что вписал video_prompt — генерить получалось
-  // только по одной сцене прямо из модалки, где кнопки не зависят от корзины.
   if (studioState.project && studioState.view === "board") renderStudioBoard();
 });
 
