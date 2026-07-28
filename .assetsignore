@@ -1,0 +1,10 @@
+.git
+.wrangler
+node_modules
+videos
+freetest_out
+trends_out
+freetest.py
+gemtest.py
+face
+face.jpg

@@ -986,7 +986,7 @@ h1 {
   right: 0;
   z-index: 15;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   height: 60px;
   border-top: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 92%, transparent);

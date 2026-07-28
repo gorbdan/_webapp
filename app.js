@@ -732,7 +732,7 @@ categorySheet?.addEventListener("click", (event) => {
   if (event.target === categorySheet) closeCategorySheet();
 });
 
-const APP_TITLES = { katalog: "Библиотека", history: "История", topup: "Пополнить" };
+const APP_TITLES = { katalog: "Библиотека", studio: "Студия мультиков", history: "История", topup: "Пополнить" };
 
 function switchTab(tabName) {
   document.querySelectorAll(".tab-page").forEach((p) => p.classList.add("hidden"));

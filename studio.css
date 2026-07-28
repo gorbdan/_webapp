@@ -1,0 +1,430 @@
+/* ── Студия нейромультиков ───────────────────────────────
+   ТЗ: docs/specs/2026-07-20_cartoon_studio.md (репо бота). Отдельный файл,
+   а не хвост styles.css — фича большая и самодостаточная. */
+
+.studio-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.studio-block-btn {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+.studio-back {
+  align-self: flex-start;
+  margin-bottom: 4px;
+}
+
+.studio-title {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+
+/* ── Список проектов ─────────────────────── */
+
+.studio-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.studio-project-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.12s ease;
+}
+
+.studio-project-card:active {
+  transform: scale(0.98);
+}
+
+.studio-project-card:hover {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+
+.studio-project-name {
+  font-weight: 800;
+  font-size: 14px;
+  margin: 0 0 3px;
+}
+
+.studio-project-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.studio-project-status {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.studio-project-status--draft {
+  background: var(--line);
+  color: var(--muted);
+}
+
+.studio-project-status--stitching {
+  background: var(--accent);
+  color: #fff;
+}
+
+.studio-project-status--done {
+  background: var(--brand-2);
+  color: #fff;
+}
+
+/* ── Форма идеи ───────────────────────────── */
+
+.studio-field-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  margin: 4px 0 -2px;
+}
+
+.studio-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.studio-textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.studio-seg .segment {
+  flex: 1;
+  text-align: center;
+}
+
+.studio-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: -2px 0 0;
+  line-height: 1.4;
+}
+
+.studio-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.studio-toggle-row input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.studio-switch {
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--line);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.studio-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.studio-toggle-row input:checked + .studio-switch {
+  background: var(--brand);
+}
+
+.studio-toggle-row input:checked + .studio-switch::after {
+  transform: translateX(16px);
+}
+
+.studio-refs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.studio-refs:empty {
+  display: none;
+}
+
+.studio-ref-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.studio-ref-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.studio-ref-thumb button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(16, 19, 31, 0.7);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ── Раскадровка ──────────────────────────── */
+
+#studioViewBoard {
+  padding-bottom: 68px; /* место под sticky-корзину, см. .studio-cart */
+}
+
+.studio-scene-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.studio-scene-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+}
+
+.studio-scene-thumb {
+  aspect-ratio: 9 / 16;
+  background: color-mix(in srgb, var(--line) 50%, var(--surface));
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.studio-scene-thumb img,
+.studio-scene-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.studio-scene-num {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(16, 19, 31, 0.72);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+.studio-scene-status {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+.studio-scene-status--ready {
+  background: var(--brand-2);
+  color: #fff;
+}
+
+.studio-scene-status--queued {
+  background: var(--accent);
+  color: #fff;
+}
+
+.studio-scene-status--empty {
+  background: rgba(109, 100, 114, 0.85);
+  color: #fff;
+}
+
+.studio-scene-status--error {
+  background: #c0392b;
+  color: #fff;
+}
+
+.studio-scene-foot {
+  padding: 6px 8px;
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio-scene-add {
+  aspect-ratio: 9 / 16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* ── Корзина-смета (sticky над таб-баром) ─── */
+
+.studio-cart {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 60px; /* высота .tab-bar */
+  z-index: 14;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0));
+  background: var(--text);
+  color: var(--bg);
+}
+
+.studio-cart-sum {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.studio-cart-sum b {
+  font-weight: 800;
+}
+
+.studio-cart-btn {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 16px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.studio-cart-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Детали сцены (модалка) ───────────────── */
+
+.studio-model-pills,
+.studio-duration-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.studio-pill {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.studio-pill.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.studio-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.studio-detail-row:last-of-type {
+  border-bottom: none;
+}
+
+/* ── Финал ────────────────────────────────── */
+
+.studio-final-video {
+  width: 100%;
+  border-radius: 14px;
+  background: #000;
+  aspect-ratio: 9 / 16;
+  object-fit: contain;
+}
+
+.studio-final-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
