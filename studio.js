@@ -774,6 +774,14 @@ document.getElementById("sceneModal").addEventListener("click", (e) => {
 });
 document.getElementById("sceneModal").addEventListener("close", () => {
   studioState.sceneModalId = null;
+  // Живой баг Ани: правка frame_prompt/video_prompt в модалке (blur-сохранение)
+  // мутирует объект сцены в studioState.scenes напрямую (findStudioScene
+  // возвращает ссылку, не копию) — но корзина (renderStudioCart) пересчитывалась
+  // только внутри renderStudioBoard, а её никто не звал при закрытии модалки.
+  // Нижняя кнопка «Сгенерить» оставалась залоченной со старым «Итого: 0»,
+  // даже когда юзер только что вписал video_prompt — генерить получалось
+  // только по одной сцене прямо из модалки, где кнопки не зависят от корзины.
+  if (studioState.project && studioState.view === "board") renderStudioBoard();
 });
 
 // ── Финал ────────────────────────────────────────────────────
