@@ -34,6 +34,15 @@ async function studioCall(action, body = {}, { silent = false } = {}) {
   // тик (initData восстановится сам), на явном действии юзера — это уже
   // реально нештатная ситуация, дальше сработает обычная проверка сервера.
   if (silent && !initData) return null;
+  // ВРЕМЕННО для живой диагностики 2026-07-28: initData пуст даже после
+  // ожидания и на телефоне, и на Desktop — сырые факты вместо догадок.
+  if (!silent && !initData) {
+    showToast(
+      `[debug] initData пуст. platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
+      `hasUnsafe=${!!tg?.initDataUnsafe} unsafeUser=${!!tg?.initDataUnsafe?.user} ` +
+      `unsafeKeys=${tg?.initDataUnsafe ? Object.keys(tg.initDataUnsafe).join(",") : "-"}`
+    );
+  }
   try {
     const res = await fetch(STUDIO_API + action, {
       method: "POST",
