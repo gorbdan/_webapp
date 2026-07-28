@@ -451,6 +451,17 @@ function renderStudioBoard() {
         video.muted = true;
         video.playsInline = true;
         video.preload = "metadata";
+        // Zveno-URL клипов могут протухать/не играть в вебвью (аудит
+        // 2026-07-28) — не оставляем чёрный квадрат, откатываемся на кадр.
+        video.addEventListener("error", () => {
+          video.remove();
+          if (scene.frame_url) {
+            const img = document.createElement("img");
+            img.src = normalizeUrl(scene.frame_url);
+            img.alt = "";
+            thumb.prepend(img);
+          }
+        });
         thumb.appendChild(video);
       } else if (scene.frame_url) {
         const img = document.createElement("img");
@@ -481,7 +492,11 @@ function renderStudioBoard() {
 
   const readyClips = scenes.filter((s) => s.status === "clip_ready" && s.clip_url).length;
   const stitchBtn = document.getElementById("studioStitchBtn");
-  stitchBtn.classList.toggle("hidden", readyClips < 2 || project.status === "stitching");
+  // Склейка (Ф3) на боте ещё НЕ реализована — кнопку не показываем, иначе
+  // тап гарантированно кончается ошибкой (аудит 2026-07-28). Вернуть условие
+  // readyClips >= 2 при релизе Ф3 (STUDIO_STITCH_ENABLED = true).
+  const STUDIO_STITCH_ENABLED = false;
+  stitchBtn.classList.toggle("hidden", !STUDIO_STITCH_ENABLED || readyClips < 2 || project.status === "stitching");
   stitchBtn.disabled = project.status === "stitching";
   stitchBtn.textContent = project.status === "stitching" ? "Склеиваю…" : "🎬 Склеить мультик";
 
@@ -552,14 +567,16 @@ function studioPendingBatch() {
   for (const scene of studioState.scenes) {
     const needsFrame = scene.status === "empty" && (scene.frame_prompt || "").trim() && !liveKeys.has(`frame:${scene.id}`);
     if (needsFrame) {
-      jobs.push({ type: "frame", scene_id: scene.id });
+      // expected_cost — сверка цены на боте (ревизия п.5 ТЗ): аудит 2026-07-28
+      // показал, что поле не отправлялось вовсе и защита была мертва.
+      jobs.push({ type: "frame", scene_id: scene.id, payload: { expected_cost: studioFramePrice() } });
       total += studioFramePrice();
     }
     const hasVideoPrompt = (scene.video_prompt || "").trim().length > 0;
     const clipLive = liveKeys.has(`clip:${scene.id}`) || scene.status === "clip_queued";
     const needsClip = hasVideoPrompt && !clipLive && scene.status !== "clip_ready" && (scene.frame_url || needsFrame);
     if (needsClip) {
-      jobs.push({ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration } });
+      jobs.push({ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration, expected_cost: studioClipPrice(scene) } });
       total += studioClipPrice(scene);
     }
   }
@@ -600,6 +617,14 @@ function openStudioScene(sceneId) {
 }
 
 function renderStudioSceneModal() {
+  // Самоизлечение: модалка закрыта в обход closeSceneModal (Esc в вебвью, где
+  // события dialog не доставляются) — sceneModalId залип, поллинг продолжает
+  // рендерить закрытую модалку. Чиним стейт первым же вызовом.
+  if (studioState.sceneModalId && !document.getElementById("sceneModal").open) {
+    studioState.sceneModalId = null;
+    if (studioState.project && studioState.view === "board") renderStudioBoard();
+    return;
+  }
   const scene = findStudioScene(studioState.sceneModalId);
   if (!scene) return;
   const idx = studioSortedScenes().findIndex((s) => s.id === scene.id);
@@ -615,6 +640,20 @@ function renderStudioSceneModal() {
     video.controls = true;
     video.playsInline = true;
     video.className = "preview loaded";
+    video.addEventListener("error", () => {
+      video.remove();
+      const note = document.createElement("p");
+      note.className = "studio-hint";
+      note.textContent = "🎬 Клип не открылся здесь — он продублирован в чат с ботом.";
+      media.prepend(note);
+      if (scene.frame_url) {
+        const img = document.createElement("img");
+        img.src = normalizeUrl(scene.frame_url);
+        img.className = "preview loaded";
+        img.alt = "";
+        media.prepend(img);
+      }
+    });
     media.appendChild(video);
   } else if (scene.frame_url) {
     const img = document.createElement("img");
@@ -728,7 +767,7 @@ document.getElementById("sceneFrameGenerate").addEventListener("click", async ()
   }
   const data = await studioCall("enqueue", {
     project_id: studioState.project.id,
-    jobs: [{ type: "frame", scene_id: scene.id }],
+    jobs: [{ type: "frame", scene_id: scene.id, payload: { expected_cost: studioFramePrice() } }],
   });
   if (data && data.ok) {
     scene.status = "frame_queued";
@@ -749,7 +788,7 @@ document.getElementById("sceneClipGenerate").addEventListener("click", async () 
   }
   const data = await studioCall("enqueue", {
     project_id: studioState.project.id,
-    jobs: [{ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration } }],
+    jobs: [{ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration, expected_cost: studioClipPrice(scene) } }],
   });
   if (data && data.ok) {
     scene.status = "clip_queued";
@@ -789,6 +828,11 @@ function closeSceneModal() {
 }
 
 document.getElementById("sceneModalClose").addEventListener("click", closeSceneModal);
+// Esc закрывает dialog через cancel→close; в вебвью close-событие не приходит
+// (аудит 2026-07-28), cancel — приходит чаще. Плюс самоизлечение ниже.
+document.getElementById("sceneModal").addEventListener("cancel", () => {
+  setTimeout(closeSceneModal, 0); // после нативного закрытия — только cleanup
+});
 document.getElementById("sceneModal").addEventListener("click", (e) => {
   if (e.target.id === "sceneModal") closeSceneModal();
 });
@@ -858,6 +902,41 @@ function stopStudioPolling() {
 // переключает видимость .tab-page, ничего не знает про студию и её
 // sticky-корзину (она вне #pageStudio по вёрстке — см. index.html).
 
+// Прод-аудит 2026-07-28: вебапп, открытый с НИЖНЕЙ reply-кнопки, не получает
+// initData от Telegram ВООБЩЕ (документированное поведение: у reply-запусков
+// только sendData-канал; проверено на tdesktop — initData пуст, initDataUnsafe
+// пустой объект). Студии initData обязателен → вместо вечных «сессия устарела»
+// показываем честный экран с объяснением, как открыть студию правильно
+// (инлайн-кнопка «🎬 Студия мультиков» в меню бота).
+function renderStudioNoAuth() {
+  const wrap = document.getElementById("studioProjects");
+  const empty = document.getElementById("studioProjectsEmpty");
+  empty.classList.add("hidden");
+  document.getElementById("studioNewBtn").classList.add("hidden");
+  wrap.innerHTML = "";
+  const box = document.createElement("div");
+  box.className = "empty-state";
+  box.innerHTML =
+    "<p>🔐 Студии нужна авторизация Telegram, а при открытии вебаппа кнопкой " +
+    "у поля ввода Telegram её не передаёт.</p>" +
+    "<p>Открой студию из чата с ботом: нажми <b>/start</b> и выбери " +
+    "<b>«🎬 Студия мультиков»</b> в меню.</p>";
+  wrap.appendChild(box);
+  showStudioView("list");
+}
+
+async function enterStudioTab() {
+  const initData = await waitForInitData(1500);
+  if (!initData) {
+    renderStudioNoAuth();
+    return;
+  }
+  document.getElementById("studioNewBtn").classList.remove("hidden");
+  showStudioView(studioState.view);
+  if (studioState.view === "board") maybeStartStudioPolling();
+  if (studioState.view === "list" && !studioState.projects.length) loadStudioProjects();
+}
+
 tabBar.addEventListener("click", (e) => {
   const tab = e.target.closest(".tab");
   if (!tab) return;
@@ -866,7 +945,14 @@ tabBar.addEventListener("click", (e) => {
     studioCartEl.classList.add("hidden");
     return;
   }
-  showStudioView(studioState.view);
-  if (studioState.view === "board") maybeStartStudioPolling();
-  if (studioState.view === "list" && !studioState.projects.length) loadStudioProjects();
+  enterStudioTab();
 });
+
+// Deep-link из бота: инлайн-кнопка «🎬 Студия мультиков» открывает вебапп с
+// ?tab=studio — сразу переключаемся на студию (клик по табу дёргает и
+// switchTab из app.js, и enterStudioTab выше).
+try {
+  if (new URLSearchParams(window.location.search).get("tab") === "studio") {
+    document.querySelector('.tab[data-tab="studio"]')?.click();
+  }
+} catch { /* не критично */ }
