@@ -492,11 +492,7 @@ function renderStudioBoard() {
 
   const readyClips = scenes.filter((s) => s.status === "clip_ready" && s.clip_url).length;
   const stitchBtn = document.getElementById("studioStitchBtn");
-  // Склейка (Ф3) на боте ещё НЕ реализована — кнопку не показываем, иначе
-  // тап гарантированно кончается ошибкой (аудит 2026-07-28). Вернуть условие
-  // readyClips >= 2 при релизе Ф3 (STUDIO_STITCH_ENABLED = true).
-  const STUDIO_STITCH_ENABLED = false;
-  stitchBtn.classList.toggle("hidden", !STUDIO_STITCH_ENABLED || readyClips < 2 || project.status === "stitching");
+  stitchBtn.classList.toggle("hidden", readyClips < 2 || project.status === "stitching");
   stitchBtn.disabled = project.status === "stitching";
   stitchBtn.textContent = project.status === "stitching" ? "Склеиваю…" : "🎬 Склеить мультик";
 
@@ -848,7 +844,30 @@ function renderStudioFinal() {
   const project = studioState.project;
   studioApplyAspect(studioViews.final, project);
   document.getElementById("studioFinalTitle").textContent = project.title || "Готово";
-  document.getElementById("studioFinalVideo").src = normalizeUrl(project.final_url);
+
+  const video = document.getElementById("studioFinalVideo");
+  const hintId = "studioFinalHint";
+  document.getElementById(hintId)?.remove();
+  if (project.final_url) {
+    video.classList.remove("hidden");
+    video.src = normalizeUrl(project.final_url);
+    video.onerror = () => showStudioFinalHint();
+  } else {
+    // Хостинга видео нет (ревизия ТЗ) — плеера в вебаппе может не быть,
+    // финал всегда приходит файлом в чат с ботом.
+    video.classList.add("hidden");
+    video.removeAttribute("src");
+    showStudioFinalHint();
+  }
+
+  function showStudioFinalHint() {
+    video.classList.add("hidden");
+    const hint = document.createElement("p");
+    hint.id = hintId;
+    hint.className = "studio-hint";
+    hint.textContent = "🎬 Мультик готов — он в чате с ботом.";
+    video.insertAdjacentElement("afterend", hint);
+  }
 
   const totalDuration = studioState.scenes.reduce(
     (sum, s) => sum + (s.status === "clip_ready" ? Number(s.duration) || 0 : 0),
@@ -926,7 +945,13 @@ function renderStudioNoAuth() {
 }
 
 async function enterStudioTab() {
-  const initData = await waitForInitData(1500);
+  // Тот же таймаут, что и у обычных вызовов (studioCall → waitForInitData()
+  // без аргумента, 3с) — раньше тут стояло 1.5с, ровно вдвое меньше. Это
+  // самый ранний и самый частый момент (в т.ч. авто-переход по ?tab=studio
+  // сразу при загрузке страницы) — именно тут медленный Desktop-клиент
+  // рискует не успеть и показать юзеру, открывшему студию ПРАВИЛЬНО через
+  // инлайн-кнопку, ложный экран «ты открыл неправильно».
+  const initData = await waitForInitData();
   if (!initData) {
     renderStudioNoAuth();
     return;

@@ -366,8 +366,11 @@ async function botComplete(db, body) {
       }
     }
     if (job.type === "stitch") {
-      if (status === "done" && result.final_url) {
-        stmts.push(db.prepare("UPDATE studio_projects SET status = 'done', final_url = ?, updated_at = ? WHERE id = ?").bind(String(result.final_url), now, job.project_id));
+      // Хостинга видео нет (ревизия ТЗ) — final_url обычно пустой, финал
+      // живёт в чате как файл. status='done' сам по себе значит «склеено
+      // и отправлено», final_url — опциональный плеер, если он есть.
+      if (status === "done") {
+        stmts.push(db.prepare("UPDATE studio_projects SET status = 'done', final_url = ?, updated_at = ? WHERE id = ?").bind(String(result.final_url || ""), now, job.project_id));
       } else {
         stmts.push(db.prepare("UPDATE studio_projects SET status = 'draft', updated_at = ? WHERE id = ?").bind(now, job.project_id));
       }
