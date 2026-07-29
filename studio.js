@@ -6,11 +6,17 @@
 
 const STUDIO_API = "/api/studio/";
 
-async function studioCall(action, body = {}) {
+async function studioCall(action, body = {}, { silent = false } = {}) {
   if (!tg) {
-    showToast("Открой студию внутри Telegram.");
+    if (!silent) showToast("Открой студию внутри Telegram.");
     return null;
   }
+  // Живой баг 2026-07-28: во время долгой генерации клипа (минуты) телефон
+  // может свернуть/заблокировать экран — WebView иногда на миг отдаёт пустой
+  // tg.initData при возврате. Фоновый 4с-поллинг (silent: true, см.
+  // refreshStudioProject) в этот момент не должен пугать юзера тостом "сессия
+  // устарела" — тихо пропускаем тик, initData восстановится сам к следующему.
+  if (silent && !tg.initData) return null;
   try {
     const res = await fetch(STUDIO_API + action, {
       method: "POST",
@@ -19,13 +25,15 @@ async function studioCall(action, body = {}) {
     });
     const data = await res.json().catch(() => ({}));
     if (!data.ok) {
-      showToast(studioErrorText(data.error));
+      if (!(silent && data.error === "invalid_init_data")) {
+        showToast(studioErrorText(data.error));
+      }
       return data;
     }
     return data;
   } catch (e) {
     console.error(`studio ${action} failed`, e);
-    showToast("Не получилось связаться со студией. Попробуй ещё раз.");
+    if (!silent) showToast("Не получилось связаться со студией. Попробуй ещё раз.");
     return null;
   }
 }
@@ -145,9 +153,9 @@ async function openStudioProject(projectId) {
   maybeStartStudioPolling();
 }
 
-async function refreshStudioProject() {
+async function refreshStudioProject({ silent = false } = {}) {
   if (!studioState.project) return;
-  const data = await studioCall("project.get", { project_id: studioState.project.id });
+  const data = await studioCall("project.get", { project_id: studioState.project.id }, { silent });
   if (!data || !data.ok) return;
   const prevErrorIds = new Set(studioState.scenes.filter((s) => s.status === "error").map((s) => s.id));
   studioState.project = data.project;
@@ -753,7 +761,7 @@ function startStudioPolling() {
       stopStudioPolling();
       return;
     }
-    await refreshStudioProject();
+    await refreshStudioProject({ silent: true });
     if (!studioState.activeJobs.length) stopStudioPolling();
   }, 4000);
 }

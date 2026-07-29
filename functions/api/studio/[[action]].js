@@ -424,7 +424,14 @@ export async function onRequestPost(context) {
   if (WEBAPP_ACTIONS[action]) {
     if (!env.BOT_TOKEN) return json({ ok: false, error: "server_misconfigured" }, 500);
     const verified = await verifyStudioUser(body?.init_data, env.BOT_TOKEN);
-    if (!verified) return json({ ok: false, error: "invalid_init_data" }, 401);
+    if (!verified.ok) {
+      // Живой баг 2026-07-28: логируем ПРИЧИНУ отказа для диагностики
+      // (Cloudflare Observability → Logs) — "сессия устарела" на клиенте
+      // раньше маскировала все варианты (no_hash/hash_mismatch/
+      // stale_auth_date/empty_init_data/...) под одним сообщением.
+      console.error(`studio auth failed: action=${action} reason=${verified.reason}`);
+      return json({ ok: false, error: "invalid_init_data" }, 401);
+    }
     return WEBAPP_ACTIONS[action]({ db, env, body, userId: verified.userId });
   }
 

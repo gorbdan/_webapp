@@ -25,10 +25,21 @@ async function hmacSha256(keyBytes, msgBytes) {
 // при любом способе открытия вебапа) — обязателен user.id. user_id берётся
 // ТОЛЬКО отсюда, никогда из тела запроса (ревизия п.7 ТЗ). initData старше
 // 24ч — отказ.
+//
+// Живой баг 2026-07-28 (Аня): "сессия устарела" на каком-то из действий, не
+// на первом — при том, что проверка детерминирована (тот же initData даёт
+// тот же результат всегда). Подозрение: tg.initData на телефоне может стать
+// пустым на миг при сворачивании/разблокировке во время долгой генерации
+// клипа, и фоновый 4с-поллинг статуса попадает в это окно. Возвращаем ПРИЧИНУ
+// отказа (не просто null) — логируется в роутере через console.error,
+// смотреть в Cloudflare Observability → Logs при повторном воспроизведении.
 export async function verifyStudioUser(initData, botToken) {
-  const params = new URLSearchParams(String(initData || ""));
+  const raw = String(initData || "");
+  if (!raw) return { reason: "empty_init_data" };
+
+  const params = new URLSearchParams(raw);
   const receivedHash = params.get("hash");
-  if (!receivedHash) return null;
+  if (!receivedHash) return { reason: "no_hash" };
   params.delete("hash");
 
   const dataCheckString = [...params.entries()]
@@ -39,20 +50,20 @@ export async function verifyStudioUser(initData, botToken) {
   const enc = new TextEncoder();
   const secretKey = await hmacSha256(enc.encode("WebAppData"), enc.encode(botToken));
   const calculatedHash = bytesToHex(await hmacSha256(secretKey, enc.encode(dataCheckString)));
-  if (calculatedHash !== receivedHash) return null;
+  if (calculatedHash !== receivedHash) return { reason: "hash_mismatch" };
 
   const authDate = Number(params.get("auth_date") || 0);
-  if (!authDate || Date.now() / 1000 - authDate > 86400) return null;
+  if (!authDate || Date.now() / 1000 - authDate > 86400) return { reason: "stale_auth_date", authDate };
 
   let user;
   try {
     user = JSON.parse(params.get("user") || "");
   } catch {
-    return null;
+    return { reason: "bad_user_json" };
   }
   const userId = Number(user?.id);
-  if (!Number.isInteger(userId) || userId <= 0) return null;
-  return { userId };
+  if (!Number.isInteger(userId) || userId <= 0) return { reason: "bad_user_id" };
+  return { ok: true, userId };
 }
 
 export function checkBotSecret(request, env) {
