@@ -606,10 +606,17 @@ document.getElementById("studioCartGenerate").addEventListener("click", async ()
 
 function openStudioScene(sceneId) {
   studioState.sceneModalId = sceneId;
-  renderStudioSceneModal();
   const modal = document.getElementById("sceneModal");
+  // Открыть ДО рендера, не после: renderStudioSceneModal() начинается с
+  // самоизлечения по modal.open (см. ниже) — если рендерить, пока диалог ещё
+  // не открыт, .open === false, и самоизлечение ошибочно решает, что модалку
+  // закрыли в обход кода, сбрасывает sceneModalId в null и выходит, ничего не
+  // отрисовав. Модалка открывалась пустой и НИ ОДНА кнопка/поле внутри не
+  // работали — studioState.sceneModalId оставался null навсегда для этого
+  // открытия (баг из аудита самоизлечения, найден живым тестом на мобильном).
   if (typeof modal.showModal === "function") modal.showModal();
   else modal.setAttribute("open", "");
+  renderStudioSceneModal();
 }
 
 function renderStudioSceneModal() {
