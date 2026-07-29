@@ -44,6 +44,14 @@ const STUDIO_ERROR_TEXT = {
   bad_image: "Слишком большое фото — попробуй другое.",
   upload_failed: "Не получилось загрузить фото.",
   bad_request: "Что-то пошло не так с запросом.",
+  // Коды сцены/job'а от бота (studio_scenes.error, studio_jobs.error) —
+  // без этих ключей юзер видел сырую английскую строку в тосте.
+  not_enough_funds: "Не хватает изюминок — пополни баланс и попробуй снова.",
+  moderation: "Модель отклонила запрос модерацией — попробуй другое фото или описание.",
+  provider: "Провайдер генерации временно недоступен — попробуй ещё раз чуть позже.",
+  price_changed: "Цена изменилась — обнови экран и попробуй снова.",
+  internal: "Что-то пошло не так на нашей стороне — попробуй ещё раз.",
+  dependency_failed: "Не получилось из-за ошибки на предыдущем шаге этой сцены.",
 };
 
 function studioErrorText(code) {
@@ -165,7 +173,7 @@ async function refreshStudioProject() {
 
   const newErrors = studioState.scenes.filter((s) => s.status === "error" && !prevErrorIds.has(s.id));
   if (newErrors.length) {
-    showToast(`Не получилось сгенерировать сцену: ${studioErrorText(newErrors[0].error) === "Что-то пошло не так. Попробуй ещё раз." ? (newErrors[0].error || "ошибка") : studioErrorText(newErrors[0].error)}`);
+    showToast(`Не получилось сгенерировать сцену: ${studioErrorText(newErrors[0].error)}`);
   }
 }
 
@@ -357,8 +365,16 @@ function findStudioScene(id) {
   return studioState.scenes.find((s) => s.id === id) || null;
 }
 
+// Формат проекта фиксируется один раз при создании (9:16 или 16:9) — раньше
+// сцены и финальное видео были жёстко в 9:16 в CSS, 16:9-проекты обрезались
+// в портретную рамку. Переменная читается .studio-scene-thumb/.studio-final-video.
+function studioApplyAspect(containerEl, project) {
+  containerEl.style.setProperty("--studio-aspect", project?.aspect === "16:9" ? "16 / 9" : "9 / 16");
+}
+
 function renderStudioBoard() {
   const project = studioState.project;
+  studioApplyAspect(studioViews.board, project);
   document.getElementById("studioBoardTitle").textContent = project.title || "Без названия";
 
   const grid = document.getElementById("studioScenes");
@@ -565,7 +581,12 @@ function renderStudioSceneModal() {
     media.appendChild(img);
   }
 
-  document.getElementById("sceneFramePrompt").value = scene.frame_prompt || "";
+  // Не перетираем поле, если юзер сейчас в нём печатает — эта функция
+  // вызывается и фоновым 4с-поллингом (пока в проекте есть ЛЮБАЯ активная
+  // генерация, не обязательно этой сцены), иначе набранный текст молча
+  // стирался посреди набора.
+  const framePromptEl = document.getElementById("sceneFramePrompt");
+  if (document.activeElement !== framePromptEl) framePromptEl.value = scene.frame_prompt || "";
   const frameBtn = document.getElementById("sceneFrameGenerate");
   const frameBusy = scene.status === "frame_queued";
   frameBtn.disabled = frameBusy;
@@ -577,7 +598,8 @@ function renderStudioSceneModal() {
   document.getElementById("sceneFrameNewerHint").classList.toggle("hidden", !scene.frame_newer_than_clip);
 
   if (showVideoFields) {
-    document.getElementById("sceneVideoPrompt").value = scene.video_prompt || "";
+    const videoPromptEl = document.getElementById("sceneVideoPrompt");
+    if (document.activeElement !== videoPromptEl) videoPromptEl.value = scene.video_prompt || "";
     renderSceneModelPills(scene);
     renderSceneDurationPills(scene);
     document.getElementById("sceneClipPrice").textContent = `${studioClipPrice(scene)} 🍇`;
@@ -715,6 +737,7 @@ document.getElementById("sceneModal").addEventListener("close", () => {
 
 function renderStudioFinal() {
   const project = studioState.project;
+  studioApplyAspect(studioViews.final, project);
   document.getElementById("studioFinalTitle").textContent = project.title || "Готово";
   document.getElementById("studioFinalVideo").src = normalizeUrl(project.final_url);
 
