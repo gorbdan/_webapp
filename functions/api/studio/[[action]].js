@@ -430,7 +430,10 @@ export async function onRequestPost(context) {
       // раньше маскировала все варианты (no_hash/hash_mismatch/
       // stale_auth_date/empty_init_data/...) под одним сообщением.
       console.error(`studio auth failed: action=${action} reason=${verified.reason}`);
-      return json({ ok: false, error: "invalid_init_data" }, 401);
+      // ВРЕМЕННО для живой диагностики 2026-07-28 (Аня не видит логи Cloudflare
+      // Observability для этого проекта) — причина прямо в ответе, без секретов.
+      // Убрать debug_reason, когда баг найден.
+      return json({ ok: false, error: "invalid_init_data", debug_reason: verified.reason }, 401);
     }
     return WEBAPP_ACTIONS[action]({ db, env, body, userId: verified.userId });
   }

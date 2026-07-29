@@ -26,7 +26,11 @@ async function studioCall(action, body = {}, { silent = false } = {}) {
     const data = await res.json().catch(() => ({}));
     if (!data.ok) {
       if (!(silent && data.error === "invalid_init_data")) {
-        showToast(studioErrorText(data.error));
+        // ВРЕМЕННО для живой диагностики 2026-07-28: дописываем debug_reason
+        // от сервера в тост, если он есть — убрать вместе с debug_reason на
+        // сервере, когда баг найден.
+        const text = data.debug_reason ? `${studioErrorText(data.error)} [${data.debug_reason}]` : studioErrorText(data.error);
+        showToast(text);
       }
       return data;
     }
