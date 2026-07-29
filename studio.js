@@ -36,12 +36,17 @@ async function studioCall(action, body = {}, { silent = false } = {}) {
   if (silent && !initData) return null;
   // ВРЕМЕННО для живой диагностики 2026-07-28: initData пуст даже после
   // ожидания и на телефоне, и на Desktop — сырые факты вместо догадок.
+  // Предыдущая версия показывала это ОТДЕЛЬНЫМ тостом, который тут же
+  // перетирался следующим (ответом сервера) — юзер видел только последний.
+  // Теперь один тост со всеми фактами сразу, fetch на пустой initData не
+  // шлём вообще (сервер и так ответит invalid_init_data/empty_init_data).
   if (!silent && !initData) {
     showToast(
-      `[debug] initData пуст. platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
+      `[debug] initData пуст после ожидания. platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
       `hasUnsafe=${!!tg?.initDataUnsafe} unsafeUser=${!!tg?.initDataUnsafe?.user} ` +
       `unsafeKeys=${tg?.initDataUnsafe ? Object.keys(tg.initDataUnsafe).join(",") : "-"}`
     );
+    return { ok: false, error: "invalid_init_data", debug_reason: "empty_init_data_client" };
   }
   try {
     const res = await fetch(STUDIO_API + action, {
