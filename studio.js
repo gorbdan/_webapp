@@ -123,10 +123,27 @@ const studioViews = {
 };
 const studioCartEl = document.getElementById("studioCart");
 
+// Резерв места под sticky-корзину в #studioViewBoard (см. studio.css) должен
+// ТОЧНО совпадать с реальной высотой .studio-cart — она меняется по
+// env(safe-area-inset-bottom) устройства, фиксированное число в CSS могло
+// не совпасть, и «🎬 Склеить мультик» пряталась под корзиной, недоскроллить
+// (живой аудит 2026-07-31).
+function syncStudioCartSpace() {
+  document.documentElement.style.setProperty("--studio-cart-space", `${studioCartEl.offsetHeight}px`);
+}
+// ResizeObserver ловит изменение высоты уже показанной корзины (контент/
+// safe-area/viewport) — но переход display:none→flex сам по себе не везде
+// надёжно триггерит ResizeObserver (замечено на тесте), поэтому showStudioView
+// ниже ЕЩЁ И зовёт syncStudioCartSpace() явно сразу после показа/скрытия.
+if (typeof ResizeObserver !== "undefined") {
+  new ResizeObserver(syncStudioCartSpace).observe(studioCartEl);
+}
+
 function showStudioView(name) {
   studioState.view = name;
   Object.entries(studioViews).forEach(([key, el]) => el.classList.toggle("hidden", key !== name));
   studioCartEl.classList.toggle("hidden", name !== "board");
+  syncStudioCartSpace();
   if (name !== "board") stopStudioPolling();
 }
 
