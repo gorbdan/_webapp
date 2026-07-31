@@ -52,9 +52,11 @@ async function projectList(db, userId) {
   return json({ ok: true, projects: rows });
 }
 
+const PROJECT_ASPECTS = new Set(["9:16", "16:9", "4:3"]);
+
 async function projectCreate(db, userId, body) {
   const mode = body?.mode === "manual" ? "manual" : "ai";
-  const aspect = body?.aspect === "16:9" ? "16:9" : "9:16";
+  const aspect = PROJECT_ASPECTS.has(body?.aspect) ? body.aspect : "9:16";
   const id = uuid();
   const now = nowIso();
   const refUrls = Array.isArray(body?.ref_urls) ? body.ref_urls.slice(0, 4) : [];
@@ -120,13 +122,14 @@ async function sceneUpsert(db, userId, body) {
       .bind(String(s.id), project.id).first();
     if (!existing) return json({ ok: false, error: "not_found" }, 404);
     await db.prepare(
-      "UPDATE studio_scenes SET ord = ?, frame_prompt = ?, video_prompt = ?, model = ?, duration = ? WHERE id = ?",
+      "UPDATE studio_scenes SET ord = ?, frame_prompt = ?, video_prompt = ?, model = ?, duration = ?, resolution = ? WHERE id = ?",
     ).bind(
       Number.isInteger(s.ord) ? s.ord : existing.ord,
       "frame_prompt" in s ? String(s.frame_prompt || "").slice(0, 2000) : existing.frame_prompt,
       "video_prompt" in s ? String(s.video_prompt || "").slice(0, 2000) : existing.video_prompt,
       "model" in s ? String(s.model || SCENE_DEFAULT_MODEL) : existing.model,
       "duration" in s ? Number(s.duration) || existing.duration : existing.duration,
+      "resolution" in s ? String(s.resolution || "720p") : (existing.resolution || "720p"),
       existing.id,
     ).run();
     return json({ ok: true, scene_id: existing.id });
@@ -140,7 +143,7 @@ async function sceneUpsert(db, userId, body) {
   }
   const id = uuid();
   await db.prepare(
-    "INSERT INTO studio_scenes (id, project_id, ord, frame_prompt, video_prompt, model, duration, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'empty')",
+    "INSERT INTO studio_scenes (id, project_id, ord, frame_prompt, video_prompt, model, duration, resolution, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'empty')",
   ).bind(
     id, project.id,
     Number.isInteger(s.ord) ? s.ord : (cnt?.n || 0),
@@ -148,6 +151,7 @@ async function sceneUpsert(db, userId, body) {
     String(s.video_prompt || "").slice(0, 2000),
     String(s.model || SCENE_DEFAULT_MODEL),
     Number(s.duration) || 5,
+    String(s.resolution || "720p"),
   ).run();
   return json({ ok: true, scene_id: id });
 }
@@ -206,6 +210,7 @@ async function enqueue(db, userId, body) {
       if (!payload.video_prompt) payload.video_prompt = scene.video_prompt;
       if (!payload.model) payload.model = scene.model;
       if (!payload.duration) payload.duration = scene.duration;
+      if (!payload.resolution) payload.resolution = scene.resolution || "720p";
       // depends_on (ревизия п.3): кадр ещё не готов — клип ждёт job кадра
       // из ЭТОГО же батча; кадра нет вообще — отказ.
       if (scene.frame_url) {

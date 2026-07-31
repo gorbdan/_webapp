@@ -411,8 +411,10 @@ function findStudioScene(id) {
 // Формат проекта фиксируется один раз при создании (9:16 или 16:9) — раньше
 // сцены и финальное видео были жёстко в 9:16 в CSS, 16:9-проекты обрезались
 // в портретную рамку. Переменная читается .studio-scene-thumb/.studio-final-video.
+const STUDIO_ASPECT_RATIO_CSS = { "16:9": "16 / 9", "9:16": "9 / 16", "4:3": "4 / 3" };
+
 function studioApplyAspect(containerEl, project) {
-  containerEl.style.setProperty("--studio-aspect", project?.aspect === "16:9" ? "16 / 9" : "9 / 16");
+  containerEl.style.setProperty("--studio-aspect", STUDIO_ASPECT_RATIO_CSS[project?.aspect] || "9 / 16");
 }
 
 function renderStudioBoard() {
@@ -572,7 +574,7 @@ function studioPendingBatch() {
     const clipLive = liveKeys.has(`clip:${scene.id}`) || scene.status === "clip_queued";
     const needsClip = hasVideoPrompt && !clipLive && scene.status !== "clip_ready" && (scene.frame_url || needsFrame);
     if (needsClip) {
-      jobs.push({ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration, expected_cost: studioClipPrice(scene) } });
+      jobs.push({ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration, resolution: scene.resolution, expected_cost: studioClipPrice(scene) } });
       total += studioClipPrice(scene);
     }
   }
@@ -687,6 +689,7 @@ function renderStudioSceneModal() {
     if (document.activeElement !== videoPromptEl) videoPromptEl.value = scene.video_prompt || "";
     renderSceneModelPills(scene);
     renderSceneDurationPills(scene);
+    renderSceneResolutionPills(scene);
     document.getElementById("sceneClipPrice").textContent = `${studioClipPrice(scene)} 🍇`;
     const clipBtn = document.getElementById("sceneClipGenerate");
     const clipBusy = scene.status === "clip_queued";
@@ -709,9 +712,11 @@ function renderSceneModelPills(scene) {
       scene.model = code;
       const durations = model.durations || [5];
       if (!durations.includes(scene.duration)) scene.duration = durations[0];
+      const resolutions = model.resolutions || ["720p"];
+      if (!resolutions.includes(scene.resolution)) scene.resolution = resolutions[0];
       await studioCall("scene.upsert", {
         project_id: studioState.project.id,
-        scene: { id: scene.id, model: scene.model, duration: scene.duration },
+        scene: { id: scene.id, model: scene.model, duration: scene.duration, resolution: scene.resolution },
       });
       renderStudioSceneModal();
     });
@@ -732,6 +737,28 @@ function renderSceneDurationPills(scene) {
       if (scene.duration === d || !studioState.project) return;
       scene.duration = d;
       await studioCall("scene.upsert", { project_id: studioState.project.id, scene: { id: scene.id, duration: d } });
+      renderStudioSceneModal();
+    });
+    wrap.appendChild(pill);
+  });
+}
+
+const STUDIO_RESOLUTION_LABEL = { "480p": "480", "720p": "720", "1080p": "1080" };
+
+function renderSceneResolutionPills(scene) {
+  const wrap = document.getElementById("sceneResolutionPills");
+  wrap.innerHTML = "";
+  const resolutions = studioState.prices?.models?.[scene.model]?.resolutions || ["720p"];
+  const current = scene.resolution || "720p";
+  resolutions.forEach((r) => {
+    const pill = document.createElement("button");
+    pill.type = "button";
+    pill.className = `studio-pill ${current === r ? "active" : ""}`;
+    pill.textContent = STUDIO_RESOLUTION_LABEL[r] || r;
+    pill.addEventListener("click", async () => {
+      if (scene.resolution === r || !studioState.project) return;
+      scene.resolution = r;
+      await studioCall("scene.upsert", { project_id: studioState.project.id, scene: { id: scene.id, resolution: r } });
       renderStudioSceneModal();
     });
     wrap.appendChild(pill);
@@ -791,7 +818,7 @@ document.getElementById("sceneClipGenerate").addEventListener("click", async () 
   }
   const data = await studioCall("enqueue", {
     project_id: studioState.project.id,
-    jobs: [{ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration, expected_cost: studioClipPrice(scene) } }],
+    jobs: [{ type: "clip", scene_id: scene.id, payload: { model: scene.model, duration: scene.duration, resolution: scene.resolution, expected_cost: studioClipPrice(scene) } }],
   });
   if (data && data.ok) {
     scene.status = "clip_queued";

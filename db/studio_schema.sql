@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS studio_projects (
   title TEXT DEFAULT '',
   idea TEXT DEFAULT '',
   mode TEXT DEFAULT 'ai',         -- ai | manual
-  aspect TEXT DEFAULT '9:16',     -- 9:16 | 16:9, фикс после создания (склейка)
+  aspect TEXT DEFAULT '9:16',     -- 9:16 | 16:9 | 4:3, фикс после создания (склейка)
   use_avatar INTEGER DEFAULT 0,
   ref_urls TEXT DEFAULT '[]',
   status TEXT DEFAULT 'draft',    -- draft | stitching | done
@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS studio_scenes (
   video_prompt TEXT DEFAULT '',
   model TEXT DEFAULT 'seedance2_fast',
   duration INTEGER DEFAULT 5,
+  resolution TEXT DEFAULT '720p',
   clip_url TEXT DEFAULT '',
   -- empty|frame_queued|frame_ready|clip_queued|clip_ready|error
   status TEXT DEFAULT 'empty',
