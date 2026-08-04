@@ -684,6 +684,12 @@
         "prompt": "Turn this person into the cover of a hit music album, preserving their exact face. Bold art-direction: dramatic lighting, a striking color-graded backdrop, a stylish outfit matching a modern pop/hip-hop aesthetic, artist name and album title in tasteful typography, a parental-advisory-style label. Looks like a real streaming cover, magazine-grade.",
         "example_url": "https://iili.io/C7DqKsj.jpg",
         "added_at": "2026-07-02T04:14:39.453864+00:00"
+      },
+      {
+        "description": "Современная авторская наивная иллюстрация: hand-drawn минимализм, забавные пропорции, плоские контрастные цвета — как дорогой дизайнерский постер.",
+        "upload_hint": "Любое фото",
+        "prompt": "Нарисуй это фото в стиле современной авторской наивной иллюстрации: минимализм hand-drawn, забавные пропорции, неровные контуры, плоские контрастные цвета, декоративные штрихи, без теней, без градиентов, без 3D, вид дорогого дизайнерского постера",
+        "added_at": "2026-08-04T00:00:00.000000+00:00"
       }
     ]
   },
