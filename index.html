@@ -7,6 +7,7 @@
     <title>Библиотека промптов</title>
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./studio.css" />
+    <link rel="stylesheet" href="./boards.css" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -26,6 +27,13 @@
       </header>
 
       <main id="pageKatalog" class="tab-page">
+        <div class="board-banner hidden" id="boardBanner">
+          <span class="board-banner-text" id="boardBannerText"></span>
+          <span class="board-banner-actions">
+            <button class="link-btn" id="boardBannerSwitch" type="button">Сменить</button>
+            <button class="link-btn" id="boardBannerDisable" type="button">Отключить</button>
+          </span>
+        </div>
         <section class="toolbar" aria-label="Фильтры библиотеки">
           <label class="search">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -212,6 +220,7 @@
           <p class="eyebrow" id="modalMeta"></p>
           <h2 id="modalTitle"></h2>
           <pre id="modalPrompt"></pre>
+          <div class="board-note hidden" id="modalBoardNote"></div>
           <div class="modal-hint hidden" id="modalUploadHint"></div>
           <textarea class="modal-note hidden" id="modalNote" rows="3" maxlength="300"></textarea>
           <div class="modal-actions">
@@ -233,6 +242,66 @@
         <div class="chips chips--sheet" id="categories" aria-label="Категории"></div>
       </div>
     </dialog>
+
+    <!-- Доски (mood-борды), MVP. ТЗ: docs/specs/2026-08-09_mood_boards.md (репо бота). -->
+    <dialog class="sheet board-create-sheet" id="boardCreateModal">
+      <div class="sheet-shell">
+        <div class="sheet-header">
+          <h3>Новая доска</h3>
+          <button class="icon-button" id="boardCreateClose" type="button" aria-label="Закрыть" title="Закрыть">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <input class="board-input" id="boardCreateInput" type="text" maxlength="60" placeholder="Например, «Вечерний гламур»" autocomplete="off" />
+        <div class="board-create-actions">
+          <button class="primary-btn board-block-btn" id="boardCreateConfirm" type="button" disabled>Создать</button>
+          <button class="ghost-btn board-block-btn" id="boardCreateCancel" type="button">Отмена</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="sheet board-actions-sheet" id="boardActionsSheet">
+      <div class="sheet-shell">
+        <div class="sheet-header">
+          <h3>Доска</h3>
+          <button class="icon-button" id="boardActionsClose" type="button" aria-label="Закрыть" title="Закрыть">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="board-actions-list">
+          <button class="board-action-item" id="boardActionRename" type="button">✏️ Переименовать</button>
+          <button class="board-action-item board-action-item--danger" id="boardActionDelete" type="button">🗑 Удалить доску</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="board-overlay hidden" id="boardOverlay">
+      <div class="board-overlay-inner">
+        <div class="board-header">
+          <button class="board-back" id="boardBackBtn" type="button">‹ Мои доски</button>
+          <div class="board-title-wrap">
+            <h2 class="board-title" id="boardTitleText"></h2>
+            <button class="board-title-edit" id="boardTitleEditBtn" type="button" aria-label="Переименовать" title="Переименовать">✏️</button>
+            <input class="board-title-input hidden" id="boardTitleInput" type="text" maxlength="60" autocomplete="off" />
+          </div>
+          <button class="board-menu-btn" id="boardMenuBtn" type="button" aria-label="Меню доски" title="Меню">⋮</button>
+        </div>
+
+        <div class="board-status" id="boardStatus"></div>
+
+        <div class="board-photo-grid" id="boardPhotoGrid"></div>
+        <div class="board-empty hidden" id="boardEmptyState">
+          <div class="board-empty-icon">🖼️</div>
+          <p>Пока пусто. Добавь несколько фото — свои снимки или картинки-вдохновение.</p>
+        </div>
+
+        <div class="board-bottom-bar" id="boardBottomBar">
+          <button class="ghost-btn board-block-btn" id="boardAddPhotoBtn" type="button">📷 Добавить фото</button>
+          <button class="primary-btn board-block-btn hidden" id="boardActivateContinueBtn" type="button">✅ Сделать активной и продолжить</button>
+        </div>
+        <input type="file" id="boardPhotoFile" accept="image/*" class="hidden" />
+      </div>
+    </div>
 
     <dialog class="modal" id="sceneModal">
       <div class="modal-shell">
@@ -268,5 +337,6 @@
 
     <script src="./app.js?v=20260623-uxv3"></script>
     <script src="./studio.js?v=20260720-studio-v1"></script>
+    <script src="./boards.js?v=20260809-boards-mvp1"></script>
   </body>
 </html>
