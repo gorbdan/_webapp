@@ -15,11 +15,22 @@
 //   { action: "board_refs", title: "<имя доски>", board_refs: ["<url>", ...] }
 // (алиасы на стороне бота: action "connect_board"/"br", поля "t"/"br" —
 // вебапп шлёт полные имена, короткие не нужны при таком размере payload).
+//
+// Full «✨ Понять мой стиль» (2026-08-09) — отдельный экшен, ТЗ бэкенду
+// docs/specs/2026-08-09_mood_boards_full.md (репо бота):
+//   { action: "board_style_analyze", board_id, title, board_refs: ["<url>", ...] }
+// Ответ (текст описания стиля + подтверждение/отключение) живёт целиком в
+// чате бота — вебапп не пытается получить его синхронно обратно (нет
+// публичного HTTP-моста бот↔вебапп для этого). `board.styleRequested` —
+// чисто локальный косметический флаг для копирайта баннера/статуса
+// (какая доска когда-либо отправлялась на AI-анализ), реальное состояние
+// «стиль подмешивается» живёт на боте.
 
 const BOARDS_STORAGE_KEY = "sirnike_mood_boards_v1";
 const BOARDS_MAX_BOARDS = 5;
 const BOARDS_MAX_PHOTOS_PER_BOARD = 10;
 const BOARDS_MAX_REFS_PER_GEN = 8;
+const BOARDS_MIN_PHOTOS_FOR_STYLE = 2; // меньше — недостаточно для «стиля подборки»
 
 let boardsState = loadBoardsState();
 let boardOverlayBoardId = null; // какая доска сейчас открыта в оверлее (Экран 2)
@@ -134,7 +145,9 @@ function renderBoardBanner() {
   if (!board) {
     banner.classList.add("hidden");
   } else {
-    textEl.textContent = `🖼️ Доска «${board.name}» активна`;
+    textEl.textContent = board.styleRequested
+      ? `🖼️ Доска «${board.name}» активна — стиль ИИ подмешивается в каждую генерацию`
+      : `🖼️ Доска «${board.name}» активна`;
     banner.classList.remove("hidden");
   }
   syncBoardBannerSpace();
@@ -327,6 +340,7 @@ const boardStatusEl = document.getElementById("boardStatus");
 const boardPhotoGrid = document.getElementById("boardPhotoGrid");
 const boardEmptyState = document.getElementById("boardEmptyState");
 const boardActivateContinueBtn = document.getElementById("boardActivateContinueBtn");
+const boardStyleAnalyzeBtn = document.getElementById("boardStyleAnalyzeBtn");
 const boardAddPhotoBtn = document.getElementById("boardAddPhotoBtn");
 const boardPhotoFile = document.getElementById("boardPhotoFile");
 
@@ -365,6 +379,7 @@ function renderBoardOverlay() {
 
   const isActive = boardsState.activeId === board.id;
   boardActivateContinueBtn.classList.toggle("hidden", isActive || !hasPhotos);
+  boardStyleAnalyzeBtn.classList.toggle("hidden", isActive || board.photos.length < BOARDS_MIN_PHOTOS_FOR_STYLE);
 
   const atLimit = board.photos.length >= BOARDS_MAX_PHOTOS_PER_BOARD;
   boardAddPhotoBtn.disabled = atLimit;
@@ -381,7 +396,9 @@ function renderBoardOverlayStatus() {
     const wrap = document.createElement("div");
     wrap.className = "board-status-active";
     const span = document.createElement("span");
-    span.textContent = "🖼️ Доска активна — фото из неё пойдут в следующую генерацию";
+    span.textContent = board.styleRequested
+      ? "🖼️ Доска активна — стиль ИИ подмешивается в каждую генерацию"
+      : "🖼️ Доска активна — фото из неё пойдут в следующую генерацию";
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "link-btn";
@@ -435,6 +452,7 @@ function renderBoardPhotoGrid() {
 document.getElementById("boardBackBtn")?.addEventListener("click", closeBoardOverlay);
 
 boardActivateContinueBtn?.addEventListener("click", () => activateBoardAndContinue(boardOverlayBoardId));
+boardStyleAnalyzeBtn?.addEventListener("click", () => analyzeBoardStyleAndContinue(boardOverlayBoardId));
 
 boardAddPhotoBtn?.addEventListener("click", () => {
   const board = getBoardById(boardOverlayBoardId);
@@ -545,6 +563,23 @@ function buildBoardActivatePayload(board) {
   });
 }
 
+// Full: «✨ Понять мой стиль» — отдельный экшен, НЕ board_refs. Анализ
+// смотрит на всю доску (до 10 фото), не срезается до 8 (тот срез — потолок
+// референсов ГЕНЕРАЦИИ, к анализу подборки не относится). Ответ (текст
+// описания + подтверждение) приходит в чат бота — синхронного возврата в
+// сам вебапп нет (у бота нет публичного HTTP для этого), поэтому здесь
+// нет попытки показать текст описания внутри вебаппа — редактирование
+// живёт в чате. См. docs/specs/2026-08-09_mood_boards_full.md (репо бота).
+function buildBoardStyleAnalyzePayload(board) {
+  return JSON.stringify({
+    action: "board_style_analyze",
+    board_id: board.id,
+    title: board.name,
+    board_refs: board.photos.slice(0, BOARDS_MAX_PHOTOS_PER_BOARD),
+    v: typeof APP_VERSION !== "undefined" ? APP_VERSION : "boards-mvp-1",
+  });
+}
+
 // tg.sendData() доставляет данные боту ТОЛЬКО когда вебапп открыт с
 // reply-клавиатуры (KeyboardButton) — документированное ограничение
 // Telegram, см. isOpenedViaInlineButton() в app.js. Библиотека стилей с
@@ -587,11 +622,41 @@ function activateBoardAndContinue(id) {
   }
 }
 
+// Full: тот же вход/гварды, что у activateBoardAndContinue (инлайн-вход
+// физически не доставит sendData — см. комментарий выше), но другой
+// экшен и другая пометка локального состояния.
+function analyzeBoardStyleAndContinue(id) {
+  const board = getBoardById(id);
+  if (!board) return;
+  if (!tg) {
+    showToast("Открой библиотеку внутри Telegram, чтобы подключить доску.");
+    return;
+  }
+  if (isOpenedViaInlineButton()) {
+    showToast("Из этого входа доска не подключится. Открой библиотеку кнопкой в меню снизу экрана и попробуй ещё раз.");
+    return;
+  }
+  board.styleRequested = true;
+  setActiveBoardId(id);
+  saveBoardsState();
+  renderBoardBanner();
+  try {
+    tg.sendData(buildBoardStyleAnalyzePayload(board));
+    setTimeout(() => tg.close(), 900);
+  } catch (e) {
+    console.error("board style analyze sendData failed", e);
+    showToast("Не получилось отправить доску на анализ. Попробуй ещё раз.");
+  }
+}
+
 // ── Экран 4: инфо-строка в карточке стиля (используется из app.js) ─────
 
 function getActiveBoardNoteText() {
   const board = getActiveBoard();
-  return board ? `🖼️ С доски «${board.name}» тоже подмешается` : "";
+  if (!board) return "";
+  return board.styleRequested
+    ? `🖼️ Стиль доски «${board.name}» тоже подмешается`
+    : `🖼️ С доски «${board.name}» тоже подмешается`;
 }
 
 // ── Инициализация ────────────────────────────────────────────────────
