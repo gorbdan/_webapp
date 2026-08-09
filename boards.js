@@ -545,15 +545,35 @@ function buildBoardActivatePayload(board) {
   });
 }
 
-// Тот же payload-механизм (tg.sendData), что и у «Использовать» в app.js
-// и у «topup» — доски не завязаны на инлайн-путь answerWebAppQuery (тот
-// путь специфичен под резолв стиля по cat_idx/item_idx, к доскам отношения
-// не имеет), поведение соответствует уже существующему для действия «topup».
+// tg.sendData() доставляет данные боту ТОЛЬКО когда вебапп открыт с
+// reply-клавиатуры (KeyboardButton) — документированное ограничение
+// Telegram, см. isOpenedViaInlineButton() в app.js. Библиотека стилей с
+// 2026-07-16 в основном открывается ИНЛАЙН-кнопкой (web_app= напрямую из
+// main_menu_kb и т.д.) — с этого входа sendData молча теряет данные: доска
+// пометится активной на экране, но бот её не получит.
+//
+// Путь «Использовать» решает это через answerWebAppQuery (Cloudflare
+// Function), но для board_refs он не годится: до 8 URL фото — это
+// заведомо больше лимита callback_data в 64 байта (там передаются только
+// cat_idx/item_idx). Текстовый JSON-фолбэк в handle_text (SirNike.py)
+// тоже недостижим — сообщения от answerWebAppQuery блокирует наш же
+// via_bot-гвард в начале handle_text (docs/specs/2026-07-17_via_bot_message_leak.md,
+// добавлен специально, чтобы такие сообщения не читались как обычный
+// текст) — он отрежет JSON раньше, чем тот дойдёт до фолбэк-парсера.
+//
+// Честный фикс уровня MVP (тот же принцип, что studio.js renderStudioNoAuth
+// для аналогичной проблемы студии): не подключать доску молча там, где это
+// физически невозможно — предупредить и не закрывать вебапп, чтобы юзер
+// мог переоткрыть библиотеку правильным путём.
 function activateBoardAndContinue(id) {
   const board = getBoardById(id);
   if (!board) return;
   if (!tg) {
     showToast("Открой библиотеку внутри Telegram, чтобы подключить доску.");
+    return;
+  }
+  if (isOpenedViaInlineButton()) {
+    showToast("Из этого входа доска не подключится. Открой библиотеку кнопкой в меню снизу экрана и попробуй ещё раз.");
     return;
   }
   setActiveBoardId(id);
