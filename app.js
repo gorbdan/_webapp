@@ -584,6 +584,14 @@ function renderCategoryRows() {
     cardsEl.appendChild(makeCategoryRow("🆕", "Новинки", newItems));
   }
 
+  // Доски (mood-борды), MVP: docs/specs/2026-08-09_mood_boards.md (репо бота).
+  // Секция строится в boards.js (отдельный файл, своё хранилище в
+  // localStorage) — тут только точка встраивания в домашний ряд каталога.
+  if (typeof renderBoardsRow === "function") {
+    const boardsRow = renderBoardsRow();
+    if (boardsRow) cardsEl.appendChild(boardsRow);
+  }
+
   library.forEach((cat, idx) => {
     const items = allItems.filter((item) => item._categoryIndex === idx);
     if (!items.length) return;
@@ -662,6 +670,20 @@ function openDetails(item) {
   modalTitle.textContent = item.title || "";
   modalTitle.style.display = item.title ? "" : "none";
   modalPrompt.textContent = item.description || item.hint || "";
+
+  // Доски (mood-борды), Экран 4: если активна доска — информационная строка
+  // НАД блоком «Что загрузить», не интерактивная (docs/specs/2026-08-09_mood_boards.md).
+  const modalBoardNote = document.getElementById("modalBoardNote");
+  if (modalBoardNote) {
+    const boardNoteText = typeof getActiveBoardNoteText === "function" ? getActiveBoardNoteText() : "";
+    if (boardNoteText) {
+      modalBoardNote.textContent = boardNoteText;
+      modalBoardNote.classList.remove("hidden");
+    } else {
+      modalBoardNote.textContent = "";
+      modalBoardNote.classList.add("hidden");
+    }
+  }
 
   // «Что загрузить» — отдельный заметный блок над кнопками, а не хвост
   // длинного описания: юзер должен увидеть требование к фото ДО того,

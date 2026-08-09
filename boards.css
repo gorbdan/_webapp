@@ -1,0 +1,433 @@
+/* ── Доски (mood-борды), MVP ──────────────────────────────
+   ТЗ: docs/specs/2026-08-09_mood_boards.md (репо бота). Отдельный файл,
+   тот же принцип, что studio.css — большая самодостаточная фича. */
+
+/* Баннер активной доски — закреплён под шапкой на ВСЕХ экранах каталога
+   (главная/категория/поиск). Сам баннер живёт внутри #pageKatalog, поэтому
+   на других вкладках (Студия/История/Пополнить) естественным образом скрыт
+   вместе с родительской вкладкой — ничего специально прятать не нужно.
+   Toolbar смещается на реальную высоту баннера через CSS-переменную,
+   которую boards.js держит в актуальном состоянии ResizeObserver'ом —
+   тот же приём, что --studio-cart-space в studio.css. */
+.board-banner {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.board-banner-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-banner-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.toolbar {
+  top: var(--board-banner-space, 0px);
+}
+
+.link-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--brand-2);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+/* ── Ряд «Мои доски» на главной каталога ─────────────────── */
+
+.board-tile-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 2px 6px;
+  margin: 0 -2px;
+}
+
+.board-tile-row::-webkit-scrollbar {
+  display: none;
+}
+
+.board-tile {
+  flex: 0 0 auto;
+  width: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: center;
+}
+
+.board-tile-cover {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--line) 55%, var(--surface));
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: 1fr;
+  place-items: center;
+  font-size: 24px;
+  border: 1px solid var(--line);
+  transition: transform 0.12s ease;
+}
+
+.board-tile:active .board-tile-cover {
+  transform: scale(0.96);
+}
+
+.board-tile-cover--collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  place-items: stretch;
+  gap: 1px;
+}
+
+.board-tile-cover--collage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.board-tile-cover--active {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.board-tile-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.board-tile-cover--new {
+  border: 2px dashed var(--muted);
+  color: var(--muted);
+  font-size: 26px;
+  font-weight: 800;
+  background: transparent;
+}
+
+.board-tile-name {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.board-tile-hint {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* ── Модалка «Новая доска» ────────────────────────────────── */
+
+.board-create-sheet .sheet-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.board-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.board-input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.board-create-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.board-block-btn {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+/* ── Меню действий доски («⋮») ───────────────────────────── */
+
+.board-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.board-action-item {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.board-action-item:hover {
+  background: var(--line);
+}
+
+.board-action-item--danger {
+  color: var(--brand);
+}
+
+/* ── Информационная строка в карточке стиля (Экран 4) ────── */
+
+.board-note {
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* ── Экран доски (просмотр/редактирование) — полноэкранный оверлей ── */
+
+.board-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.board-overlay-inner {
+  min-height: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 14px 14px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.board-back {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  padding: 6px 0;
+  color: var(--brand-2);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.board-title-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.board-title {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 16px;
+  cursor: text;
+}
+
+.board-title-edit {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  padding: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.board-title-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--brand);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.board-menu-btn {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.board-menu-btn:hover {
+  background: var(--line);
+}
+
+.board-status-active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, #1fae5e 16%, var(--surface));
+  border: 1px solid color-mix(in srgb, #1fae5e 45%, var(--line));
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.board-status-inactive-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.board-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.board-photo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--line) 50%, var(--surface));
+}
+
+.board-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.board-photo-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(16, 19, 31, 0.68);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.board-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.board-empty-icon {
+  font-size: 32px;
+}
+
+.board-bottom-bar {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.board-bottom-bar .ghost-btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
