@@ -412,14 +412,13 @@ function renderBoardOverlayStatus() {
     wrap.appendChild(span);
     wrap.appendChild(btn);
     boardStatusEl.appendChild(wrap);
-  } else {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "board-status-inactive-btn";
-    btn.textContent = "Сделать доску активной";
-    btn.addEventListener("click", () => activateBoardAndContinue(board.id));
-    boardStatusEl.appendChild(btn);
   }
+  // Не активна — статус-баннер пуст. Раньше здесь дублировалась кнопка
+  // «Сделать доску активной» одновременно с «✨ Понять мой стиль» /
+  // «✅ Подключить фото без анализа» внизу экрана (одно и то же действие
+  // под двумя разными подписями на одном экране — реальная путаница,
+  // живой баг-репорт 2026-08-09). Единственный вход в активацию теперь —
+  // нижняя панель (boardActivateContinueBtn/boardStyleAnalyzeBtn).
 }
 
 function renderBoardPhotoGrid() {
