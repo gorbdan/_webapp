@@ -1,6 +1,6 @@
 // Конструктор видео (Хаб генерации, MVP). ТЗ: docs/specs/2026-08-13_webapp_generation_hub.md
 // (репо бота). Открывается напрямую с персональной ссылки бота
-// (?tab=videoConstructor&cfg=<base64 JSON>) вместо сегодняшней чат-панели
+// (&tab=video_constructor&cfg=<base64 JSON>) вместо сегодняшней чат-панели
 // video_kb — весь подбор настроек тут, один payload в конце
 // (action: "start_generation"/"sg"), карточка подтверждения и запуск —
 // остаются в чате (см. docstring в начале файла boards.js — тот же принцип:
@@ -11,84 +11,85 @@
 // studioCall/studioCompressImageToBase64 из studio.js, переиспользуем, не
 // строим заново (тот же приём, что уже в boards.js).
 //
-// ⚠️ Формат `cfg` (список активных моделей/форматов/качества/длительностей/
-// цен, которые бот пробрасывает через персональный URL) — бэкенд ещё
-// реализует его в параллельной сессии (см. docs/briefs/backend.md). Схема
-// ниже — предложение фронтенда, СВЕРИТЬ с тем, что реально пришлёт бэкенд
-// (см. docs/BOT_CONTRACT.md, раздел про Конструктор, когда появится) и
-// поправить parseConstructorConfig при расхождении. До тех пор — FALLBACK_CONFIG
-// ниже даёт рабочий экран для вёрстки и локальной проверки.
-//
-// Ожидаемая форма cfg (после base64-JSON-декода):
+// ⚠️ Формат `cfg` — СВЕРЕНО с реальным бэкендом (SirNike.py,
+// _video_constructor_cfg_payload(), строка ~1274), не с черновиком спеки:
 // {
-//   "models": [
+//   "video_models": [
 //     {
-//       "id": "seedance2", "label": "Seedance 2", "badge": null,
-//       "blurb": "Максимум качества и движения — наш выбор",
-//       "formats": ["16:9","9:16","1:1","4:3"],
-//       "quality": ["pro","fast"],            // [] или отсутствует — блок «Качество» скрыт
-//       "durations": [5,10,15],               // ИЛИ {"custom": [2,10]} — свободный ввод (Wan 2.7)
-//       "face_grid": true,                    // поддержка тумблера детектора лиц
-//       "prices": {"pro": {"5":20,"10":45,"15":65}, "fast": {"5":15,"10":30,"15":45}}
-//       // без качества — prices плоский: {"5":20,"10":45,"15":65}
-//     }
-//   ],
-//   "default_model": "seedance2"
+//       "code": "seedance2", "label": "Seedance 2",
+//       "blurb": "максимум качества и движения, наш выбор",
+//       "aspects": ["16:9","9:16","1:1","4:3"],
+//       "modes": ["480p","720p","1080p"],      // может быть 1 элемент — тогда без тумблера «Качество»
+//       "durations": [5,10,15],
+//       "face_grid": true,
+//       "prices": {"480p": {"5":20,"10":45,"15":65}, "720p": {...}, "1080p": {...}}
+//       // ключ prices может быть и "default", если modes пуст — на практике не бывает
+//     }, ...
+//   ]
 // }
+// Нет отдельного default_model — бот всегда кладёт seedance2 первым (он
+// включён без фичефлага), поэтому дефолт конструктора = первая модель списка.
+//
+// ⚠️ Бэкенд умеет различать в payload.quality ТОЛЬКО "fast" (-> реальный
+// режим "480p", если он есть у модели) и всё остальное (-> "720p", если он
+// есть у модели, иначе первый доступный режим) — см.
+// _apply_webapp_generation_video в SirNike.py. Поэтому тумблер «Качество»
+// в конструкторе — всегда бинарный 🔥Pro/⚡Fast, а не список реальных modes;
+// показываем его только если у модели есть "480p" (иначе бэкенд всё равно
+// не даст выбрать ничего, кроме 720p/дефолта — незачем врать тумблером).
 
-const FALLBACK_CONFIG = {
-  models: [
+const FALLBACK_CFG = {
+  video_models: [
     {
-      id: "seedance2", label: "Seedance 2", badge: null,
-      blurb: "Максимум качества и движения — наш выбор",
-      formats: ["16:9", "9:16", "1:1", "4:3"], quality: ["pro", "fast"], durations: [5, 10, 15],
+      code: "seedance2", label: "Seedance 2",
+      blurb: "максимум качества и движения, наш выбор",
+      aspects: ["16:9", "9:16", "1:1", "4:3"], modes: ["480p", "720p", "1080p"], durations: [5, 10, 15],
       face_grid: true,
-      prices: { pro: { "5": 20, "10": 45, "15": 65 }, fast: { "5": 15, "10": 30, "15": 45 } },
+      prices: { "480p": { "5": 15, "10": 28, "15": 40 }, "720p": { "5": 20, "10": 45, "15": 65 }, "1080p": { "5": 30, "10": 60, "15": 85 } },
     },
     {
-      id: "seedance2_fast", label: "Seedance 2 Fast", badge: null,
-      blurb: "Быстрее и дешевле, чуть проще движение",
-      formats: ["16:9", "9:16", "1:1", "4:3"], quality: [], durations: [5, 10, 15],
+      code: "seedance2_fast", label: "Seedance 2 Fast (бета)",
+      blurb: "быстрее и дешевле, попроще картинка",
+      aspects: ["16:9", "9:16", "1:1", "4:3"], modes: ["720p"], durations: [5, 10, 15],
       face_grid: true,
-      prices: { "5": 12, "10": 22, "15": 32 },
+      prices: { "720p": { "5": 12, "10": 22, "15": 32 } },
     },
     {
-      id: "kling3", label: "Kling 3.0", badge: "🆕",
-      blurb: "Кинематографичная динамика кадра",
-      formats: ["16:9", "9:16", "1:1", "4:3"], quality: [], durations: [5, 10],
+      code: "kling3", label: "Kling 3.0 🆕",
+      blurb: "оживляет фото, плавная камера",
+      aspects: ["16:9", "9:16", "1:1", "4:3"], modes: ["720p", "1080p"], durations: [5, 10],
       face_grid: false,
-      prices: { "5": 30, "10": 55 },
+      prices: { "720p": { "5": 30, "10": 55 }, "1080p": { "5": 40, "10": 75 } },
     },
     {
-      id: "veo31", label: "Veo 3.1", badge: "🆕",
-      blurb: "Реалистичная физика и звук",
-      formats: ["16:9", "9:16"], quality: [], durations: [5, 10],
+      code: "veo31", label: "Veo 3.1 (Google) 🆕",
+      blurb: "кинореализм, до 8 сек",
+      aspects: ["16:9", "9:16"], modes: ["720p"], durations: [4, 6, 8],
       face_grid: false,
-      prices: { "5": 35, "10": 65 },
+      prices: { "720p": { "4": 28, "6": 42, "8": 56 } },
     },
     {
-      id: "wan27", label: "Wan 2.7", badge: "🆕",
-      blurb: "Гибкая длительность под задачу",
-      formats: ["16:9", "9:16"], quality: [], durations: { custom: [2, 10] },
+      code: "wan27", label: "Wan 2.7 (Alibaba) 🆕",
+      blurb: "живая мимика и жесты",
+      aspects: ["16:9", "9:16"], modes: ["480p", "720p", "1080p"], durations: [5, 10],
       face_grid: false,
-      prices: { per_second: 4 },
+      prices: { "480p": { "5": 18, "10": 32 }, "720p": { "5": 24, "10": 44 }, "1080p": { "5": 32, "10": 58 } },
     },
     {
-      id: "gemini_omni", label: "Gemini Omni", badge: "🆕",
-      blurb: "Универсальная модель для сложных сцен",
-      formats: ["16:9", "9:16"], quality: [], durations: [5, 10],
+      code: "gemini_omni", label: "Gemini Omni Flash 🆕",
+      blurb: "звук генерируется сам, быстрая генерация",
+      aspects: ["16:9", "9:16"], modes: ["480p", "720p", "1080p"], durations: [5, 10],
       face_grid: false,
-      prices: { "5": 28, "10": 50 },
+      prices: { "480p": { "5": 20, "10": 36 }, "720p": { "5": 28, "10": 50 }, "1080p": { "5": 36, "10": 64 } },
     },
     {
-      id: "seedance25", label: "Seedance 2.5", badge: "💎",
-      blurb: "Премиум-модель, максимум детализации",
-      formats: ["16:9", "9:16"], quality: [], durations: [5, 10],
+      code: "seedance25", label: "Seedance 2.5 💎",
+      blurb: "премиум: до 30 сек без склейки, 50 референсов",
+      aspects: ["16:9", "9:16"], modes: ["480p", "720p"], durations: [5, 10, 15],
       face_grid: false,
-      prices: { "5": 60, "10": 110 },
+      prices: { "480p": { "5": 40, "10": 75, "15": 105 }, "720p": { "5": 60, "10": 110, "15": 155 } },
     },
   ],
-  default_model: "seedance2",
 };
 
 const VC_FORMAT_LABELS = { "16:9": "📺 16:9", "9:16": "📱 9:16", "1:1": "⬛ 1:1", "4:3": "🖼 4:3" };
@@ -96,58 +97,81 @@ const VC_QUALITY_LABELS = { pro: "🔥 Pro", fast: "⚡ Fast" };
 const VC_MAX_PHOTOS = 9;
 const VC_DESCRIPTION_MAX_BYTES = 3500; // тот же порог, что у set_prompt (docs/BOT_CONTRACT.md)
 
-let vcConfig = FALLBACK_CONFIG;
+let vcModels = [];
 let vcState = {
   model: null,
   aspect: null,
-  quality: null,
+  quality: null, // "pro" | "fast" | null (модель без тумблера качества)
   duration: null,
-  customDuration: null,
   faceGrid: true,
   description: "",
   photos: [], // локально загруженные (imgbb URL), без фото активной доски — те мёрджатся при отправке
 };
 
-function parseConstructorConfig() {
+// ── cfg -> внутренняя модель ────────────────────────────────────────────
+
+function vcModelFromCfgEntry(m) {
+  const modes = Array.isArray(m.modes) ? m.modes.filter(Boolean) : [];
+  return {
+    code: String(m.code || "").trim(),
+    label: String(m.label || m.code || "").trim(),
+    blurb: String(m.blurb || "").trim(),
+    formats: Array.isArray(m.aspects) && m.aspects.length ? m.aspects : ["16:9", "9:16"],
+    durations: Array.isArray(m.durations) && m.durations.length ? m.durations : [5],
+    faceGrid: !!m.face_grid,
+    hasQualityToggle: modes.includes("480p"),
+    prices: m.prices && typeof m.prices === "object" ? m.prices : {},
+  };
+}
+
+function parseCfgFromUrl() {
   try {
     const raw = new URLSearchParams(window.location.search).get("cfg");
-    if (!raw) return FALLBACK_CONFIG;
+    if (!raw) return FALLBACK_CFG;
     const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
     const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
     const json = new TextDecoder("utf-8").decode(bytes);
     const parsed = JSON.parse(json);
-    if (!parsed || !Array.isArray(parsed.models) || parsed.models.length === 0) return FALLBACK_CONFIG;
+    if (!parsed || !Array.isArray(parsed.video_models) || parsed.video_models.length === 0) return FALLBACK_CFG;
     return parsed;
   } catch (e) {
     console.error("constructor: cfg parse failed, using fallback", e);
-    return FALLBACK_CONFIG;
+    return FALLBACK_CFG;
   }
 }
 
-function vcGetModel(id) {
-  return vcConfig.models.find((m) => m.id === id) || vcConfig.models[0];
-}
-
-function vcHasCustomDuration(model) {
-  return model.durations && !Array.isArray(model.durations) && Array.isArray(model.durations.custom);
+function vcGetModel(code) {
+  return vcModels.find((m) => m.code === code) || vcModels[0];
 }
 
 // ── Инициализация состояния под выбранную модель ───────────────────────
 
-function vcResetStateForModel(modelId) {
-  const model = vcGetModel(modelId);
-  vcState.model = model.id;
+function vcResetStateForModel(code) {
+  const model = vcGetModel(code);
+  vcState.model = model.code;
   if (!model.formats.includes(vcState.aspect)) vcState.aspect = model.formats[0];
-  vcState.quality = model.quality && model.quality.length ? model.quality[0] : null;
-  if (vcHasCustomDuration(model)) {
-    const [min] = model.durations.custom;
-    vcState.duration = null;
-    vcState.customDuration = vcState.customDuration || min;
-  } else {
-    vcState.duration = model.durations[0];
-    vcState.customDuration = null;
-  }
-  vcState.faceGrid = !!model.face_grid;
+  vcState.quality = model.hasQualityToggle ? "pro" : null;
+  if (!model.durations.includes(vcState.duration)) vcState.duration = model.durations[0];
+  vcState.faceGrid = model.faceGrid;
+}
+
+// ── Цена — зеркало резолва _apply_webapp_generation_video на бэкенде ───
+
+function vcPriceBucketKey(model) {
+  const keys = Object.keys(model.prices || {});
+  if (keys.length === 0) return null;
+  if (model.hasQualityToggle && vcState.quality === "fast" && keys.includes("480p")) return "480p";
+  if (keys.includes("720p")) return "720p";
+  return keys[0];
+}
+
+function vcCalcPrice() {
+  const model = vcGetModel(vcState.model);
+  const bucketKey = vcPriceBucketKey(model);
+  if (!bucketKey) return null;
+  const bucket = model.prices[bucketKey] || {};
+  const val = bucket[String(vcState.duration)];
+  return typeof val === "number" ? val : null;
 }
 
 // ── Рендер ───────────────────────────────────────────────────────────
@@ -157,14 +181,14 @@ function renderVcModelGrid() {
   const blurb = document.getElementById("vcModelBlurb");
   if (!grid) return;
   grid.innerHTML = "";
-  vcConfig.models.forEach((m) => {
+  vcModels.forEach((m) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "vc-model-chip" + (vcState.model === m.id ? " active" : "");
-    btn.textContent = m.badge ? `${m.label} ${m.badge}` : m.label;
+    btn.className = "vc-model-chip" + (vcState.model === m.code ? " active" : "");
+    btn.textContent = m.label;
     btn.addEventListener("click", () => {
-      if (vcState.model === m.id) return;
-      vcResetStateForModel(m.id);
+      if (vcState.model === m.code) return;
+      vcResetStateForModel(m.code);
       renderVcAll();
     });
     grid.appendChild(btn);
@@ -200,42 +224,15 @@ function renderVcAspect() {
 function renderVcQuality() {
   const model = vcGetModel(vcState.model);
   const block = document.getElementById("vcQualityBlock");
-  const hasQuality = model.quality && model.quality.length > 0;
-  block.classList.toggle("hidden", !hasQuality);
-  if (!hasQuality) return;
-  renderVcSegment("vcQualitySeg", model.quality, vcState.quality, (v) => VC_QUALITY_LABELS[v] || v, (v) => {
+  block.classList.toggle("hidden", !model.hasQualityToggle);
+  if (!model.hasQualityToggle) return;
+  renderVcSegment("vcQualitySeg", ["pro", "fast"], vcState.quality, (v) => VC_QUALITY_LABELS[v] || v, (v) => {
     vcState.quality = v;
   });
 }
 
 function renderVcDuration() {
   const model = vcGetModel(vcState.model);
-  const el = document.getElementById("vcDurationSeg");
-  if (!el) return;
-  el.innerHTML = "";
-  if (vcHasCustomDuration(model)) {
-    const [min, max] = model.durations.custom;
-    const wrap = document.createElement("div");
-    wrap.className = "vc-custom-duration";
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = String(min);
-    input.max = String(max);
-    input.value = String(vcState.customDuration ?? min);
-    input.addEventListener("input", () => {
-      const val = Math.min(max, Math.max(min, parseInt(input.value, 10) || min));
-      vcState.customDuration = val;
-      renderVcPrice();
-      renderVcContinueBtn();
-    });
-    const suffix = document.createElement("span");
-    suffix.className = "vc-custom-duration-suffix";
-    suffix.textContent = `с (${min}–${max})`;
-    wrap.appendChild(input);
-    wrap.appendChild(suffix);
-    el.appendChild(wrap);
-    return;
-  }
   renderVcSegment("vcDurationSeg", model.durations, vcState.duration, (v) => `${v}с`, (v) => {
     vcState.duration = v;
   });
@@ -244,23 +241,9 @@ function renderVcDuration() {
 function renderVcFaceGrid() {
   const model = vcGetModel(vcState.model);
   const block = document.getElementById("vcFaceGridBlock");
-  block.classList.toggle("hidden", !model.face_grid);
+  block.classList.toggle("hidden", !model.faceGrid);
   const toggle = document.getElementById("vcFaceGridToggle");
   if (toggle) toggle.checked = vcState.faceGrid;
-}
-
-function vcCalcPrice() {
-  const model = vcGetModel(vcState.model);
-  const prices = model.prices || {};
-  if (model.prices && model.prices.per_second) {
-    const dur = vcState.customDuration || 0;
-    return Math.round(model.prices.per_second * dur);
-  }
-  const bucket = vcState.quality ? prices[vcState.quality] : prices;
-  if (!bucket) return null;
-  const key = String(vcHasCustomDuration(model) ? vcState.customDuration : vcState.duration);
-  const val = bucket[key];
-  return typeof val === "number" ? val : null;
 }
 
 function renderVcPrice() {
@@ -416,12 +399,12 @@ function buildStartGenerationPayload() {
     product: "video",
     video_model: vcState.model,
     aspect: vcState.aspect,
-    duration: vcHasCustomDuration(model) ? vcState.customDuration : vcState.duration,
+    duration: vcState.duration,
     description: vcState.description.trim(),
     v: typeof APP_VERSION !== "undefined" ? APP_VERSION : "constructor-v1",
   };
-  if (vcState.quality) payload.quality = vcState.quality;
-  if (model.face_grid) payload.face_grid = vcState.faceGrid;
+  if (model.hasQualityToggle && vcState.quality) payload.quality = vcState.quality;
+  if (model.faceGrid) payload.face_grid = vcState.faceGrid;
   if (refs.length) payload.refs = refs.slice(0, 9);
   if (boardId) payload.board_id = boardId;
   return JSON.stringify(payload);
@@ -449,10 +432,9 @@ document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
 
 // ── Инициализация ────────────────────────────────────────────────────
 
-vcConfig = parseConstructorConfig();
-vcResetStateForModel(vcConfig.default_model || vcConfig.models[0].id);
+vcModels = parseCfgFromUrl().video_models.map(vcModelFromCfgEntry);
+vcResetStateForModel(vcModels[0].code);
 renderVcAll();
-document.getElementById("vcPriceStrip")?.classList.remove("hidden");
 
 // --vc-price-strip-space — тот же приём, что --studio-cart-space/
 // --board-banner-space: JS-измеренная высота sticky-подвала, а не
@@ -471,11 +453,19 @@ document.getElementById("vcPriceStrip")?.classList.remove("hidden");
 })();
 
 // Deep-link из бота: «🎬 Видео для Reels» открывает вебапп с
-// ?tab=videoConstructor&cfg=... — сразу переключаемся на конструктор (тот
-// же приём, что studio.js делает для ?tab=studio, но конструктор в MVP не
-// висит кнопкой в tab-bar, поэтому переключаем экран напрямую, не кликом).
+// &tab=video_constructor&cfg=... — сразу переключаемся на конструктор (тот
+// же приём, что studio.js делает для ?tab=studio). ⚠️ Бэкенд шлёт именно
+// "video_constructor" (snake_case, video_constructor_kb в SirNike.py), не
+// "videoConstructor" — тот camelCase используется ТОЛЬКО как внутреннее имя
+// экрана для switchTab()/APP_TITLES, не как значение query-параметра tab.
+// (Живой баг, найденный при аудите этой ветки: сравнение шло с неверной
+// строкой, и конструктор никогда не открывался автоматически по ссылке
+// бота — юзер видел пустой каталог.) Прячем ценовую панель (vcPriceStrip),
+// пока экран реально не активен — она стоит вне .tab-page и раньше
+// показывалась безусловно на любой вкладке.
 try {
-  if (new URLSearchParams(window.location.search).get("tab") === "videoConstructor") {
+  if (new URLSearchParams(window.location.search).get("tab") === "video_constructor") {
     switchTab("videoConstructor");
+    document.getElementById("vcPriceStrip")?.classList.remove("hidden");
   }
 } catch { /* не критично */ }
