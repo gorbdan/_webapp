@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./studio.css" />
     <link rel="stylesheet" href="./boards.css" />
+    <link rel="stylesheet" href="./constructor.css" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -187,6 +188,70 @@
           </button>
         </div>
       </div>
+
+      <!-- Конструктор видео (Хаб генерации, MVP, docs/specs/2026-08-13_webapp_generation_hub.md
+           в репо бота). Открывается напрямую по персональной ссылке от бота
+           (?tab=videoConstructor&cfg=...), заменяет цепочку из 2-3 сообщений
+           чата на один экран: все настройки тут, поход в чат — только чтобы
+           подтвердить цену и запустить (см. constructor.js). -->
+      <div id="pageVideoConstructor" class="tab-page hidden">
+        <div class="vc-board-note hidden" id="vcBoardNote"></div>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Какая модель?</h2>
+          <div class="vc-model-grid" id="vcModelGrid"></div>
+          <p class="vc-model-blurb" id="vcModelBlurb"></p>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Формат</h2>
+          <div class="segmented vc-seg" id="vcAspectSeg"></div>
+        </section>
+
+        <section class="vc-block hidden" id="vcQualityBlock">
+          <h2 class="vc-block-title">Качество</h2>
+          <div class="segmented vc-seg" id="vcQualitySeg"></div>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Длительность</h2>
+          <div class="segmented vc-seg" id="vcDurationSeg"></div>
+        </section>
+
+        <section class="vc-block hidden" id="vcFaceGridBlock">
+          <div class="vc-toggle-wrap">
+            <label class="studio-toggle-row vc-toggle-row">
+              <span>
+                <span class="vc-toggle-label">Детектор лиц</span>
+                <span class="vc-toggle-sub">Защита от отказа модерации</span>
+              </span>
+              <input type="checkbox" id="vcFaceGridToggle" checked />
+              <span class="studio-switch" aria-hidden="true"></span>
+            </label>
+            <button type="button" class="icon-button vc-info-btn" id="vcFaceGridInfo" aria-label="Подробнее" title="Подробнее">ⓘ</button>
+          </div>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Что должно происходить в видео</h2>
+          <textarea class="vc-textarea" id="vcDescriptionInput" maxlength="3500" rows="3" placeholder="Необязательно, если добавишь фото..."></textarea>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Фото (до 9)</h2>
+          <div class="vc-refs" id="vcRefs"></div>
+          <button class="ghost-btn vc-block-btn" id="vcUploadBtn" type="button">📷 Добавить фото</button>
+          <input type="file" id="vcPhotoFile" accept="image/*" class="hidden" />
+        </section>
+      </div>
+
+      <div class="vc-price-strip hidden" id="vcPriceStrip">
+        <div class="vc-price-line">
+          <span class="vc-price-cap">Будет стоить</span>
+          <span class="vc-price-amount" id="vcPriceAmount">≈ — 🍇</span>
+        </div>
+        <button class="primary-btn vc-block-btn" id="vcContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
+      </div>
     </div>
 
     <nav class="tab-bar" id="tabBar">
@@ -339,5 +404,6 @@
     <script src="./app.js?v=20260623-uxv3"></script>
     <script src="./studio.js?v=20260720-studio-v1"></script>
     <script src="./boards.js?v=20260810-boards-full-fix1"></script>
+    <script src="./constructor.js?v=20260813-constructor-v1"></script>
   </body>
 </html>
