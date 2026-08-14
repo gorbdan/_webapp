@@ -65,6 +65,40 @@ function renderPcContinueBtn() {
   btn.disabled = pcState.description.trim().length === 0;
 }
 
+// ── prefill (deep-link «✏️ Изменить») ───────────────────────────────────
+// Симметрично buildPcStartGenerationPayload — бот кодирует ТУ ЖЕ форму
+// полей в base64 JSON (build_generation_prefill/constructor_prefill_url,
+// SirNike.py) и кладёт в &prefill= рядом с &tab=photo_constructor.
+// Повреждённый/отсутствующий prefill не должен ронять экран — try/catch,
+// экран просто открывается пустым, как сегодня. `image_model` намеренно
+// не читаем — переключатель Gemini/GPT-5 в этом экране не показан
+// (см. комментарий вверху файла), бэкенд сам выбирает дефолт при отправке.
+function pcParsePrefillFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("prefill");
+    if (!raw) return null;
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const json = new TextDecoder("utf-8").decode(bytes);
+    const parsed = JSON.parse(json);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (e) {
+    console.error("photo constructor: prefill parse failed, ignoring", e);
+    return null;
+  }
+}
+
+function pcApplyPrefill(pf) {
+  if (!pf || typeof pf !== "object") return;
+  if (typeof pf.description === "string") {
+    pcState.description = pf.description;
+    if (pcDescriptionInput) pcDescriptionInput.value = pf.description;
+  }
+  if (Array.isArray(pf.refs)) {
+    pcState.refs = pf.refs.filter((u) => typeof u === "string" && u).slice(0, PC_MAX_PHOTOS);
+  }
+}
+
 const pcDescriptionInput = document.getElementById("pcDescriptionInput");
 pcDescriptionInput?.addEventListener("input", () => {
   let text = pcDescriptionInput.value;
@@ -155,5 +189,6 @@ try {
   }
 } catch { /* не критично */ }
 
+pcApplyPrefill(pcParsePrefillFromUrl());
 renderPcRefs();
 renderPcContinueBtn();

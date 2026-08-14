@@ -79,6 +79,35 @@ function renderAvContinueBtn() {
   btn.disabled = avState.refs.length === 0;
 }
 
+// ── prefill (deep-link «✏️ Изменить») ───────────────────────────────────
+// Симметрично buildAvStartGenerationPayload — бот кодирует ТУ ЖЕ форму
+// полей в base64 JSON (build_generation_prefill/constructor_prefill_url,
+// SirNike.py) и кладёт в &prefill= рядом с &tab=avatar_constructor.
+// Повреждённый/отсутствующий prefill не должен ронять экран — try/catch,
+// экран просто открывается пустым, как сегодня.
+function avParsePrefillFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("prefill");
+    if (!raw) return null;
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const json = new TextDecoder("utf-8").decode(bytes);
+    const parsed = JSON.parse(json);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (e) {
+    console.error("avatar constructor: prefill parse failed, ignoring", e);
+    return null;
+  }
+}
+
+function avApplyPrefill(pf) {
+  if (!pf || typeof pf !== "object") return;
+  if (AV_KIND_OPTIONS.some((opt) => opt.value === pf.avatar_type)) avState.kind = pf.avatar_type;
+  if (Array.isArray(pf.refs)) {
+    avState.refs = pf.refs.filter((u) => typeof u === "string" && u).slice(0, AV_MAX_PHOTOS);
+  }
+}
+
 const avPhotoFile = document.getElementById("avPhotoFile");
 document.getElementById("avUploadBtn")?.addEventListener("click", () => {
   if (avState.refs.length >= AV_MAX_PHOTOS) {
@@ -156,6 +185,7 @@ try {
   }
 } catch { /* не критично */ }
 
+avApplyPrefill(avParsePrefillFromUrl());
 renderAvKindSeg();
 renderAvRefs();
 renderAvContinueBtn();

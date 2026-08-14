@@ -64,6 +64,40 @@ function renderMjContinueBtn() {
   btn.disabled = mjState.description.trim().length === 0;
 }
 
+// ── prefill (deep-link «✏️ Изменить» / библиотечное «Использовать») ────
+// Симметрично buildMjStartGenerationPayload — бот кодирует ТУ ЖЕ форму
+// полей в base64 JSON (build_generation_prefill/constructor_prefill_url,
+// SirNike.py) и кладёт в &prefill= рядом с &tab=midjourney_constructor.
+// Повреждённый/отсутствующий prefill не должен ронять экран — try/catch,
+// экран просто открывается пустым, как сегодня.
+function mjParsePrefillFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("prefill");
+    if (!raw) return null;
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const json = new TextDecoder("utf-8").decode(bytes);
+    const parsed = JSON.parse(json);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (e) {
+    console.error("mj constructor: prefill parse failed, ignoring", e);
+    return null;
+  }
+}
+
+function mjApplyPrefill(pf) {
+  if (!pf || typeof pf !== "object") return;
+  if (typeof pf.description === "string") {
+    mjState.description = pf.description;
+    if (mjDescriptionInput) mjDescriptionInput.value = pf.description;
+  }
+  // EvoLink Midjourney принимает только один референс — тот же потолок, что
+  // у исходящего payload (renderMjRefs уже отражает лимит в UI).
+  if (Array.isArray(pf.refs) && pf.refs.length && typeof pf.refs[0] === "string" && pf.refs[0]) {
+    mjState.refs = [pf.refs[0]];
+  }
+}
+
 const mjDescriptionInput = document.getElementById("mjDescriptionInput");
 mjDescriptionInput?.addEventListener("input", () => {
   let text = mjDescriptionInput.value;
@@ -163,5 +197,6 @@ try {
   }
 } catch { /* не критично */ }
 
+mjApplyPrefill(mjParsePrefillFromUrl());
 renderMjRefs();
 renderMjContinueBtn();
