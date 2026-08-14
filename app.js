@@ -348,7 +348,34 @@ async function sendPromptViaAnswerWebAppQuery(item, userNote, button) {
   }
 }
 
+// Видео-стиль — «Использовать» больше НЕ шлёт payload сразу (Full,
+// docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md, п.4.1):
+// клиентский переход на «Создать» → Конструктор видео с уже заполненным
+// описанием (текст стиля), Mini App не закрывается, юзер донастраивает
+// модель/формат/фото поверх и сам жмёт «🚀 Продолжить в чат». vcApplyPrefill —
+// из constructor.js (тот же классический скрипт, общий top-level scope, что
+// уже используется у boards.js/studio.js). Фото-стили — без изменений,
+// продолжают старый мгновенный payload ниже.
+function useVideoStyleInConstructor(item, button) {
+  if (typeof switchTab !== "function" || typeof vcApplyPrefill !== "function" || typeof renderVcAll !== "function") {
+    return false; // конструктор ещё не подгрузился — честно откатываемся на старый путь
+  }
+  const text = (item.prompt || "").trim();
+  if (!text) return false;
+  detailsModal?.close();
+  switchTab("videoConstructor");
+  vcApplyPrefill({ description: text });
+  renderVcAll();
+  if (button) {
+    button.disabled = false;
+    button.textContent = "Использовать";
+  }
+  return true;
+}
+
 function sendPrompt(item, button) {
+  if (isVideoItem(item) && useVideoStyleInConstructor(item, button)) return;
+
   // Свободный текст «свои пожелания» — виден только когда у item есть
   // input_hint (поле показано в openDetails). Бот подставит его в промт сам,
   // тут просто читаем текущее значение инпута (maxlength=300 в разметке).
