@@ -144,6 +144,46 @@ function vcGetModel(code) {
   return vcModels.find((m) => m.code === code) || vcModels[0];
 }
 
+// ── prefill (deep-link «✏️ Изменить» / библиотечное «Использовать») ────
+// Симметрично buildStartGenerationPayload — бот кодирует ТУ ЖЕ форму полей
+// в base64 JSON (build_generation_prefill/constructor_prefill_url,
+// SirNike.py) и кладёт в &prefill= рядом с &tab=video_constructor.
+// Повреждённый/отсутствующий prefill не должен ронять экран — try/catch,
+// экран просто открывается пустым, как сегодня.
+function vcParsePrefillFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("prefill");
+    if (!raw) return null;
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const json = new TextDecoder("utf-8").decode(bytes);
+    const parsed = JSON.parse(json);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (e) {
+    console.error("constructor: prefill parse failed, ignoring", e);
+    return null;
+  }
+}
+
+function vcApplyPrefill(pf) {
+  if (!pf || typeof pf !== "object") return;
+  const modelCode = vcModels.some((m) => m.code === pf.video_model) ? pf.video_model : vcModels[0].code;
+  vcResetStateForModel(modelCode);
+  const model = vcGetModel(modelCode);
+  if (typeof pf.aspect === "string" && model.formats.includes(pf.aspect)) vcState.aspect = pf.aspect;
+  if (model.hasQualityToggle && (pf.quality === "pro" || pf.quality === "fast")) vcState.quality = pf.quality;
+  const duration = typeof pf.duration === "string" ? Number(pf.duration) : pf.duration;
+  if (typeof duration === "number" && model.durations.includes(duration)) vcState.duration = duration;
+  if (model.faceGrid && typeof pf.face_grid === "boolean") vcState.faceGrid = pf.face_grid;
+  if (typeof pf.description === "string") {
+    vcState.description = pf.description;
+    if (vcDescriptionInput) vcDescriptionInput.value = pf.description;
+  }
+  if (Array.isArray(pf.refs)) {
+    vcState.photos = pf.refs.filter((u) => typeof u === "string" && u).slice(0, VC_MAX_PHOTOS);
+  }
+}
+
 // ── Инициализация состояния под выбранную модель ───────────────────────
 
 function vcResetStateForModel(code) {
@@ -434,6 +474,7 @@ document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
 
 vcModels = parseCfgFromUrl().video_models.map(vcModelFromCfgEntry);
 vcResetStateForModel(vcModels[0].code);
+vcApplyPrefill(vcParsePrefillFromUrl());
 renderVcAll();
 
 // --vc-price-strip-space — тот же приём, что --studio-cart-space/

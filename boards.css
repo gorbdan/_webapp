@@ -74,6 +74,24 @@
   display: none;
 }
 
+/* Таб «Доски» (единая навигация, Full) — те же плитки, что были в ряду на
+   главной каталога, но полноэкранная сетка с переносом строк вместо
+   горизонтального скролла (тут для них весь экран, скролл ни к чему). */
+.board-tile-row--page {
+  flex-wrap: wrap;
+  overflow-x: visible;
+  gap: 14px 10px;
+}
+
+.board-tile-row--page .board-tile {
+  width: 96px;
+}
+
+.board-tile-row--page .board-tile-cover {
+  width: 96px;
+  height: 96px;
+}
+
 .board-tile {
   flex: 0 0 auto;
   width: 84px;
