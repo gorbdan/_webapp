@@ -254,6 +254,52 @@
         <button class="primary-btn vc-block-btn" id="vcContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
       </div>
 
+      <!-- Midjourney-конструктор (Хаб генерации, Full, docs/specs/2026-08-13_webapp_generation_hub.md
+           в репо бота). Открывается по персональной ссылке от бота
+           (&tab=midjourney_constructor), заменяет текстовый мини-флоу «🎨 Midjourney»
+           на один экран: описание + опциональный один референс. -->
+      <div id="pageMidjourneyConstructor" class="tab-page hidden">
+        <section class="vc-block">
+          <h2 class="vc-block-title">Опиши, что хочешь сгенерировать</h2>
+          <textarea class="vc-textarea" id="mjDescriptionInput" maxlength="3500" rows="4" placeholder="Например, «девушка в кафе, утренний свет, плёночная фотография»"></textarea>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Фото-референс (необязательно)</h2>
+          <div class="vc-refs" id="mjRefs"></div>
+          <button class="ghost-btn vc-block-btn" id="mjUploadBtn" type="button">📷 Добавить фото</button>
+          <input type="file" id="mjPhotoFile" accept="image/*" class="hidden" />
+        </section>
+
+        <p class="vc-model-blurb" id="mjCostHint"></p>
+      </div>
+
+      <div class="vc-price-strip hidden" id="mjPriceStrip">
+        <button class="primary-btn vc-block-btn" id="mjContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
+      </div>
+
+      <!-- Аватар-конструктор (Хаб генерации, Full, docs/specs/2026-08-13_webapp_generation_hub.md
+           в репо бота). Открывается по персональной ссылке от бота
+           (&tab=avatar_constructor), заменяет мини-флоу «🪄 Аватар» на один
+           экран: тип аватара + несколько фото. -->
+      <div id="pageAvatarConstructor" class="tab-page hidden">
+        <section class="vc-block">
+          <h2 class="vc-block-title">Какой тип?</h2>
+          <div class="segmented vc-seg" id="avKindSeg"></div>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Фото (несколько, чем больше — тем точнее)</h2>
+          <div class="vc-refs" id="avRefs"></div>
+          <button class="ghost-btn vc-block-btn" id="avUploadBtn" type="button">📷 Добавить фото</button>
+          <input type="file" id="avPhotoFile" accept="image/*" class="hidden" />
+        </section>
+      </div>
+
+      <div class="vc-price-strip hidden" id="avPriceStrip">
+        <button class="primary-btn vc-block-btn" id="avContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
+      </div>
+
       <!-- Живой прогресс генерации (D1-зеркало), docs/specs/2026-08-13_webapp_generation_hub_full.md
            в репо бота. Открывается ТОЛЬКО с инлайн-кнопки «👀 Смотреть прогресс»
            на статусном сообщении бота (&tab=progress&job_id=...&product=...) —
@@ -421,6 +467,8 @@
     <script src="./studio.js?v=20260720-studio-v1"></script>
     <script src="./boards.js?v=20260810-boards-full-fix1"></script>
     <script src="./constructor.js?v=20260813-constructor-v2"></script>
+    <script src="./mj_constructor.js?v=20260813-mj-constructor-v1"></script>
+    <script src="./avatar_constructor.js?v=20260813-avatar-constructor-v1"></script>
     <script src="./progress.js?v=20260813-progress-v1"></script>
   </body>
 </html>

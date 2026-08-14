@@ -5,7 +5,9 @@
    тумблера (studio.css: .studio-toggle-row/.studio-switch) — новых
    визуальных примитивов не изобретаем. */
 
-#pageVideoConstructor {
+#pageVideoConstructor,
+#pageMidjourneyConstructor,
+#pageAvatarConstructor {
   padding-bottom: calc(var(--vc-price-strip-space, 96px) + 12px);
   display: flex;
   flex-direction: column;
