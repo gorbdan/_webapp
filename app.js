@@ -37,6 +37,7 @@ const categorySheet = document.getElementById("categorySheet");
 const categorySheetClose = document.getElementById("categorySheetClose");
 
 let library = [];
+let topStyles = [];
 let activeCategory = "all";
 let activeFilter = "all";
 let query = "";
@@ -142,6 +143,49 @@ async function loadLibrary() {
     console.error("Failed to load prompt library", e);
     library = [];
   }
+}
+
+// «Топ-стили» — раздел из статистики использования шаблонов в боте
+// (docs/specs/2026-07-16_top_styles_stats_feed.md в репо бота). Тот же
+// паттерн, что у prompt_library.json: fetch при загрузке, graceful-
+// деградация без ошибок в консоли и без пустого блока, если файла нет,
+// он пуст, или индексы не резолвятся (например, после переиндексации
+// библиотеки — cat_idx/item_idx устарели).
+async function loadTopStylesRaw() {
+  try {
+    const res = await fetch(`./top_styles.json?v=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.warn("Top styles feed unavailable (non-fatal)", e);
+    return [];
+  }
+}
+
+// Резолвим АБСОЛЮТНЫЕ cat_idx/item_idx (контракт спеки) в реальные items
+// текущей библиотеки — порядок из top_styles.json (по убыванию uses_30d)
+// сохраняем, НЕ пропускаем через sortNewestFirst. До 10 карточек.
+function resolveTopStyles(raw) {
+  const resolved = [];
+  for (const entry of raw) {
+    const catIdx = Number(entry?.cat_idx);
+    const itemIdx = Number(entry?.item_idx);
+    const cat = library[catIdx];
+    const items = Array.isArray(cat?.items) ? cat.items : [];
+    const item = items[itemIdx];
+    if (!cat || !item) continue;
+    resolved.push({
+      ...item,
+      _id: itemId(item, catIdx, itemIdx),
+      _categoryIndex: catIdx,
+      _categoryTitle: cat.title || "Категория",
+      _categoryEmoji: cat.emoji || "□",
+      _itemIndex: itemIdx,
+    });
+    if (resolved.length >= 10) break;
+  }
+  return resolved;
 }
 
 function makeChip(label, count, value, emoji = "") {
@@ -571,13 +615,38 @@ function makeCategoryRow(emoji, title, items) {
   return section;
 }
 
+// Раздел «🔥 Топ-стили»: ряд как у категорий (makeCategoryRow), но БЕЗ
+// sortNewestFirst — порядок уже задан ботом (по убыванию uses_30d), его
+// нельзя терять. Карточки — та же makeCard, что и везде в каталоге.
+function makeTopStylesRow(items) {
+  const section = document.createElement("section");
+  section.className = "category-row";
+
+  const header = document.createElement("div");
+  header.className = "category-row-header";
+  header.innerHTML = `<span>🔥 Топ-стили</span><span class="category-row-count">${items.length}</span>`;
+  section.appendChild(header);
+
+  const track = document.createElement("div");
+  track.className = "category-row-track";
+  for (const item of items) track.appendChild(makeCard(item));
+  section.appendChild(track);
+
+  return section;
+}
+
 // Домашний экран каталога (категория «Все», без фильтра/поиска): ряды по
 // категориям вместо плоской сетки, порядок категорий — как в
 // prompt_library.json (обратный порядок пробовали, не понравилось, вернули
-// обычный). Виртуальный ряд «Новинки» — над всеми, если есть свежие позиции
-// хоть в одной категории.
+// обычный). Виртуальный ряд «Топ-стили» — в самом верху (если статистика
+// резолвится), «Новинки» — следом, если есть свежие позиции хоть в одной
+// категории.
 function renderCategoryRows() {
   const allItems = flattenLibrary();
+
+  if (topStyles.length > 0) {
+    cardsEl.appendChild(makeTopStylesRow(topStyles));
+  }
 
   const newItems = allItems.filter(isNewItem);
   if (newItems.length > 0) {
@@ -973,5 +1042,7 @@ function applyInitialTabFromUrl() {
     emptyEl.classList.remove("hidden");
     return;
   }
+  // Резолв индексов требует уже загруженной библиотеки — грузим после.
+  topStyles = resolveTopStyles(await loadTopStylesRaw());
   render();
 })();
