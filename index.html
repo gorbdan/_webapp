@@ -22,13 +22,59 @@
             <span id="balanceCount">0</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
+          <button class="icon-button" id="historyOpenBtn" type="button" aria-label="История генераций" title="История">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
           <button class="icon-button" id="themeToggle" type="button" aria-label="Переключить тему" title="Тема">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
         </div>
       </header>
 
-      <main id="pageKatalog" class="tab-page">
+      <!-- «Создать» (Хаб генерации, Full — единая навигация). ТЗ:
+           docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md
+           (репо бота), раздел 1.3/1.4. Дефолтный экран Mini App (заменяет
+           каталог как экран по умолчанию) — сетка из 4 продуктов, тап
+           переключает на соответствующий конструктор клиентским роутингом
+           (без нового payload/сети). -->
+      <main id="pageCreate" class="tab-page">
+        <div class="board-banner hidden" id="createBoardBanner">
+          <span class="board-banner-text" id="createBoardBannerText"></span>
+          <span class="board-banner-actions">
+            <button class="link-btn" id="createBoardBannerSwitch" type="button">Сменить</button>
+            <button class="link-btn" id="createBoardBannerDisable" type="button">Отключить</button>
+          </span>
+        </div>
+        <p class="page-hint">Выбери, что создать</p>
+        <div class="create-grid" id="createGrid">
+          <button class="create-tile" type="button" data-product="photo">
+            <span class="create-tile-icon">🖼</span>
+            <span class="create-tile-label">Фото</span>
+          </button>
+          <button class="create-tile" type="button" data-product="video">
+            <span class="create-tile-icon">🎬</span>
+            <span class="create-tile-label">Видео для Reels</span>
+          </button>
+          <button class="create-tile" type="button" data-product="avatar">
+            <span class="create-tile-icon">🪄</span>
+            <span class="create-tile-label">Аватар</span>
+          </button>
+          <button class="create-tile" type="button" data-product="midjourney">
+            <span class="create-tile-icon">🎨</span>
+            <span class="create-tile-label">Midjourney</span>
+          </button>
+        </div>
+      </main>
+
+      <!-- «Доски» — вынесены из главной каталога в отдельный первоуровневый
+           таб (спека, раздел 1.6). Сами экраны доски (оверлей) — без
+           изменений, boards.js. -->
+      <div id="pageBoards" class="tab-page hidden">
+        <p class="page-hint">Собери фото своего стиля — доска подмешается в генерацию</p>
+        <div class="board-tile-row board-tile-row--page" id="boardsPageGrid"></div>
+      </div>
+
+      <div id="pageKatalog" class="tab-page hidden">
         <div class="board-banner hidden" id="boardBanner">
           <span class="board-banner-text" id="boardBannerText"></span>
           <span class="board-banner-actions">
@@ -58,7 +104,7 @@
 
         <section class="grid" id="cards" aria-live="polite"></section>
         <div class="empty hidden" id="empty"></div>
-      </main>
+      </div>
 
       <div id="pageHistory" class="tab-page hidden">
         <p class="page-hint">Последние 10 генераций</p>
@@ -300,6 +346,35 @@
         <button class="primary-btn vc-block-btn" id="avContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
       </div>
 
+      <!-- Фото-конструктор (Хаб генерации, Full — последний из основных
+           продуктов, docs/briefs/frontend.md). Открывается по персональной
+           ссылке от бота (&tab=photo_constructor), заменяет свободный
+           текстовый мини-флоу «✨ Сгенерировать фото» на один экран: описание +
+           опциональные фото (до 8, без фото бот сам подставит сохранённый
+           аватар). Переключатель модели Gemini/GPT-5 сознательно НЕ показан —
+           у вебаппа нет надёжного канала узнать, включён ли GPT5_IMAGE_ENABLED
+           на бэкенде (в отличие от видео, где это приходит через cfg), а
+           бэкенд молча откатывает gpt5 на gemini при выключенном флаге —
+           значит дефолт gemini всегда безопасен и ничего не теряет. -->
+      <div id="pagePhotoConstructor" class="tab-page hidden">
+        <section class="vc-block">
+          <h2 class="vc-block-title">Опиши, что хочешь сгенерировать</h2>
+          <textarea class="vc-textarea" id="pcDescriptionInput" maxlength="3500" rows="4" placeholder="Например, «в стиле киноплаката, драматичный свет»"></textarea>
+        </section>
+
+        <section class="vc-block">
+          <h2 class="vc-block-title">Фото (до 8, необязательно)</h2>
+          <p class="vc-model-blurb" id="pcRefsHint">Без фото используем твой сохранённый аватар — если он есть.</p>
+          <div class="vc-refs" id="pcRefs"></div>
+          <button class="ghost-btn vc-block-btn" id="pcUploadBtn" type="button">📷 Добавить фото</button>
+          <input type="file" id="pcPhotoFile" accept="image/*" class="hidden" />
+        </section>
+      </div>
+
+      <div class="vc-price-strip hidden" id="pcPriceStrip">
+        <button class="primary-btn vc-block-btn" id="pcContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
+      </div>
+
       <!-- Живой прогресс генерации (D1-зеркало), docs/specs/2026-08-13_webapp_generation_hub_full.md
            в репо бота. Открывается ТОЛЬКО с инлайн-кнопки «👀 Смотреть прогресс»
            на статусном сообщении бота (&tab=progress&job_id=...&product=...) —
@@ -316,22 +391,29 @@
       </div>
     </div>
 
+    <!-- Единая навигация (Хаб генерации, Full):
+         docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md,
+         раздел 1.1 — «Создать/Стили/Доски/Студия», «Создать» первый и
+         активен по умолчанию. История/Пополнение вынесены из нижнего бара
+         (иконки в шапке/баланс-пилюля), чтобы не плодить 6-й таб — тот же
+         принцип «одна кнопка = один путь», что и у удаления дублирующей
+         секции «Мои доски» из каталога (раздел 1.5). -->
     <nav class="tab-bar" id="tabBar">
-      <button class="tab active" type="button" data-tab="katalog">
+      <button class="tab active" type="button" data-tab="create">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Создать</span>
+      </button>
+      <button class="tab" type="button" data-tab="katalog">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        <span>Каталог</span>
+        <span>Стили</span>
+      </button>
+      <button class="tab" type="button" data-tab="boards">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-11 11"/></svg>
+        <span>Доски</span>
       </button>
       <button class="tab" type="button" data-tab="studio">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         <span>Студия</span>
-      </button>
-      <button class="tab" type="button" data-tab="history">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>История</span>
-      </button>
-      <button class="tab" type="button" data-tab="topup">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        <span>Пополнить</span>
       </button>
     </nav>
 
@@ -469,6 +551,7 @@
     <script src="./constructor.js?v=20260813-constructor-v2"></script>
     <script src="./mj_constructor.js?v=20260813-mj-constructor-v1"></script>
     <script src="./avatar_constructor.js?v=20260813-avatar-constructor-v1"></script>
+    <script src="./photo_constructor.js?v=20260814-photo-constructor-v1"></script>
     <script src="./progress.js?v=20260813-progress-v1"></script>
   </body>
 </html>

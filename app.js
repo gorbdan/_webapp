@@ -584,13 +584,13 @@ function renderCategoryRows() {
     cardsEl.appendChild(makeCategoryRow("🆕", "Новинки", newItems));
   }
 
-  // Доски (mood-борды), MVP: docs/specs/2026-08-09_mood_boards.md (репо бота).
-  // Секция строится в boards.js (отдельный файл, своё хранилище в
-  // localStorage) — тут только точка встраивания в домашний ряд каталога.
-  if (typeof renderBoardsRow === "function") {
-    const boardsRow = renderBoardsRow();
-    if (boardsRow) cardsEl.appendChild(boardsRow);
-  }
+  // Доски (mood-борды): с единой навигацией (Full,
+  // docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md, раздел
+  // 1.5) секция «Мои доски» на главной каталога УБРАНА — дублирует
+  // отдельный таб «Доски» (pageBoards, boards.js). Правило «одна кнопка/
+  // секция — один путь» важнее экономии одного тапа. Управление досками —
+  // теперь только через таб «Доски», баннер активной доски остаётся здесь
+  // и на «Создать» (см. renderBoardBanner в boards.js).
 
   library.forEach((cat, idx) => {
     const items = allItems.filter((item) => item._categoryIndex === idx);
@@ -754,7 +754,19 @@ categorySheet?.addEventListener("click", (event) => {
   if (event.target === categorySheet) closeCategorySheet();
 });
 
-const APP_TITLES = { katalog: "Библиотека", studio: "Студия мультиков", history: "История", topup: "Пополнить", videoConstructor: "Видео для Reels", midjourneyConstructor: "Midjourney", avatarConstructor: "Аватар", progress: "Прогресс генерации" };
+const APP_TITLES = {
+  create: "Создать",
+  katalog: "Стили",
+  boards: "Доски",
+  studio: "Студия мультиков",
+  history: "История",
+  topup: "Пополнить",
+  videoConstructor: "Видео для Reels",
+  midjourneyConstructor: "Midjourney",
+  avatarConstructor: "Аватар",
+  photoConstructor: "Фото",
+  progress: "Прогресс генерации",
+};
 
 function switchTab(tabName) {
   document.querySelectorAll(".tab-page").forEach((p) => p.classList.add("hidden"));
@@ -787,10 +799,49 @@ tabBar.addEventListener("click", (e) => {
   const tab = e.target.closest(".tab");
   if (!tab) return;
   switchTab(tab.dataset.tab);
+  // Таб «Доски» — отдельный первоуровневый экран (единая навигация, Full),
+  // контент строит boards.js; освежаем при каждом заходе (мог измениться
+  // после мутаций из оверлея доски, где события не всегда доходят сюда).
+  if (tab.dataset.tab === "boards" && typeof renderBoardsPage === "function") renderBoardsPage();
 });
 
 balancePill.addEventListener("click", () => switchTab("topup"));
+document.getElementById("historyOpenBtn")?.addEventListener("click", () => switchTab("history"));
 if (historyToCatalog) historyToCatalog.addEventListener("click", () => switchTab("katalog"));
+
+// «Создать» — сетка 4 продуктов (единая навигация, Full, docs/specs/
+// 2026-08-13_webapp_generation_hub_navigation_full.md, раздел 1.3). Тап
+// переключает клиентским роутингом на уже существующий экран продукта —
+// НИКАКОГО нового payload/сети при самом тапе по плитке (только у уже
+// работающих конструкторов при их собственной отправке). «Фото» — особый
+// случай: ведёт на «Стили» (библиотеку), не на отдельный экран — в этом
+// продукте фото-генерация целиком идёт через выбор стиля из библиотеки
+// (свободный текстовый ввод «✨ Сгенерировать фото» — отдельный чат-флоу,
+// не выносится в эту сетку, см. раздел 1.3 спеки, строка про «Фото»).
+document.getElementById("createGrid")?.addEventListener("click", (e) => {
+  const tile = e.target.closest(".create-tile");
+  if (!tile) return;
+  const product = tile.dataset.product;
+  if (product === "photo") {
+    switchTab("katalog");
+    return;
+  }
+  if (product === "video") {
+    switchTab("videoConstructor");
+    document.getElementById("vcPriceStrip")?.classList.remove("hidden");
+    return;
+  }
+  if (product === "avatar") {
+    switchTab("avatarConstructor");
+    document.getElementById("avPriceStrip")?.classList.remove("hidden");
+    return;
+  }
+  if (product === "midjourney") {
+    switchTab("midjourneyConstructor");
+    document.getElementById("mjPriceStrip")?.classList.remove("hidden");
+    return;
+  }
+});
 
 function readBalanceFromUrl() {
   try {
@@ -892,11 +943,30 @@ document.getElementById("packages").addEventListener("click", (e) => {
   setTimeout(() => tg.close(), 600);
 });
 
+// Дефолт Mini App — «Создать» (единая навигация, Full, docs/specs/
+// 2026-08-13_webapp_generation_hub_navigation_full.md, раздел 1.4): экран
+// pageCreate уже видим по умолчанию в разметке (без класса hidden), значит
+// никакого JS-вызова не нужно для обычного открытия без &tab=. Единственный
+// случай, который явно нужно ОБРАБОТАТЬ здесь, — `&tab=library`: миграция
+// требует, чтобы существующие кнопки «Открыть библиотеку» (12 точек в
+// SirNike.py) по-прежнему открывали каталог, а не молча стали «Создать».
+// Остальные значения tab (video_constructor/midjourney_constructor/
+// avatar_constructor/photo_constructor/progress) — каждый уже сам себя
+// обрабатывает в своём файле (constructor.js/mj_constructor.js/
+// avatar_constructor.js/photo_constructor.js/progress.js).
+function applyInitialTabFromUrl() {
+  try {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab === "library") switchTab("katalog");
+  } catch { /* не критично — остаётся дефолт «Создать» */ }
+}
+
 (async function init() {
   applyTheme(getTheme());
   setBalance(readBalanceFromUrl());
   decoratePackages();
   renderHistory();
+  applyInitialTabFromUrl();
   await loadLibrary();
   if (!library.length) {
     emptyEl.textContent = "Не удалось загрузить библиотеку. Проверь prompt_library.json.";

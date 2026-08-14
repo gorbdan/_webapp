@@ -137,19 +137,28 @@ function closeBoardDialog(dialog) {
 
 // ── Баннер активной доски (закреплён на ВСЕХ экранах каталога) ─────────
 
+// Единая навигация (Full, docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md,
+// раздел 1.7): баннер активной доски теперь виден на ДВУХ экранах —
+// «Стили» (#boardBanner, как раньше) и «Создать» (#createBoardBanner, новый
+// в index.html, тот же текст/поведение). Один источник состояния
+// (getActiveBoard), просто синкаем оба DOM-узла.
 function renderBoardBanner() {
-  const banner = document.getElementById("boardBanner");
-  const textEl = document.getElementById("boardBannerText");
-  if (!banner || !textEl) return;
+  const targets = [
+    { banner: document.getElementById("boardBanner"), text: document.getElementById("boardBannerText") },
+    { banner: document.getElementById("createBoardBanner"), text: document.getElementById("createBoardBannerText") },
+  ];
   const board = getActiveBoard();
-  if (!board) {
-    banner.classList.add("hidden");
-  } else {
-    textEl.textContent = board.styleRequested
-      ? `🖼️ Доска «${board.name}» активна — стиль ИИ подмешивается в каждую генерацию`
-      : `🖼️ Доска «${board.name}» активна`;
-    banner.classList.remove("hidden");
-  }
+  targets.forEach(({ banner, text }) => {
+    if (!banner || !text) return;
+    if (!board) {
+      banner.classList.add("hidden");
+    } else {
+      text.textContent = board.styleRequested
+        ? `🖼️ Доска «${board.name}» активна — стиль ИИ подмешивается в каждую генерацию`
+        : `🖼️ Доска «${board.name}» активна`;
+      banner.classList.remove("hidden");
+    }
+  });
   syncBoardBannerSpace();
 }
 
@@ -173,51 +182,47 @@ function syncBoardBannerSpace() {
   }
 })();
 
+// Единая навигация (Full): «Доски» — отдельный первоуровневый таб, не
+// подраздел каталога (раздел 1.6 спеки). «Сменить» на баннере активной
+// доски (на «Стили» и на «Создать») теперь переключает СЮДА клиентским
+// роутингом, без сброса фильтров каталога (они больше не относятся к делу —
+// доски больше не живут внутри каталога).
 function goToBoardsSection() {
-  if (typeof switchTab === "function") switchTab("katalog");
-  activeCategory = "all";
-  activeFilter = "all";
-  query = "";
-  if (typeof searchInput !== "undefined" && searchInput) searchInput.value = "";
-  document.querySelectorAll(".segment").forEach((b) => b.classList.toggle("active", b.dataset.filter === "all"));
-  render();
-  requestAnimationFrame(() => {
-    document.getElementById("boardsRowAnchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+  if (typeof switchTab === "function") switchTab("boards");
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
 }
 
 document.getElementById("boardBannerSwitch")?.addEventListener("click", goToBoardsSection);
+document.getElementById("createBoardBannerSwitch")?.addEventListener("click", goToBoardsSection);
 document.getElementById("boardBannerDisable")?.addEventListener("click", () => {
   deactivateBoard();
   renderBoardBanner();
   renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
+  if (boardOverlayBoardId) renderBoardOverlayStatus();
+});
+document.getElementById("createBoardBannerDisable")?.addEventListener("click", () => {
+  deactivateBoard();
+  renderBoardBanner();
+  renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
   if (boardOverlayBoardId) renderBoardOverlayStatus();
 });
 
-// ── Экран 1: ряд «Мои доски» на главной каталога ────────────────────────
+// ── Таб «Доски» — список плиток на отдельном первоуровневом экране ──────
+// (было — ряд «Мои доски» на главной каталога, убрано разделом 1.5 спеки
+// единой навигации; сама логика плиток не изменилась, только адрес).
 
-function renderBoardsRow() {
-  const section = document.createElement("section");
-  section.className = "category-row";
-  section.id = "boardsRowAnchor";
-
-  const header = document.createElement("div");
-  header.className = "category-row-header";
-  header.innerHTML = `<span>🖼️ Мои доски</span><span class="category-row-count">${boardsState.boards.length}</span>`;
-  section.appendChild(header);
-
-  const track = document.createElement("div");
-  track.className = "board-tile-row";
-
+function renderBoardsPage() {
+  const grid = document.getElementById("boardsPageGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
   if (boardsState.boards.length === 0) {
-    track.appendChild(makeNewBoardTile(true));
+    grid.appendChild(makeNewBoardTile(true));
   } else {
-    boardsState.boards.forEach((board) => track.appendChild(makeBoardTile(board)));
-    track.appendChild(makeNewBoardTile(false));
+    boardsState.boards.forEach((board) => grid.appendChild(makeBoardTile(board)));
+    grid.appendChild(makeNewBoardTile(false));
   }
-
-  section.appendChild(track);
-  return section;
 }
 
 function makeBoardTile(board) {
@@ -328,6 +333,7 @@ boardCreateConfirm?.addEventListener("click", () => {
   const board = createBoard(name);
   closeCreateBoardModal();
   renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
   openBoardOverlay(board.id); // «После создания — сразу переход на Экран 2»
 });
 
@@ -408,6 +414,7 @@ function renderBoardOverlayStatus() {
       renderBoardOverlay();
       renderBoardBanner();
       renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
     });
     wrap.appendChild(span);
     wrap.appendChild(btn);
@@ -441,6 +448,7 @@ function renderBoardPhotoGrid() {
       removePhotoFromBoard(board.id, idx);
       renderBoardOverlay();
       renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
     });
     cell.appendChild(img);
     cell.appendChild(rm);
@@ -479,6 +487,7 @@ boardPhotoFile?.addEventListener("change", async (e) => {
       addPhotoToBoard(boardOverlayBoardId, data.url);
       renderBoardOverlay();
       renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
     }
   } catch (e2) {
     console.error("board photo upload failed", e2);
@@ -506,6 +515,7 @@ function commitBoardTitleEdit() {
   boardTitleInput.classList.add("hidden");
   boardTitleText.classList.remove("hidden");
   renderCards();
+  if (typeof renderBoardsPage === "function") renderBoardsPage();
 }
 
 boardTitleText?.addEventListener("click", startBoardTitleEdit);
@@ -661,3 +671,4 @@ function getActiveBoardNoteText() {
 // ── Инициализация ────────────────────────────────────────────────────
 
 renderBoardBanner();
+renderBoardsPage();
