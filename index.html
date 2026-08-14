@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./studio.css" />
     <link rel="stylesheet" href="./boards.css" />
     <link rel="stylesheet" href="./constructor.css" />
+    <link rel="stylesheet" href="./progress.css" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -191,7 +192,7 @@
 
       <!-- Конструктор видео (Хаб генерации, MVP, docs/specs/2026-08-13_webapp_generation_hub.md
            в репо бота). Открывается напрямую по персональной ссылке от бота
-           (?tab=videoConstructor&cfg=...), заменяет цепочку из 2-3 сообщений
+           (&tab=video_constructor&cfg=...), заменяет цепочку из 2-3 сообщений
            чата на один экран: все настройки тут, поход в чат — только чтобы
            подтвердить цену и запустить (см. constructor.js). -->
       <div id="pageVideoConstructor" class="tab-page hidden">
@@ -251,6 +252,21 @@
           <span class="vc-price-amount" id="vcPriceAmount">≈ — 🍇</span>
         </div>
         <button class="primary-btn vc-block-btn" id="vcContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
+      </div>
+
+      <!-- Живой прогресс генерации (D1-зеркало), docs/specs/2026-08-13_webapp_generation_hub_full.md
+           в репо бота. Открывается ТОЛЬКО с инлайн-кнопки «👀 Смотреть прогресс»
+           на статусном сообщении бота (&tab=progress&job_id=...&product=...) —
+           не из общей навигации. Тонкое зеркало статуса, НЕ очередь заданий:
+           никогда не пытается показать сам результат (фото/видео) внутри
+           вебвью — только стадийный текст, по готовности — «Открой чат». -->
+      <div id="pageProgress" class="tab-page hidden">
+        <div class="progress-shell">
+          <div class="progress-spinner" id="progressSpinner" aria-hidden="true"></div>
+          <p class="progress-stage" id="progressStageText">Готовим…</p>
+          <p class="progress-hint" id="progressHintText"></p>
+          <button class="primary-btn progress-block-btn hidden" id="progressCloseBtn" type="button">Закрыть</button>
+        </div>
       </div>
     </div>
 
@@ -404,6 +420,7 @@
     <script src="./app.js?v=20260623-uxv3"></script>
     <script src="./studio.js?v=20260720-studio-v1"></script>
     <script src="./boards.js?v=20260810-boards-full-fix1"></script>
-    <script src="./constructor.js?v=20260813-constructor-v1"></script>
+    <script src="./constructor.js?v=20260813-constructor-v2"></script>
+    <script src="./progress.js?v=20260813-progress-v1"></script>
   </body>
 </html>
