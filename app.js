@@ -1057,12 +1057,38 @@ function applyInitialTabFromUrl() {
   } catch { /* не критично — остаётся дефолт «Создать» */ }
 }
 
+// Плитки «Создать» скрываются для продуктов, выключенных фичефлагом на
+// момент открытия Mini App (docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md,
+// раздел 1.3/5.2) — бот уже кладёт `&features=<base64 JSON: {"video","midjourney",
+// "avatar","photo"}>` в персональный URL (_generation_hub_features_payload,
+// SirNike.py), тут просто читаем. «Фото» НЕ гейтится этим флагом (спека,
+// таблица в разделе 1.3 — фото-генерация целиком идёт через Библиотеку,
+// отдельного конструктора для неё в сетке нет). Отсутствие/повреждённый
+// параметр — не ронять экран, показываем все плитки как раньше.
+function applyGenerationHubFeaturesFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("features");
+    if (!raw) return;
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const features = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+    ["video", "avatar", "midjourney"].forEach((product) => {
+      if (features[product] === false) {
+        document.querySelector(`.create-tile[data-product="${product}"]`)?.classList.add("hidden");
+      }
+    });
+  } catch (e) {
+    console.error("generation hub features parse failed, showing all tiles", e);
+  }
+}
+
 (async function init() {
   applyTheme(getTheme());
   setBalance(readBalanceFromUrl());
   decoratePackages();
   renderHistory();
   applyInitialTabFromUrl();
+  applyGenerationHubFeaturesFromUrl();
   await loadLibrary();
   if (!library.length) {
     emptyEl.textContent = "Не удалось загрузить библиотеку. Проверь prompt_library.json.";
