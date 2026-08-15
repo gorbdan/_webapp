@@ -861,6 +861,7 @@ const APP_TITLES = {
   midjourneyConstructor: "Midjourney",
   avatarConstructor: "Аватар",
   photoConstructor: "Фото",
+  enhanceConstructor: "Улучшить фото",
   progress: "Прогресс генерации",
 };
 
@@ -935,6 +936,11 @@ document.getElementById("createGrid")?.addEventListener("click", (e) => {
   if (product === "midjourney") {
     switchTab("midjourneyConstructor");
     document.getElementById("mjPriceStrip")?.classList.remove("hidden");
+    return;
+  }
+  if (product === "enhance") {
+    switchTab("enhanceConstructor");
+    document.getElementById("ecPriceStrip")?.classList.remove("hidden");
     return;
   }
 });
@@ -1072,7 +1078,7 @@ function applyGenerationHubFeaturesFromUrl() {
     const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
     const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
     const features = JSON.parse(new TextDecoder("utf-8").decode(bytes));
-    ["video", "avatar", "midjourney"].forEach((product) => {
+    ["video", "avatar", "midjourney", "enhance"].forEach((product) => {
       if (features[product] === false) {
         document.querySelector(`.create-tile[data-product="${product}"]`)?.classList.add("hidden");
       }

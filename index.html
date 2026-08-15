@@ -63,6 +63,10 @@
             <span class="create-tile-icon">🎨</span>
             <span class="create-tile-label">Midjourney</span>
           </button>
+          <button class="create-tile" type="button" data-product="enhance">
+            <span class="create-tile-icon">✨</span>
+            <span class="create-tile-label">Улучшить фото</span>
+          </button>
         </div>
       </main>
 
@@ -375,6 +379,27 @@
         <button class="primary-btn vc-block-btn" id="pcContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
       </div>
 
+      <!-- Улучшить фото (Хаб генерации, Full, docs/specs/
+           2026-08-14_menu_simplification_and_enhance_constructor.md в репо бота).
+           Открывается по персональной ссылке от бота (&tab=enhance_constructor),
+           заменяет сегодняшний ручной флоу «пришли фото» (`_cb_enhance_photo`) —
+           промт и модель фиксированы на бэкенде, юзер только грузит РОВНО одно
+           фото (второе заменяет первое, не добавляется — в отличие от остальных
+           конструкторов). -->
+      <div id="pageEnhanceConstructor" class="tab-page hidden">
+        <section class="vc-block">
+          <h2 class="vc-block-title">Пришли фото, которое нужно улучшить</h2>
+          <p class="vc-model-blurb">Бот повысит качество и сделает его похожим на кадр от профессионального фотографа — черты лица останутся прежними.</p>
+          <div class="vc-refs" id="ecRefs"></div>
+          <button class="ghost-btn vc-block-btn" id="ecUploadBtn" type="button">📷 Добавить фото</button>
+          <input type="file" id="ecPhotoFile" accept="image/*" class="hidden" />
+        </section>
+      </div>
+
+      <div class="vc-price-strip hidden" id="ecPriceStrip">
+        <button class="primary-btn vc-block-btn" id="ecContinueBtn" type="button" disabled>🚀 Продолжить в чат</button>
+      </div>
+
       <!-- Живой прогресс генерации (D1-зеркало), docs/specs/2026-08-13_webapp_generation_hub_full.md
            в репо бота. Открывается ТОЛЬКО с инлайн-кнопки «👀 Смотреть прогресс»
            на статусном сообщении бота (&tab=progress&job_id=...&product=...) —
@@ -552,6 +577,7 @@
     <script src="./mj_constructor.js?v=20260813-mj-constructor-v1"></script>
     <script src="./avatar_constructor.js?v=20260813-avatar-constructor-v1"></script>
     <script src="./photo_constructor.js?v=20260814-photo-constructor-v1"></script>
+    <script src="./enhance_constructor.js?v=20260814-enhance-constructor-v1"></script>
     <script src="./progress.js?v=20260813-progress-v1"></script>
   </body>
 </html>
