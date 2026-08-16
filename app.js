@@ -906,21 +906,20 @@ balancePill.addEventListener("click", () => switchTab("topup"));
 document.getElementById("historyOpenBtn")?.addEventListener("click", () => switchTab("history"));
 if (historyToCatalog) historyToCatalog.addEventListener("click", () => switchTab("katalog"));
 
-// «Создать» — сетка 4 продуктов (единая навигация, Full, docs/specs/
-// 2026-08-13_webapp_generation_hub_navigation_full.md, раздел 1.3). Тап
-// переключает клиентским роутингом на уже существующий экран продукта —
-// НИКАКОГО нового payload/сети при самом тапе по плитке (только у уже
-// работающих конструкторов при их собственной отправке). «Фото» — особый
-// случай: ведёт на «Стили» (библиотеку), не на отдельный экран — в этом
-// продукте фото-генерация целиком идёт через выбор стиля из библиотеки
-// (свободный текстовый ввод «✨ Сгенерировать фото» — отдельный чат-флоу,
-// не выносится в эту сетку, см. раздел 1.3 спеки, строка про «Фото»).
+// «Создать» — сетка 5 продуктов (единая навигация, Full, docs/specs/
+// 2026-08-13_webapp_generation_hub_navigation_full.md, раздел 1.3, плюс
+// «Улучшить фото»). Тап переключает клиентским роутингом на уже
+// существующий экран продукта — НИКАКОГО нового payload/сети при самом
+// тапе по плитке. «Фото» ведёт на photo_constructor.js (симметрично
+// video/avatar/midjourney/enhance) — правка 2026-08-16 по прямому фидбеку
+// Ани: раньше вела на «Стили», хотя выделенный конструктор давно есть.
 document.getElementById("createGrid")?.addEventListener("click", (e) => {
   const tile = e.target.closest(".create-tile");
   if (!tile) return;
   const product = tile.dataset.product;
   if (product === "photo") {
-    switchTab("katalog");
+    switchTab("photoConstructor");
+    document.getElementById("pcPriceStrip")?.classList.remove("hidden");
     return;
   }
   if (product === "video") {
