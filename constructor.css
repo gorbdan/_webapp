@@ -48,6 +48,15 @@
   transform: scale(0.97);
 }
 
+/* Нечётное число ВИДИМЫХ плиток (сегодня 5, но какие-то могут быть скрыты
+   &features=) оставляло последнюю видимую плитку одну в пустой строке —
+   класс ставится/снимается в JS (applyGenerationHubFeaturesFromUrl,
+   app.js), т.к. чистым CSS-селектором нельзя корректно посчитать «нечётное
+   число НЕскрытых» — nth-child считает DOM-позицию, не видимость. */
+.create-tile--span-full {
+  grid-column: 1 / -1;
+}
+
 .create-tile-icon {
   font-size: 30px;
   line-height: 1;
