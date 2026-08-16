@@ -872,6 +872,17 @@ function switchTab(tabName) {
   tabBar.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === tabName));
   const titleEl = document.getElementById("appTitle");
   if (titleEl && APP_TITLES[tabName]) titleEl.textContent = APP_TITLES[tabName];
+  // Живой баг, найден на проде: каждый конструктор (vc/mj/av/pc/ec) держит
+  // свой sticky price-strip (position:fixed) ВНЕ .tab-page и сам его
+  // раскрывает при входе — но никогда не прятал ЧУЖИЕ. Переключение
+  // Видео → Midjourney → Аватар оставляло все посещённые price-strip'ы
+  // видимыми одновременно, они накладывались друг на друга внизу экрана.
+  // switchTab — единственная точка, через которую проходит ЛЮБОЙ переход
+  // между экранами (клик по плитке, deep-link ?tab=, таб-бар) — прячем тут
+  // ВСЕ безусловно; конкретный экран сам раскрывает свой сразу следующей
+  // строкой после вызова switchTab (этот код не трогаем, только гарантируем,
+  // что предыдущий не остаётся висеть до следующего явного показа).
+  document.querySelectorAll('[id$="PriceStrip"]').forEach((el) => el.classList.add("hidden"));
 }
 
 function decoratePackages() {
@@ -1058,8 +1069,18 @@ document.getElementById("packages").addEventListener("click", (e) => {
 function applyInitialTabFromUrl() {
   try {
     const tab = new URLSearchParams(window.location.search).get("tab");
-    if (tab === "library") switchTab("katalog");
+    if (tab === "library") {
+      switchTab("katalog");
+      return;
+    }
   } catch { /* не критично — остаётся дефолт «Создать» */ }
+  // Дефолтный случай (без &tab= вовсе) — pageCreate уже видим в разметке
+  // без класса hidden, экран переключать не нужно, но #appTitle остаётся
+  // захардкоженным «Библиотека» из <h1> — синхронизируем текст заголовка
+  // с реально видимым экраном (живой баг, найден на проде: юзер видит
+  // «Библиотека» над сеткой «Создать»).
+  const titleEl = document.getElementById("appTitle");
+  if (titleEl) titleEl.textContent = APP_TITLES.create;
 }
 
 // Плитки «Создать» скрываются для продуктов, выключенных фичефлагом на
@@ -1073,17 +1094,32 @@ function applyInitialTabFromUrl() {
 function applyGenerationHubFeaturesFromUrl() {
   try {
     const raw = new URLSearchParams(window.location.search).get("features");
-    if (!raw) return;
-    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
-    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-    const features = JSON.parse(new TextDecoder("utf-8").decode(bytes));
-    ["video", "avatar", "midjourney", "enhance"].forEach((product) => {
-      if (features[product] === false) {
-        document.querySelector(`.create-tile[data-product="${product}"]`)?.classList.add("hidden");
-      }
-    });
+    if (raw) {
+      const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+      const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+      const features = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+      ["video", "avatar", "midjourney", "enhance"].forEach((product) => {
+        if (features[product] === false) {
+          document.querySelector(`.create-tile[data-product="${product}"]`)?.classList.add("hidden");
+        }
+      });
+    }
   } catch (e) {
     console.error("generation hub features parse failed, showing all tiles", e);
+  }
+  syncCreateGridLastRow();
+}
+
+// Если ВИДИМЫХ плиток нечётное число, последняя одна повисает в пустой
+// строке 2-колоночной сетки — растягиваем её на всю ширину. Пересчитывается
+// после гейта по фичефлагам (visible-состав меняется), не завязано на
+// фиксированную DOM-позицию.
+function syncCreateGridLastRow() {
+  const tiles = [...document.querySelectorAll(".create-tile")];
+  tiles.forEach((t) => t.classList.remove("create-tile--span-full"));
+  const visible = tiles.filter((t) => !t.classList.contains("hidden"));
+  if (visible.length % 2 === 1) {
+    visible[visible.length - 1].classList.add("create-tile--span-full");
   }
 }
 

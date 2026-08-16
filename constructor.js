@@ -120,6 +120,7 @@ function vcModelFromCfgEntry(m) {
     durations: Array.isArray(m.durations) && m.durations.length ? m.durations : [5],
     faceGrid: !!m.face_grid,
     hasQualityToggle: modes.includes("480p"),
+    modes, // нужен целиком (не только hasQualityToggle) — см. vcPriceBucketKey
     prices: m.prices && typeof m.prices === "object" ? m.prices : {},
   };
 }
@@ -197,11 +198,19 @@ function vcResetStateForModel(code) {
 
 // ── Цена — зеркало резолва _apply_webapp_generation_video на бэкенде ───
 
+// Зеркалит resolve_webapp_video_quality (SirNike.py) буква в букву: «Fast» —
+// САМЫЙ ЛЁГКИЙ доступный режим модели (первый в modes), «Pro»/дефолт —
+// САМЫЙ КАЧЕСТВЕННЫЙ (последний в modes), НЕ фиксированный "720p". Раньше
+// тут был захардкожен приоритет на "720p" для pro — у Seedance 2 (модели
+// 480p/720p/1080p) это давало «Будет стоить ≈20», хотя бот реально резолвит
+// pro в 1080p и спишет 30 — расхождение с ценой в карточке подтверждения,
+// именно тот баг, что явно запрещён критерием приёмки спеки.
 function vcPriceBucketKey(model) {
   const keys = Object.keys(model.prices || {});
   if (keys.length === 0) return null;
-  if (model.hasQualityToggle && vcState.quality === "fast" && keys.includes("480p")) return "480p";
-  if (keys.includes("720p")) return "720p";
+  const modes = Array.isArray(model.modes) && model.modes.length ? model.modes : keys;
+  const target = model.hasQualityToggle && vcState.quality === "fast" ? modes[0] : modes[modes.length - 1];
+  if (target && keys.includes(target)) return target;
   return keys[0];
 }
 
