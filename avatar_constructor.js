@@ -24,6 +24,88 @@ const AV_KIND_OPTIONS = [
 
 let avState = { kind: "female", refs: [] };
 
+// ── Список уже сохранённых аватаров (&avatars= от бота, _avatar_list_payload
+// в SirNike.py) — живой фидбек Ани 2026-08-16: экран умел только создавать
+// новый, списка существующих не было вообще. Тап по неактивной карточке —
+// мгновенное бесплатное переключение (payload set_active_avatar/saa,
+// НЕ форма создания ниже), закрывает Mini App, бот подтверждает в чате.
+// Тот же base64url-приём декодирования, что уже используют &cfg=/&prefill=.
+function avParseExistingFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("avatars");
+    if (!raw) return [];
+    const bin = atob(raw.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+    return Array.isArray(parsed && parsed.avatars) ? parsed.avatars : [];
+  } catch (e) {
+    console.error("avatar constructor: existing avatars parse failed, ignoring", e);
+    return [];
+  }
+}
+
+function avSwitchActive(kind) {
+  if (!tg) {
+    showToast("Открой Аватар внутри Telegram, чтобы переключить.");
+    return;
+  }
+  if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
+    showToast("Из этого входа переключение не сработает. Открой «🪄 Аватар» кнопкой в меню.");
+    return;
+  }
+  try {
+    tg.sendData(JSON.stringify({ action: "saa", at: kind }));
+    setTimeout(() => tg.close(), 500);
+  } catch (e) {
+    console.error("avatar constructor switch-active sendData failed", e);
+    showToast("Не получилось переключить аватар. Попробуй ещё раз.");
+  }
+}
+
+function renderAvExisting(avatars) {
+  const section = document.getElementById("avExistingSection");
+  const newHint = document.getElementById("avNewHint");
+  const row = document.getElementById("avExistingRow");
+  if (!section || !row) return;
+  if (!avatars.length) {
+    section.classList.add("hidden");
+    newHint?.classList.add("hidden");
+    return;
+  }
+  section.classList.remove("hidden");
+  newHint?.classList.remove("hidden");
+  row.innerHTML = "";
+  avatars.forEach((av) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "av-existing-card";
+    const thumb = document.createElement("div");
+    thumb.className = "av-existing-thumb" + (av.active ? " is-active" : "");
+    const img = document.createElement("img");
+    img.src = typeof thumbUrl === "function" ? thumbUrl(av.url, 160) : av.url;
+    img.alt = av.label || av.kind || "";
+    img.loading = "lazy";
+    thumb.appendChild(img);
+    if (av.active) {
+      const check = document.createElement("span");
+      check.className = "av-existing-check";
+      check.textContent = "✓";
+      thumb.appendChild(check);
+    }
+    const label = document.createElement("span");
+    label.className = "av-existing-label" + (av.active ? " is-active" : "");
+    label.textContent = av.active ? `${av.label} · активен` : av.label || av.kind || "";
+    card.appendChild(thumb);
+    card.appendChild(label);
+    if (!av.active) {
+      card.addEventListener("click", () => avSwitchActive(av.kind));
+    } else {
+      card.disabled = true;
+    }
+    row.appendChild(card);
+  });
+}
+
 function renderAvKindSeg() {
   const el = document.getElementById("avKindSeg");
   if (!el) return;
@@ -189,3 +271,4 @@ avApplyPrefill(avParsePrefillFromUrl());
 renderAvKindSeg();
 renderAvRefs();
 renderAvContinueBtn();
+renderAvExisting(avParseExistingFromUrl());

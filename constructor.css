@@ -253,6 +253,87 @@
   text-align: center;
 }
 
+/* Список сохранённых аватаров (экран «Аватар», &avatars= от бота) — карточки
+   тапабельны, неактивный тап шлёт set_active_avatar/saa и мгновенно
+   переключает без формы создания ниже. */
+.av-existing-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+}
+
+.av-existing-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: 76px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.av-existing-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.av-existing-thumb.is-active {
+  border-color: var(--brand);
+}
+
+.av-existing-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.av-existing-card:active .av-existing-thumb {
+  opacity: 0.7;
+}
+
+.av-existing-check {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--surface);
+}
+
+.av-existing-label {
+  font-size: 12px;
+  text-align: center;
+  color: var(--muted);
+  max-width: 76px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.av-existing-label.is-active {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .vc-price-strip {
   position: fixed;
   left: 0;

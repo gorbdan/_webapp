@@ -333,6 +333,19 @@
            (&tab=avatar_constructor), заменяет мини-флоу «🪄 Аватар» на один
            экран: тип аватара + несколько фото. -->
       <div id="pageAvatarConstructor" class="tab-page hidden">
+        <!-- Список уже сохранённых аватаров — бот кладёт его в &avatars=
+             персонального URL (_avatar_list_payload, SirNike.py), живой
+             фидбек Ани 2026-08-16 («список аватаров должен отображаться»).
+             Тап по неактивному — мгновенное бесплатное переключение
+             (payload set_active_avatar/saa), НЕ форма создания ниже. Секция
+             скрыта, если аватаров ещё нет — тогда экран как раньше, сразу
+             форма создания. -->
+        <section class="vc-block hidden" id="avExistingSection">
+          <h2 class="vc-block-title">Твои аватары</h2>
+          <div class="av-existing-row" id="avExistingRow"></div>
+        </section>
+
+        <p class="page-hint hidden" id="avNewHint">Создать новый</p>
         <section class="vc-block">
           <h2 class="vc-block-title">Какой тип?</h2>
           <div class="segmented vc-seg" id="avKindSeg"></div>
