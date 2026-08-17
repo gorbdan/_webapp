@@ -8,6 +8,17 @@
   gap: 10px;
 }
 
+/* Пустой список проектов (0 мультиков) раньше лежал у верхнего края экрана
+   над пустым пространством до низа (живой аудит 2026-08-17, находка №4).
+   :has(#studioProjectsEmpty:not(.hidden)) — срабатывает только пока список
+   реально пуст, в непустом состоянии этот блок скрыт классом .hidden и
+   правило не применяется, JS трогать не нужно. */
+#studioViewList:has(#studioProjectsEmpty:not(.hidden)) {
+  min-height: 60vh;
+  justify-content: center;
+  align-items: center;
+}
+
 .studio-block-btn {
   width: 100%;
   display: block;
