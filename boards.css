@@ -92,6 +92,24 @@
   height: 96px;
 }
 
+/* Пустой таб «Доски» (0 досок — только плитка «+») раньше лежал у
+   верхнего края экрана над пустым пространством до низа (живой аудит
+   2026-08-17, находка №4 — «ощущается недоделанным на фоне «Создать»).
+   :has() — плитка «+» одна-единственная в сетке ровно в пустом состоянии
+   (renderBoardsPage: 0 досок → grid.appendChild(единственная new-tile)),
+   в непустом состоянии там больше одного child — правило не сработает,
+   ничего чинить в JS не нужно. */
+#pageBoards:has(#boardsPageGrid > .board-tile:only-child) {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#pageBoards:has(#boardsPageGrid > .board-tile:only-child) #boardsPageGrid {
+  justify-content: center;
+}
+
 .board-tile {
   flex: 0 0 auto;
   width: 84px;
