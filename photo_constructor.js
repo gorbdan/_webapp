@@ -154,7 +154,7 @@ document.getElementById("pcContinueBtn")?.addEventListener("click", () => {
     return;
   }
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    showToast("Из этого входа Фото не отправит данные. Открой «✨ Сгенерировать фото» кнопкой в меню и попробуй ещё раз.");
+    sendGenerationPayloadViaAnswerWebAppQuery(buildPcStartGenerationPayload());
     return;
   }
   try {

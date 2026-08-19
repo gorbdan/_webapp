@@ -348,6 +348,56 @@ async function sendPromptViaAnswerWebAppQuery(item, userNote, button) {
   }
 }
 
+// Хаб генерации (2026-08-16, живой фидбой Ани): ВСЕ конструкторы
+// (video/photo/avatar/midjourney/enhance) шлют payload только через
+// tg.sendData() — а это, по официальной документации Telegram, работает
+// ТОЛЬКО для Mini App, открытого с reply-клавиатуры/Menu Button.
+// InlineKeyboardButton(web_app=...) — а именно так открыты «✨ Сгенерировать
+// фото»/«🪄 Аватар»/«🎨 Midjourney» из инлайн-меню И КАЖДАЯ кнопка
+// «✏️ Изменить» на карточке подтверждения — обязан использовать
+// answerWebAppQuery, sendData тут либо тихо ничего не делает, либо роняет
+// исключение. Раньше единственным «фиксом» был честный тост «открой кнопкой
+// в меню» — но у «✏️ Изменить» такого альтернативного пути нет вообще (это
+// контекст конкретного сообщения), так что тост был тупиком, не фиксом.
+//
+// Этот путь генерален (в отличие от sendPromptViaAnswerWebAppQuery выше,
+// заточенного под cat_idx/item_idx): полный JSON-payload кладётся в
+// message_text результата answerWebAppQuery (лимит Telegram — 4096
+// символов, тот же порядок, что и у sendData) — бот получает это как
+// обычное текстовое сообщение с `via_bot = сам бот`, распознаёт валидный
+// JSON с полем action/a и прогоняет через ТОТ ЖЕ apply_webapp_prompt_payload_v2,
+// что и sendData-путь (handle_text, SirNike.py) — исходное JSON-сообщение
+// бот сразу удаляет, юзер его не видит, дальше — обычная карточка
+// подтверждения. См. docs/BOT_CONTRACT.md, раздел «Инлайн-конструкторы».
+const ANSWER_WEBAPP_PAYLOAD_ENDPOINT = "/answer-webapp-payload";
+
+async function sendGenerationPayloadViaAnswerWebAppQuery(payloadJsonString) {
+  let payload;
+  try {
+    payload = JSON.parse(payloadJsonString);
+  } catch (e) {
+    console.error("sendGenerationPayloadViaAnswerWebAppQuery: invalid payload JSON", e);
+    showToast("Не получилось отправить настройки. Попробуй ещё раз.");
+    return false;
+  }
+  try {
+    const res = await fetch(ANSWER_WEBAPP_PAYLOAD_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ init_data: tg.initData, payload }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json().catch(() => ({}));
+    if (!data.ok) throw new Error(data.error || "answerWebAppQuery failed");
+    tg.close();
+    return true;
+  } catch (e) {
+    console.error("sendGenerationPayloadViaAnswerWebAppQuery failed", e);
+    showToast("Не получилось отправить настройки. Попробуй ещё раз.");
+    return false;
+  }
+}
+
 // Видео-стиль — «Использовать» больше НЕ шлёт payload сразу (Full,
 // docs/specs/2026-08-13_webapp_generation_hub_navigation_full.md, п.4.1):
 // клиентский переход на «Создать» → Конструктор видео с уже заполненным

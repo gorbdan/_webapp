@@ -50,7 +50,7 @@ function avSwitchActive(kind) {
     return;
   }
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    showToast("Из этого входа переключение не сработает. Открой «🪄 Аватар» кнопкой в меню.");
+    sendGenerationPayloadViaAnswerWebAppQuery(JSON.stringify({ action: "saa", at: kind }));
     return;
   }
   try {
@@ -233,7 +233,7 @@ document.getElementById("avContinueBtn")?.addEventListener("click", () => {
     return;
   }
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    showToast("Из этого входа Аватар не отправит данные. Открой «🪄 Аватар» кнопкой в меню и попробуй ещё раз.");
+    sendGenerationPayloadViaAnswerWebAppQuery(buildAvStartGenerationPayload());
     return;
   }
   try {

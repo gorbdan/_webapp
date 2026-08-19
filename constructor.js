@@ -464,10 +464,11 @@ document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
     showToast("Открой Конструктор внутри Telegram, чтобы продолжить.");
     return;
   }
-  // Тот же принцип, что у Досок (boards.js) — sendData доставляет данные
-  // ТОЛЬКО когда вебапп открыт с reply-клавиатуры, не с инлайн-кнопки.
+  // sendData работает только с reply-клавиатуры/Menu Button — с инлайн-
+  // кнопки (в т.ч. «✏️ Изменить» на карточке подтверждения) обязателен
+  // answerWebAppQuery (см. sendGenerationPayloadViaAnswerWebAppQuery в app.js).
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    showToast("Из этого входа Конструктор не отправит данные. Открой «🎬 Видео для Reels» кнопкой в меню снизу и попробуй ещё раз.");
+    sendGenerationPayloadViaAnswerWebAppQuery(buildStartGenerationPayload());
     return;
   }
   try {

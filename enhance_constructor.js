@@ -83,11 +83,11 @@ document.getElementById("ecContinueBtn")?.addEventListener("click", () => {
     showToast("Открой «Улучшить фото» внутри Telegram, чтобы продолжить.");
     return;
   }
+  if (!ecState.refs.length) return;
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    showToast("Из этого входа фото не отправится. Открой библиотеку кнопкой в меню и попробуй ещё раз.");
+    sendGenerationPayloadViaAnswerWebAppQuery(buildEcStartGenerationPayload());
     return;
   }
-  if (!ecState.refs.length) return;
   try {
     tg.sendData(buildEcStartGenerationPayload());
     setTimeout(() => tg.close(), 900);

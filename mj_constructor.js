@@ -153,7 +153,7 @@ document.getElementById("mjContinueBtn")?.addEventListener("click", () => {
     return;
   }
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    showToast("Из этого входа Midjourney не отправит данные. Открой «🎨 Midjourney» кнопкой в меню и попробуй ещё раз.");
+    sendGenerationPayloadViaAnswerWebAppQuery(buildMjStartGenerationPayload());
     return;
   }
   try {
