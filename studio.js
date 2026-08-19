@@ -34,18 +34,20 @@ async function studioCall(action, body = {}, { silent = false } = {}) {
   // тик (initData восстановится сам), на явном действии юзера — это уже
   // реально нештатная ситуация, дальше сработает обычная проверка сервера.
   if (silent && !initData) return null;
-  // ВРЕМЕННО для живой диагностики 2026-07-28: initData пуст даже после
-  // ожидания и на телефоне, и на Desktop — сырые факты вместо догадок.
-  // Предыдущая версия показывала это ОТДЕЛЬНЫМ тостом, который тут же
-  // перетирался следующим (ответом сервера) — юзер видел только последний.
-  // Теперь один тост со всеми фактами сразу, fetch на пустой initData не
-  // шлём вообще (сервер и так ответит invalid_init_data/empty_init_data).
+  // Баг 2026-07-28 диагностирован (debug_reason=empty_init_data — race на
+  // tdesktop, initData доставляется в вебвью не мгновенно) и промасштабирован
+  // ожиданием выше; изредка (медленный IPC) initData всё ещё пуст даже после
+  // 3с ожидания — юзеру нужен понятный текст, не сырые диагностические
+  // факты (были видны как есть до 2026-08-19). Факты остаются в консоли для
+  // отладки будущих похожих случаев, просто не всплывают тостом.
   if (!silent && !initData) {
-    showToast(
-      `[debug] initData пуст после ожидания. platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
+    console.error(
+      "studioCall: initData empty after wait",
+      `platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
       `hasUnsafe=${!!tg?.initDataUnsafe} unsafeUser=${!!tg?.initDataUnsafe?.user} ` +
       `unsafeKeys=${tg?.initDataUnsafe ? Object.keys(tg.initDataUnsafe).join(",") : "-"}`
     );
+    showToast("Сессия устарела — перезайди в вебапп.");
     return { ok: false, error: "invalid_init_data", debug_reason: "empty_init_data_client" };
   }
   try {
@@ -57,11 +59,8 @@ async function studioCall(action, body = {}, { silent = false } = {}) {
     const data = await res.json().catch(() => ({}));
     if (!data.ok) {
       if (!(silent && data.error === "invalid_init_data")) {
-        // ВРЕМЕННО для живой диагностики 2026-07-28: дописываем debug_reason
-        // от сервера в тост, если он есть — убрать вместе с debug_reason на
-        // сервере, когда баг найден.
-        const text = data.debug_reason ? `${studioErrorText(data.error)} [${data.debug_reason}]` : studioErrorText(data.error);
-        showToast(text);
+        if (data.debug_reason) console.error(`studio ${action} debug_reason=${data.debug_reason}`);
+        showToast(studioErrorText(data.error));
       }
       return data;
     }
