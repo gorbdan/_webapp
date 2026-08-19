@@ -619,6 +619,13 @@
         "prompt": "Candid ultra-realistic iPhone-style selfie of a couple sitting inside a luxury SUV during golden hour, warm low sun streaming through the window. Preserve the exact facial features and identity of both people from their reference photos \u2014 do not alter face shape, eyes, nose or lips of either person. Close framing, phone held slightly above eye level, both leaning in together, natural relaxed smiles, warm golden skin glow, soft lens flare, authentic candid phone-camera framing, not overly polished. Leather interior softly visible, dashboard blurred. Realistic skin texture, no plastic smoothing, authentic phone-camera quality. Vertical 9:16.",
         "example_url": "https://iili.io/CgepRLu.jpg",
         "added_at": "2026-08-06T00:53:38.736825+00:00"
+      },
+      {
+        "description": "\u041a\u0440\u0443\u043f\u043d\u044b\u0439 \u043f\u043e\u0440\u0442\u0440\u0435\u0442 \u0441 \u043f\u0438\u0442\u043e\u043c\u0446\u0435\u043c \u2014 \u043f\u043e\u043b\u043e\u0432\u0438\u043d\u0430 \u043b\u0438\u0446\u0430 \u0447\u0435\u043b\u043e\u0432\u0435\u043a\u0430, \u043f\u043e\u043b\u043e\u0432\u0438\u043d\u0430 \u043c\u043e\u0440\u0434\u044b \u0435\u0433\u043e \u0441\u043e\u0431\u0430\u043a\u0438/\u043a\u043e\u0448\u043a\u0438, \u0442\u0440\u043e\u0433\u0430\u0442\u0435\u043b\u044c\u043d\u0430\u044f \u044d\u043c\u043e\u0446\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u0430\u044f \u0441\u0432\u044f\u0437\u044c.",
+        "upload_hint": "\u0424\u043e\u0442\u043e \u0441\u0432\u043e\u0435\u0433\u043e \u043b\u0438\u0446\u0430 + \u0444\u043e\u0442\u043e \u043f\u0438\u0442\u043e\u043c\u0446\u0430 (\u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e)",
+        "prompt": "Photo 1: the person. Photo 2: their pet (dog or cat). Create an ultra-realistic extreme close-up portrait where the person's face and their pet's face are pressed closely together, cheek to cheek, perfectly centered and equally framed, both looking at camera. Preserve the exact facial features and identity of the person from photo 1, and the exact fur pattern, breed and face of the pet from photo 2 \u2014 no reshaping either. Warm soft natural light, genuine tender emotional bond, cozy intimate mood. Realistic skin and fur texture, photorealistic, no plastic smoothing. Square or vertical 4:5.",
+        "example_url": "https://iili.io/CLNtcdb.jpg",
+        "added_at": "2026-08-19T18:03:48.860276+00:00"
       }
     ]
   },
