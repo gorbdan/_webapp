@@ -8,9 +8,16 @@
 //    prices.push. У бота нет HTTP-входа, он сам поллит эту очередь.
 
 import {
-  json, verifyStudioUser, checkBotSecret, uuid, nowIso,
+  json, verifyStudioUser, verifyStudioSignatureOnly, checkBotSecret, uuid, nowIso,
   getOwnedProject, getConfig, setConfig,
 } from "./_lib.js";
+
+// "upload" не привязан к юзеру (uploadRef игнорирует userId — просто
+// заливает фото на imgbb) и вызывается из ВСЕХ конструкторов вебаппа
+// (кнопка «Добавить фото»), а не только из студии. Полная проверка
+// (auth_date/user) не нужна и только множит ложные "сессия устарела" на
+// самом частом действии — достаточно подписи initData.
+const WEBAPP_ACTIONS_NO_IDENTITY = new Set(["upload"]);
 
 const SCENE_DEFAULT_MODEL = "seedance2_fast";
 const JOB_TYPES = new Set(["scenario", "frame", "clip", "stitch"]);
@@ -431,16 +438,11 @@ export async function onRequestPost(context) {
 
   if (WEBAPP_ACTIONS[action]) {
     if (!env.BOT_TOKEN) return json({ ok: false, error: "server_misconfigured" }, 500);
-    const verified = await verifyStudioUser(body?.init_data, env.BOT_TOKEN);
+    const verified = WEBAPP_ACTIONS_NO_IDENTITY.has(action)
+      ? await verifyStudioSignatureOnly(body?.init_data, env.BOT_TOKEN)
+      : await verifyStudioUser(body?.init_data, env.BOT_TOKEN);
     if (!verified.ok) {
-      // Живой баг 2026-07-28: логируем ПРИЧИНУ отказа для диагностики
-      // (Cloudflare Observability → Logs) — "сессия устарела" на клиенте
-      // раньше маскировала все варианты (no_hash/hash_mismatch/
-      // stale_auth_date/empty_init_data/...) под одним сообщением.
       console.error(`studio auth failed: action=${action} reason=${verified.reason}`);
-      // ВРЕМЕННО для живой диагностики 2026-07-28 (Аня не видит логи Cloudflare
-      // Observability для этого проекта) — причина прямо в ответе, без секретов.
-      // Убрать debug_reason, когда баг найден.
       return json({ ok: false, error: "invalid_init_data", debug_reason: verified.reason }, 401);
     }
     return WEBAPP_ACTIONS[action]({ db, env, body, userId: verified.userId });
