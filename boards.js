@@ -591,24 +591,16 @@ function buildBoardStyleAnalyzePayload(board) {
 
 // tg.sendData() доставляет данные боту ТОЛЬКО когда вебапп открыт с
 // reply-клавиатуры (KeyboardButton) — документированное ограничение
-// Telegram, см. isOpenedViaInlineButton() в app.js. Библиотека стилей с
-// 2026-07-16 в основном открывается ИНЛАЙН-кнопкой (web_app= напрямую из
-// main_menu_kb и т.д.) — с этого входа sendData молча теряет данные: доска
-// пометится активной на экране, но бот её не получит.
-//
-// Путь «Использовать» решает это через answerWebAppQuery (Cloudflare
-// Function), но для board_refs он не годится: до 8 URL фото — это
-// заведомо больше лимита callback_data в 64 байта (там передаются только
-// cat_idx/item_idx). Текстовый JSON-фолбэк в handle_text (SirNike.py)
-// тоже недостижим — сообщения от answerWebAppQuery блокирует наш же
-// via_bot-гвард в начале handle_text (docs/specs/2026-07-17_via_bot_message_leak.md,
-// добавлен специально, чтобы такие сообщения не читались как обычный
-// текст) — он отрежет JSON раньше, чем тот дойдёт до фолбэк-парсера.
-//
-// Честный фикс уровня MVP (тот же принцип, что studio.js renderStudioNoAuth
-// для аналогичной проблемы студии): не подключать доску молча там, где это
-// физически невозможно — предупредить и не закрывать вебапп, чтобы юзер
-// мог переоткрыть библиотеку правильным путём.
+// Telegram. С инлайн-входа (main_menu_kb и т.д.) используем
+// sendGenerationPayloadViaAnswerWebAppQuery (app.js) — тот же генеральный
+// answerWebAppQuery-путь, что и у всех конструкторов (video/photo/avatar/
+// mj/enhance, фикс 2026-08-19): payload кодируется в message_text
+// (лимит Telegram ~4096 символов), не в callback_data (64 байта) — до 10
+// URL фото доски укладывается с большим запасом. Бэкенд (via_bot JSON-
+// интерцептор в handle_text, SirNike.py) уже понимает board_refs/bsa —
+// ничего дополнительно чинить на бэке не нужно, только сюда добавить
+// вызов вместо тупикового тоста (живая жалоба Ани 2026-08-19: «Понять мой
+// стиль» работала только с кнопки снизу).
 function activateBoardAndContinue(id) {
   const board = getBoardById(id);
   if (!board) return;
@@ -616,12 +608,12 @@ function activateBoardAndContinue(id) {
     showToast("Открой библиотеку внутри Telegram, чтобы подключить доску.");
     return;
   }
-  if (isOpenedViaInlineButton()) {
-    showToast("Из этого входа доска не подключится. Открой библиотеку кнопкой в меню снизу экрана и попробуй ещё раз.");
-    return;
-  }
   setActiveBoardId(id);
   renderBoardBanner();
+  if (isOpenedViaInlineButton()) {
+    sendGenerationPayloadViaAnswerWebAppQuery(buildBoardActivatePayload(board));
+    return;
+  }
   try {
     tg.sendData(buildBoardActivatePayload(board));
     setTimeout(() => tg.close(), 900);
@@ -631,8 +623,7 @@ function activateBoardAndContinue(id) {
   }
 }
 
-// Full: тот же вход/гварды, что у activateBoardAndContinue (инлайн-вход
-// физически не доставит sendData — см. комментарий выше), но другой
+// Full: тот же вход/гварды, что у activateBoardAndContinue, но другой
 // экшен и другая пометка локального состояния.
 function analyzeBoardStyleAndContinue(id) {
   const board = getBoardById(id);
@@ -641,14 +632,14 @@ function analyzeBoardStyleAndContinue(id) {
     showToast("Открой библиотеку внутри Telegram, чтобы подключить доску.");
     return;
   }
-  if (isOpenedViaInlineButton()) {
-    showToast("Из этого входа доска не подключится. Открой библиотеку кнопкой в меню снизу экрана и попробуй ещё раз.");
-    return;
-  }
   board.styleRequested = true;
   setActiveBoardId(id);
   saveBoardsState();
   renderBoardBanner();
+  if (isOpenedViaInlineButton()) {
+    sendGenerationPayloadViaAnswerWebAppQuery(buildBoardStyleAnalyzePayload(board));
+    return;
+  }
   try {
     tg.sendData(buildBoardStyleAnalyzePayload(board));
     setTimeout(() => tg.close(), 900);
