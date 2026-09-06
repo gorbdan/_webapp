@@ -58,10 +58,18 @@ function renderMjRefs() {
   }
 }
 
+// Живой аудит 2026-09-05 (docs/specs/2026-09-05_webapp_hub_silent_submit_fix.md,
+// часть 1) — см. аналогичный комментарий в photo_constructor.js.
 function renderMjContinueBtn() {
   const btn = document.getElementById("mjContinueBtn");
+  const hint = document.getElementById("mjContinueHint");
   if (!btn) return;
-  btn.disabled = mjState.description.trim().length === 0;
+  const empty = mjState.description.trim().length === 0;
+  btn.disabled = empty;
+  if (hint) {
+    hint.textContent = empty ? "Опиши, что хочешь сгенерировать" : "";
+    hint.classList.toggle("hidden", !empty);
+  }
 }
 
 // ── prefill (deep-link «✏️ Изменить» / библиотечное «Использовать») ────

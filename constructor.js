@@ -361,12 +361,36 @@ function vcDescriptionByteLength() {
   return new TextEncoder().encode(vcState.description).length;
 }
 
+// Модели, которые работают ТОЛЬКО от фото (image-to-video) — зеркало
+// проверки в SirNike.py (_cb_video_start, строка ~10378: `if selected_model
+// in {"seedance2", "seedance2_fast", "gemini_omni", "seedance25"} and
+// len(video_images) < 1`). Живой аудит 2026-09-05: с этими моделями по
+// умолчанию (без явной ошибки) можно было отправить payload без фото —
+// бэкенд НЕ отбивает это на этапе start_generation (только позже, на
+// «🚀 Запустить видео»), так что без клиентской проверки юзер ушёл бы с
+// пустыми руками ещё на шаг раньше, чем стоило. Если бэкенд когда-нибудь
+// пробросит этот список через cfg — заменить на чтение оттуда, не хранить
+// два места истины.
+const VC_PHOTO_REQUIRED_MODELS = new Set(["seedance2", "seedance2_fast", "gemini_omni", "seedance25"]);
+
+// Живой аудит 2026-09-05 (docs/specs/2026-09-05_webapp_hub_silent_submit_fix.md,
+// часть 1) — см. аналогичный комментарий в photo_constructor.js.
 function renderVcContinueBtn() {
   const btn = document.getElementById("vcContinueBtn");
+  const hint = document.getElementById("vcContinueHint");
   if (!btn) return;
   const { photos: boardPhotos } = vcActiveBoardPhotos();
-  const hasInput = vcState.description.trim().length > 0 || vcState.photos.length > 0 || boardPhotos.length > 0;
-  btn.disabled = !hasInput;
+  const hasPhoto = vcState.photos.length > 0 || boardPhotos.length > 0;
+  const hasDescription = vcState.description.trim().length > 0;
+  const photoRequired = VC_PHOTO_REQUIRED_MODELS.has(vcState.model);
+  const empty = photoRequired ? !hasPhoto : !hasDescription && !hasPhoto;
+  btn.disabled = empty;
+  if (hint) {
+    hint.textContent = empty
+      ? (photoRequired ? "Эта модель работает только от фото — добавь хотя бы одно" : "Добавь описание или фото")
+      : "";
+    hint.classList.toggle("hidden", !empty);
+  }
 }
 
 function renderVcAll() {

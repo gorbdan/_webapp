@@ -42,10 +42,18 @@ function renderEcRefs() {
   uploadBtn && (uploadBtn.textContent = ecState.refs.length ? "📷 Заменить фото" : "📷 Добавить фото");
 }
 
+// Живой аудит 2026-09-05 (docs/specs/2026-09-05_webapp_hub_silent_submit_fix.md,
+// часть 1) — см. аналогичный комментарий в photo_constructor.js.
 function renderEcContinueBtn() {
   const btn = document.getElementById("ecContinueBtn");
+  const hint = document.getElementById("ecContinueHint");
   if (!btn) return;
-  btn.disabled = ecState.refs.length === 0;
+  const empty = ecState.refs.length === 0;
+  btn.disabled = empty;
+  if (hint) {
+    hint.textContent = empty ? "Добавь фото, которое нужно улучшить" : "";
+    hint.classList.toggle("hidden", !empty);
+  }
 }
 
 const ecPhotoFile = document.getElementById("ecPhotoFile");
