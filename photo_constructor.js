@@ -58,11 +58,25 @@ function renderPcRefs() {
 
 // Кнопка активна только от непустого описания — тот же принцип, что у
 // Midjourney/видео («действие возможно» ⇔ кнопка активна). Фото — всегда
-// опциональны (бэкенд подставит аватар сам), описание — обязательно.
+// опциональны (бэкенд подставит аватар сам), описание — обязательно
+// (проверено по коду _apply_webapp_generation_photo, SirNike.py: пустой
+// description ВСЕГДА отбивается назад «Нужно описание...», даже если refs
+// не пуст — это не баг вебаппа, логика тут и так верна).
+//
+// ⚠️ Живой аудит 2026-09-05 (docs/specs/2026-09-05_webapp_hub_silent_submit_fix.md,
+// часть 1): disabled-кнопка сама по себе (opacity 0.72) была единственной
+// обратной связью — юзер видел «тишину» и не понимал, что не так. Теперь
+// рядом явно показывается, чего не хватает (#pcContinueHint).
 function renderPcContinueBtn() {
   const btn = document.getElementById("pcContinueBtn");
+  const hint = document.getElementById("pcContinueHint");
   if (!btn) return;
-  btn.disabled = pcState.description.trim().length === 0;
+  const empty = pcState.description.trim().length === 0;
+  btn.disabled = empty;
+  if (hint) {
+    hint.textContent = empty ? "Напиши, что сгенерировать" : "";
+    hint.classList.toggle("hidden", !empty);
+  }
 }
 
 // ── prefill (deep-link «✏️ Изменить») ───────────────────────────────────

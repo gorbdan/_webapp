@@ -155,10 +155,18 @@ function renderAvRefs() {
   }
 }
 
+// Живой аудит 2026-09-05 (docs/specs/2026-09-05_webapp_hub_silent_submit_fix.md,
+// часть 1) — см. аналогичный комментарий в photo_constructor.js.
 function renderAvContinueBtn() {
   const btn = document.getElementById("avContinueBtn");
+  const hint = document.getElementById("avContinueHint");
   if (!btn) return;
-  btn.disabled = avState.refs.length === 0;
+  const empty = avState.refs.length === 0;
+  btn.disabled = empty;
+  if (hint) {
+    hint.textContent = empty ? "Добавь хотя бы одно фото" : "";
+    hint.classList.toggle("hidden", !empty);
+  }
 }
 
 // ── prefill (deep-link «✏️ Изменить») ───────────────────────────────────
