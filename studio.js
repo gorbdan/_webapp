@@ -22,7 +22,7 @@ const STUDIO_API = "/api/studio/";
 // мгновенно, без всякой паузы. Явный ретрай в studioCall (см. ниже) — сетка
 // безопасности на случай, если юзер кликнул раньше, чем прогрелось.
 let _initDataWarmup = null;
-function _startInitDataWarmup(timeoutMs = 20000) {
+function _startInitDataWarmup(timeoutMs = 30000) {
   if (_initDataWarmup) return _initDataWarmup;
   _initDataWarmup = (async () => {
     if (tg?.initData) return tg.initData;
@@ -74,7 +74,37 @@ async function _studioCallAttempt(action, body, initData) {
 const STUDIO_RETRY_ATTEMPTS = 3;
 const STUDIO_RETRY_DELAY_MS = 3000;
 
+// 2026-09-07: даже после прогрева в фоне + ретраев юзер живьём ловил
+// "Сессия устарела" на загрузке фото (самое частое действие во всём
+// вебаппе) — race с доставкой initData на Telegram Desktop не имеет
+// гарантированного потолка. Прямое требование Ани — убрать эту гонку
+// ПОЛНОСТЬЮ для загрузки фото. Бэкенд ("upload", functions/api/studio/
+// [[action]].js) больше не требует init_data вообще для этого действия —
+// он не привязан к юзеру (просто грузит на imgbb, userId не используется),
+// поэтому здесь для "upload" не ждём и не шлём init_data вообще, без
+// единой паузы, без ретраев по initData — есть только сетевые ошибки.
+async function _studioUploadCall(body) {
+  try {
+    const res = await fetch(STUDIO_API + "upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!data.ok) {
+      showToast(studioErrorText(data.error));
+      return data;
+    }
+    return data;
+  } catch (e) {
+    console.error("studio upload failed", e);
+    showToast("Не получилось связаться со студией. Попробуй ещё раз.");
+    return null;
+  }
+}
+
 async function studioCall(action, body = {}, { silent = false } = {}) {
+  if (action === "upload") return _studioUploadCall(body);
   if (!tg) {
     if (!silent) showToast("Открой студию внутри Telegram.");
     return null;

@@ -1,22 +1,32 @@
 // Студия нейромультиков — все эндпоинты /api/studio/* (catch-all роутер).
 // ТЗ: docs/specs/2026-07-20_cartoon_studio.md в репо бота.
 //
-// Два круга доступа:
-//  - вебапп: POST JSON {init_data, ...} — HMAC-проверка initData (BOT_TOKEN),
-//    user_id только из проверенного initData;
-//  - бот:    заголовок X-Studio-Secret (STUDIO_POLL_SECRET) — poll/complete/
+// Три круга доступа:
+//  - вебапп (обычные действия): POST JSON {init_data, ...} — HMAC-проверка
+//    initData (BOT_TOKEN), user_id только из проверенного initData;
+//  - вебапп ("upload", WEBAPP_ACTIONS_NO_IDENTITY): БЕЗ init_data вообще —
+//    см. комментарий у объявления множества ниже;
+//  - бот: заголовок X-Studio-Secret (STUDIO_POLL_SECRET) — poll/complete/
 //    prices.push. У бота нет HTTP-входа, он сам поллит эту очередь.
 
 import {
-  json, verifyStudioUser, verifyStudioSignatureOnly, checkBotSecret, uuid, nowIso,
+  json, verifyStudioUser, checkBotSecret, uuid, nowIso,
   getOwnedProject, getConfig, setConfig,
 } from "./_lib.js";
 
 // "upload" не привязан к юзеру (uploadRef игнорирует userId — просто
 // заливает фото на imgbb) и вызывается из ВСЕХ конструкторов вебаппа
-// (кнопка «Добавить фото»), а не только из студии. Полная проверка
-// (auth_date/user) не нужна и только множит ложные "сессия устарела" на
-// самом частом действии — достаточно подписи initData.
+// (кнопка «Добавить фото»), а не только из студии — самое частое действие
+// во всём вебаппе. 2026-08-24: ослабили до проверки только подписи
+// initData (без auth_date/user) — уменьшило частоту ложных "сессия
+// устарела", но не убрало: initData на Telegram Desktop доставляется
+// вебвью с IPC-задержкой без гарантированного потолка (живой репро
+// 2026-09-07 — Аня словила отказ даже после 30с фонового прогрева +
+// 5 ретраев). Прямое требование Ани — убрать эту гонку ПОЛНОСТЬЮ для
+// загрузки фото, раз других денежных последствий у неё нет. "upload"
+// теперь НЕ требует init_data вообще (см. ветку ниже) — принятый
+// компромисс: эндпоинт становится открытым imgbb-прокси для любого, кто
+// найдёт URL (лимит размера в uploadRef остаётся единственной защитой).
 const WEBAPP_ACTIONS_NO_IDENTITY = new Set(["upload"]);
 
 const SCENE_DEFAULT_MODEL = "seedance2_fast";
@@ -437,10 +447,11 @@ export async function onRequestPost(context) {
   }
 
   if (WEBAPP_ACTIONS[action]) {
+    if (WEBAPP_ACTIONS_NO_IDENTITY.has(action)) {
+      return WEBAPP_ACTIONS[action]({ db, env, body, userId: null });
+    }
     if (!env.BOT_TOKEN) return json({ ok: false, error: "server_misconfigured" }, 500);
-    const verified = WEBAPP_ACTIONS_NO_IDENTITY.has(action)
-      ? await verifyStudioSignatureOnly(body?.init_data, env.BOT_TOKEN)
-      : await verifyStudioUser(body?.init_data, env.BOT_TOKEN);
+    const verified = await verifyStudioUser(body?.init_data, env.BOT_TOKEN);
     if (!verified.ok) {
       console.error(`studio auth failed: action=${action} reason=${verified.reason}`);
       return json({ ok: false, error: "invalid_init_data", debug_reason: verified.reason }, 401);

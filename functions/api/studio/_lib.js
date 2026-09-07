@@ -33,11 +33,6 @@ async function hmacSha256(keyBytes, msgBytes) {
 // клипа, и фоновый 4с-поллинг статуса попадает в это окно. Возвращаем ПРИЧИНУ
 // отказа (не просто null) — логируется в роутере через console.error,
 // смотреть в Cloudflare Observability → Logs при повторном воспроизведении.
-// Проверяет только подпись (доказывает, что initData реально выдан
-// Telegram этим ботом) — auth_date/user НЕ проверяются. Для действий вроде
-// "upload", которым не нужен userId (см. WEBAPP_ACTIONS_NO_IDENTITY в
-// роутере) — не имеет смысла валить их из-за протухшей давности сессии
-// или гонки с полем user, раз личность всё равно не используется.
 async function verifyInitDataSignature(initData, botToken) {
   const raw = String(initData || "");
   if (!raw) return { reason: "empty_init_data" };
@@ -58,12 +53,6 @@ async function verifyInitDataSignature(initData, botToken) {
   if (calculatedHash !== receivedHash) return { reason: "hash_mismatch" };
 
   return { ok: true, params };
-}
-
-export async function verifyStudioSignatureOnly(initData, botToken) {
-  const verified = await verifyInitDataSignature(initData, botToken);
-  if (!verified.ok) return verified;
-  return { ok: true };
 }
 
 export async function verifyStudioUser(initData, botToken) {
