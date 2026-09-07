@@ -9,71 +9,127 @@ const STUDIO_API = "/api/studio/";
 // Живой баг 2026-07-28 (Аня, подтверждено debug_reason=empty_init_data):
 // tg.initData физически пуст в момент первого запроса студии — на Telegram
 // Desktop плагин доставляет initData в вебвью не мгновенно (отдельный IPC до
-// хоста), а мы стучимся на сервер сразу при открытии таба. Ждём реального
-// появления initData (шаг 100мс) вместо мгновенной проверки — устраняет
-// гонку в корне, а не только маскирует её на фоновом поллинге.
-// 2026-08-19: 3с оказалось мало — на tdesktop 9.6 IPC регулярно (не
-// изредка) занимает дольше, юзер видел "сессия устарела" почти на каждой
-// загрузке фото. Подняла до 8с — единственная плата за это лишняя пауза
-// ПЕРЕД первой же попыткой, а не постоянные отказы с ручным повтором.
-async function waitForInitData(timeoutMs = 8000) {
-  if (tg?.initData) return tg.initData;
-  const step = 100;
-  let waited = 0;
-  while (waited < timeoutMs) {
-    await new Promise((r) => setTimeout(r, step));
-    waited += step;
+// хоста). 2026-08-19: ждали 3с ПОСЛЕ клика юзера — мало, юзер видел
+// "сессия устарела" почти на каждой загрузке. Подняли до 8с — тоже мало,
+// живой репро 2026-09-07 (Аня, tdesktop) поймал отказ и на 8с. Фиксированное
+// ожидание ПОСЛЕ клика — тупиковый путь: любой таймаут когда-нибудь
+// проигрывает гонке, а юзер каждый раз видит паузу перед своим действием.
+//
+// Правильный фикс: ждать не в момент клика, а СРАЗУ при загрузке вебаппа, в
+// фоне — пока юзер просто смотрит на экран/решает, что писать, IPC успевает
+// доставить initData сам. К моменту клика по «Добавить фото» _initDataWarmup
+// с высокой вероятностью уже resolved — waitForInitData() ниже видит его
+// мгновенно, без всякой паузы. Явный ретрай в studioCall (см. ниже) — сетка
+// безопасности на случай, если юзер кликнул раньше, чем прогрелось.
+let _initDataWarmup = null;
+function _startInitDataWarmup(timeoutMs = 20000) {
+  if (_initDataWarmup) return _initDataWarmup;
+  _initDataWarmup = (async () => {
     if (tg?.initData) return tg.initData;
-  }
-  return tg?.initData || "";
+    const step = 100;
+    let waited = 0;
+    while (waited < timeoutMs) {
+      await new Promise((r) => setTimeout(r, step));
+      waited += step;
+      if (tg?.initData) return tg.initData;
+    }
+    return tg?.initData || "";
+  })();
+  return _initDataWarmup;
+}
+_startInitDataWarmup(); // стартует немедленно при загрузке скрипта, не при первом действии юзера
+
+async function waitForInitData() {
+  // Живая проверка ПЕРВОЙ — если данные уже пришли (обычный случай после
+  // прогрева выше, или пришли уже ПОСЛЕ того как прогрев истёк своим
+  // таймаутом), это мгновенный синхронный путь без единой паузы.
+  if (tg?.initData) return tg.initData;
+  const warmed = await _startInitDataWarmup();
+  return warmed || tg?.initData || "";
 }
 
-async function studioCall(action, body = {}, { silent = false } = {}) {
-  if (!tg) {
-    if (!silent) showToast("Открой студию внутри Telegram.");
-    return null;
-  }
-  const initData = await waitForInitData();
-  // Не дождались даже после ожидания — на фоновом поллинге тихо пропускаем
-  // тик (initData восстановится сам), на явном действии юзера — это уже
-  // реально нештатная ситуация, дальше сработает обычная проверка сервера.
-  if (silent && !initData) return null;
-  // Баг 2026-07-28 диагностирован (debug_reason=empty_init_data — race на
-  // tdesktop, initData доставляется в вебвью не мгновенно) и промасштабирован
-  // ожиданием выше; изредка (медленный IPC) initData всё ещё пуст даже после
-  // 3с ожидания — юзеру нужен понятный текст, не сырые диагностические
-  // факты (были видны как есть до 2026-08-19). Факты остаются в консоли для
-  // отладки будущих похожих случаев, просто не всплывают тостом.
-  if (!silent && !initData) {
-    console.error(
-      "studioCall: initData empty after wait",
-      `platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
-      `hasUnsafe=${!!tg?.initDataUnsafe} unsafeUser=${!!tg?.initDataUnsafe?.user} ` +
-      `unsafeKeys=${tg?.initDataUnsafe ? Object.keys(tg.initDataUnsafe).join(",") : "-"}`
-    );
-    showToast("Сессия устарела — перезайди в вебапп.");
-    return { ok: false, error: "invalid_init_data", debug_reason: "empty_init_data_client" };
-  }
+async function _studioCallAttempt(action, body, initData) {
   try {
     const res = await fetch(STUDIO_API + action, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ init_data: initData, ...body }),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!data.ok) {
-      if (!(silent && data.error === "invalid_init_data")) {
+    return await res.json().catch(() => ({}));
+  } catch (e) {
+    console.error(`studio ${action} failed`, e);
+    return null;
+  }
+}
+
+// 2026-09-07: тост «Сессия устарела» ловился живьём почти на каждой
+// загрузке фото на Telegram Desktop, несмотря на 8с ожидания перед первой
+// попыткой — race с доставкой initData оказался шире одного фиксированного
+// окна. Вместо роста таймаута (у него нет потолка, который гарантированно
+// решит проблему, только всё более длинная пауза перед КАЖДЫМ действием)
+// studioCall теперь повторяет полный цикл (дождаться initData -> запрос) до
+// 3 раз с паузой между попытками — тост показываем только когда ВСЕ попытки
+// исчерпаны. Другие ошибки (не про initData — bad_image, not_enough_funds
+// и т.п.) не ретраятся, показываются сразу как раньше.
+const STUDIO_RETRY_ATTEMPTS = 3;
+const STUDIO_RETRY_DELAY_MS = 3000;
+
+async function studioCall(action, body = {}, { silent = false } = {}) {
+  if (!tg) {
+    if (!silent) showToast("Открой студию внутри Telegram.");
+    return null;
+  }
+
+  let lastResult = null;
+  for (let attempt = 1; attempt <= STUDIO_RETRY_ATTEMPTS; attempt++) {
+    const initData = await waitForInitData();
+    if (!initData) {
+      // Не дождались даже после ожидания — на фоновом поллинге тихо
+      // пропускаем тик (initData восстановится сам), на явном действии
+      // юзера — если есть ещё попытки, пробуем снова без лишнего шума.
+      if (silent) return null;
+      lastResult = { ok: false, error: "invalid_init_data", debug_reason: "empty_init_data_client" };
+      if (attempt < STUDIO_RETRY_ATTEMPTS) {
+        await new Promise((r) => setTimeout(r, STUDIO_RETRY_DELAY_MS));
+        continue;
+      }
+      break;
+    }
+
+    const data = await _studioCallAttempt(action, body, initData);
+    if (data === null) {
+      // Сетевая ошибка/исключение — не про initData, ретраить бессмысленно.
+      if (!silent) showToast("Не получилось связаться со студией. Попробуй ещё раз.");
+      return null;
+    }
+    if (data.ok) return data;
+    lastResult = data;
+    if (silent && data.error === "invalid_init_data") return null;
+    if (data.error !== "invalid_init_data") {
+      // Другая ошибка (bad_image, not_enough_funds и т.п.) — показываем
+      // сразу, повтор с тем же телом запроса ничего не изменит.
+      if (!silent) {
         if (data.debug_reason) console.error(`studio ${action} debug_reason=${data.debug_reason}`);
         showToast(studioErrorText(data.error));
       }
       return data;
     }
-    return data;
-  } catch (e) {
-    console.error(`studio ${action} failed`, e);
-    if (!silent) showToast("Не получилось связаться со студией. Попробуй ещё раз.");
-    return null;
+    if (attempt < STUDIO_RETRY_ATTEMPTS) {
+      await new Promise((r) => setTimeout(r, STUDIO_RETRY_DELAY_MS));
+    }
   }
+
+  // Все попытки — invalid_init_data. Факты в консоль (не тостом — юзеру
+  // нужен понятный текст, не сырая диагностика), тост — один раз в конце.
+  console.error(
+    `studioCall: invalid_init_data after ${STUDIO_RETRY_ATTEMPTS} attempts`,
+    `platform=${tg?.platform || "?"} version=${tg?.version || "?"} ` +
+    `hasUnsafe=${!!tg?.initDataUnsafe} unsafeUser=${!!tg?.initDataUnsafe?.user} ` +
+    `unsafeKeys=${tg?.initDataUnsafe ? Object.keys(tg.initDataUnsafe).join(",") : "-"} ` +
+    `debug_reason=${lastResult?.debug_reason || "-"}`
+  );
+  if (!silent) showToast("Сессия устарела — перезайди в вебапп.");
+  return lastResult;
 }
 
 const STUDIO_ERROR_TEXT = {
