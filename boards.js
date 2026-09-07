@@ -479,6 +479,13 @@ boardPhotoFile?.addEventListener("change", async (e) => {
   const file = e.target.files && e.target.files[0];
   e.target.value = "";
   if (!file || !boardOverlayBoardId) return;
+  // Живая жалоба Ани 2026-09-07: загрузка (сжатие + studioCall) без всякой
+  // обратной связи — юзер не понимал, идёт ли что-то вообще.
+  const originalLabel = boardAddPhotoBtn ? boardAddPhotoBtn.textContent : "";
+  if (boardAddPhotoBtn) {
+    boardAddPhotoBtn.disabled = true;
+    boardAddPhotoBtn.textContent = "⏳ Загружаем фото...";
+  }
   try {
     const base64 = await studioCompressImageToBase64(file);
     if (!base64) throw new Error("empty base64");
@@ -492,6 +499,9 @@ boardPhotoFile?.addEventListener("change", async (e) => {
   } catch (e2) {
     console.error("board photo upload failed", e2);
     showToast("Не получилось обработать фото.");
+  } finally {
+    if (boardAddPhotoBtn) boardAddPhotoBtn.textContent = originalLabel;
+    renderBoardOverlay();
   }
 });
 

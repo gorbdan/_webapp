@@ -136,6 +136,16 @@ pcPhotoFile?.addEventListener("change", async (e) => {
   const file = e.target.files && e.target.files[0];
   e.target.value = "";
   if (!file) return;
+  // Живая жалоба Ани 2026-09-07: загрузка фото (сжатие + studioCall, вместе
+  // до нескольких секунд, особенно на медленной сети) не показывала НИКАКОЙ
+  // обратной связи — юзер не понимал, что что-то вообще происходит. Кнопка
+  // на время загрузки отключается и меняет текст, независимо от исхода.
+  const uploadBtn = document.getElementById("pcUploadBtn");
+  const originalLabel = uploadBtn ? uploadBtn.textContent : "";
+  if (uploadBtn) {
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = "⏳ Загружаем фото...";
+  }
   try {
     const base64 = await studioCompressImageToBase64(file);
     if (!base64) throw new Error("empty base64");
@@ -148,6 +158,9 @@ pcPhotoFile?.addEventListener("change", async (e) => {
   } catch (err) {
     console.error("photo constructor photo upload failed", err);
     showToast("Не получилось обработать фото.");
+  } finally {
+    if (uploadBtn) uploadBtn.textContent = originalLabel;
+    renderPcRefs();
   }
 });
 

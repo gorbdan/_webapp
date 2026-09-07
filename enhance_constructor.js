@@ -62,6 +62,13 @@ ecPhotoFile?.addEventListener("change", async (e) => {
   const file = e.target.files && e.target.files[0];
   e.target.value = "";
   if (!file) return;
+  // Живая жалоба Ани 2026-09-07: загрузка (сжатие + studioCall) без всякой
+  // обратной связи — юзер не понимал, идёт ли что-то вообще.
+  const uploadBtn = document.getElementById("ecUploadBtn");
+  if (uploadBtn) {
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = "⏳ Загружаем фото...";
+  }
   try {
     const base64 = await studioCompressImageToBase64(file);
     if (!base64) throw new Error("empty base64");
@@ -74,6 +81,9 @@ ecPhotoFile?.addEventListener("change", async (e) => {
   } catch (err) {
     console.error("enhance constructor photo upload failed", err);
     showToast("Не получилось обработать фото.");
+  } finally {
+    if (uploadBtn) uploadBtn.disabled = false;
+    renderEcRefs();
   }
 });
 
