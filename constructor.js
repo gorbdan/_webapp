@@ -30,13 +30,15 @@
 // Нет отдельного default_model — бот всегда кладёт seedance2 первым (он
 // включён без фичефлага), поэтому дефолт конструктора = первая модель списка.
 //
-// ⚠️ Бэкенд умеет различать в payload.quality ТОЛЬКО "fast" (-> реальный
-// режим "480p", если он есть у модели) и всё остальное (-> "720p", если он
-// есть у модели, иначе первый доступный режим) — см.
-// _apply_webapp_generation_video в SirNike.py. Поэтому тумблер «Качество»
-// в конструкторе — всегда бинарный 🔥Pro/⚡Fast, а не список реальных modes;
-// показываем его только если у модели есть "480p" (иначе бэкенд всё равно
-// не даст выбрать ничего, кроме 720p/дефолта — незачем врать тумблером).
+// ⚠️ Бэкенд (resolve_webapp_video_quality, SirNike.py) трактует payload.quality
+// универсально: "fast" -> ПЕРВЫЙ режим в modes этой модели, что бы это ни
+// было (480p у Seedance 2, 720p у Kling3/Seedance 2 Fast), "pro"/что угодно
+// ещё -> ПОСЛЕДНИЙ режим. Поэтому тумблер «Качество» в конструкторе —
+// всегда бинарный 🔥Pro/⚡Fast, а не список реальных modes; показываем его
+// при ЛЮБЫХ 2+ режимах у модели (hasQualityToggle: modes.length > 1), не
+// только когда среди них буквально есть "480p" — последнее было живым
+// багом 2026-10-06: прятало тумблер у Kling3 и Seedance 2 Fast (у обоих
+// пара режимов 720p/1080p, без 480p).
 
 const FALLBACK_CFG = {
   video_models: [
@@ -119,7 +121,15 @@ function vcModelFromCfgEntry(m) {
     formats: Array.isArray(m.aspects) && m.aspects.length ? m.aspects : ["16:9", "9:16"],
     durations: Array.isArray(m.durations) && m.durations.length ? m.durations : [5],
     faceGrid: !!m.face_grid,
-    hasQualityToggle: modes.includes("480p"),
+    // Живая жалоба Ани 2026-10-06: тумблер качества не показывался для
+    // Kling 3.0 (720p/1080p) и Seedance 2 Fast (720p/1080p по дефолту
+    // SEEDANCE_FAST_MODE_OPTIONS) — старая эвристика "есть 480p в modes"
+    // предполагала, что ВСЕ модели с тумблером используют именно пару
+    // 480p/720p, но у этих двух нижний тир — 720p, не 480p. Тумблер нужен
+    // ровно когда есть больше одного режима на выбор, независимо от того,
+    // какие именно это разрешения (binary fast/pro — SirNike.py,
+    // VIDEO_QUALITY_TOGGLE_MODELS берёт первый/последний элемент modes).
+    hasQualityToggle: modes.length > 1,
     modes, // нужен целиком (не только hasQualityToggle) — см. vcPriceBucketKey
     prices: m.prices && typeof m.prices === "object" ? m.prices : {},
   };
