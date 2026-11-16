@@ -71,7 +71,7 @@ export async function verifyStudioUser(initData, botToken) {
   }
   const userId = Number(user?.id);
   if (!Number.isInteger(userId) || userId <= 0) return { reason: "bad_user_id" };
-  return { ok: true, userId };
+  return { ok: true, userId, username: String(user?.username || "") };
 }
 
 export function checkBotSecret(request, env) {

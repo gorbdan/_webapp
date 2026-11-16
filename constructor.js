@@ -310,6 +310,7 @@ function renderVcPrice() {
   if (!amountEl) return;
   const price = vcCalcPrice();
   amountEl.textContent = price === null ? "цена уточнится в чате" : `≈ ${price} 🍇`;
+  if (typeof renderVcContinueBtn === "function") renderVcContinueBtn();
 }
 
 function renderVcRefs() {
@@ -394,7 +395,13 @@ function renderVcContinueBtn() {
   const hasDescription = vcState.description.trim().length > 0;
   const photoRequired = VC_PHOTO_REQUIRED_MODELS.has(vcState.model);
   const empty = photoRequired ? !hasPhoto : !hasDescription && !hasPhoto;
-  btn.disabled = empty;
+  btn.disabled = empty || vcSubmitting;
+  if (!vcSubmitting) {
+    const price = vcGenTransport ? vcCalcPrice() : null;
+    btn.textContent = vcGenTransport
+      ? (price === null ? "🚀 Создать" : `🚀 Создать · ≈${price} 🍇`)
+      : "🚀 Продолжить в чат";
+  }
   if (hint) {
     hint.textContent = empty
       ? (photoRequired ? "Эта модель работает только от фото — добавь хотя бы одно" : "Добавь описание или фото")
@@ -493,11 +500,21 @@ function buildStartGenerationPayload() {
   return JSON.stringify(payload);
 }
 
-document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
-  if (!tg) {
-    showToast("Открой Конструктор внутри Telegram, чтобы продолжить.");
-    return;
-  }
+// «Создать» без выхода из вебаппа (docs/specs/2026-11-16_webapp_gen_transport.md):
+// задание уходит боту по HTTP-очереди (gen_transport.js), прогресс показываем
+// тут же. Если схема недоступна (бот не на связи / 404 / 5xx) — прежний путь
+// через sendData, юзер ничего не замечает кроме старой подписи кнопки.
+let vcGenTransport = false; // выставляет genTransportReady() после загрузки
+let vcSubmitting = false;
+
+function vcSetSubmitError(text) {
+  const el = document.getElementById("vcSubmitError");
+  if (!el) return;
+  el.textContent = text || "";
+  el.classList.toggle("hidden", !text);
+}
+
+function vcSendViaChat() {
   // sendData работает только с reply-клавиатуры/Menu Button — с инлайн-
   // кнопки (в т.ч. «✏️ Изменить» на карточке подтверждения) обязателен
   // answerWebAppQuery (см. sendGenerationPayloadViaAnswerWebAppQuery в app.js).
@@ -512,7 +529,57 @@ document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
     console.error("constructor sendData failed", e);
     showToast("Не получилось отправить настройки. Попробуй ещё раз.");
   }
+}
+
+async function vcSubmitViaQueue() {
+  const btn = document.getElementById("vcContinueBtn");
+  vcSubmitting = true;
+  vcSetSubmitError("");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ Отправляем…";
+  }
+  let outcome;
+  try {
+    outcome = await genSubmitAndWait(buildStartGenerationPayload());
+  } catch (e) {
+    console.error("constructor gen submit crashed", e);
+    outcome = { kind: "fallback" };
+  }
+  vcSubmitting = false;
+  renderVcContinueBtn();
+
+  if (outcome.kind === "fallback") {
+    vcGenTransport = false; // схема недоступна — дальше подпись и путь по-старому
+    renderVcContinueBtn();
+    vcSendViaChat();
+  } else if (outcome.kind === "launched") {
+    const progressId = outcome.result && outcome.result.progress_id;
+    if (progressId) progressStart(progressId);
+    else progressShowStarted();
+  } else if (outcome.kind === "timeout") {
+    vcSetSubmitError("Бот занят, попробуй через минуту.");
+  } else {
+    vcSetSubmitError(outcome.text || "Не получилось, попробуй ещё раз.");
+  }
+}
+
+document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
+  if (!tg) {
+    showToast("Открой Конструктор внутри Telegram, чтобы продолжить.");
+    return;
+  }
+  if (vcSubmitting) return;
+  if (vcGenTransport) vcSubmitViaQueue();
+  else vcSendViaChat();
 });
+
+if (typeof genTransportReady === "function") {
+  genTransportReady().then((ok) => {
+    vcGenTransport = ok;
+    renderVcContinueBtn();
+  });
+}
 
 // ── Инициализация ────────────────────────────────────────────────────
 
