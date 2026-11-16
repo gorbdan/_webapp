@@ -872,6 +872,23 @@ h1 {
 
   .topbar {
     align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Аудит 2026-08-17 №7: длинный заголовок («Студия мультиков», «Видео для
+     Reels») выталкивал иконку темы за правый край на 375px. Заголовок
+     теперь сжимается (с многоточием как крайняя мера), иконки не уезжают. */
+  .topbar h1 {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 17px;
+    line-height: 44px;
+  }
+
+  .topbar-actions {
+    gap: 6px;
   }
 
   .stats {

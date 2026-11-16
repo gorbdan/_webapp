@@ -505,7 +505,33 @@ function createImagePreview(item) {
   return image;
 }
 
-function createVideoPreview(item) {
+// Аудит 2026-08-17 №6: раньше КАЖДАЯ видео-карточка сразу ставила video.src,
+// и на первой же загрузке (даже на скрытой вкладке «Создать») браузер тянул
+// ~13 mp4 целиком и по кругу абортил/перезапрашивал — вебвью переставало
+// отвечать на тапы. Теперь src ставится, только когда карточка реально вошла
+// во вьюпорт (скрытая вкладка display:none и невидимая часть горизонтального
+// ряда не пересекаются), один раз на файл. В модалке (eager) грузим сразу.
+let _videoPreviewObserver = null;
+function getVideoPreviewObserver() {
+  if (_videoPreviewObserver || typeof IntersectionObserver === "undefined") return _videoPreviewObserver;
+  _videoPreviewObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target;
+        _videoPreviewObserver.unobserve(el);
+        if (el.dataset.src) {
+          el.src = el.dataset.src;
+          delete el.dataset.src;
+        }
+      }
+    },
+    { rootMargin: "200px" }
+  );
+  return _videoPreviewObserver;
+}
+
+function createVideoPreview(item, { eager = false } = {}) {
   const videoUrl = normalizeUrl(item.video_url || item.preview_video_url);
   if (!videoUrl) return createImagePreview(item);
 
@@ -516,7 +542,13 @@ function createVideoPreview(item) {
   video.playsInline = true;
   video.loop = true;
   video.controls = false;
-  video.src = videoUrl;
+  const observer = eager ? null : getVideoPreviewObserver();
+  if (observer) {
+    video.dataset.src = videoUrl;
+    observer.observe(video);
+  } else {
+    video.src = videoUrl;
+  }
 
   const poster = normalizeUrl(item.poster_url || item.example_url);
   if (poster) video.poster = poster;
@@ -561,7 +593,7 @@ function createPreview(item) {
 }
 
 function createFullPreview(item) {
-  if (isVideoItem(item)) return createVideoPreview(item);
+  if (isVideoItem(item)) return createVideoPreview(item, { eager: true });
   const image = document.createElement("img");
   image.className = "preview loaded";
   image.alt = item.title || "Пример";
