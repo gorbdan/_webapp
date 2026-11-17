@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="./studio.css" />
     <link rel="stylesheet" href="./boards.css" />
     <link rel="stylesheet" href="./constructor.css?v=20261116-gen-transport" />
-    <link rel="stylesheet" href="./progress.css" />
+    <link rel="stylesheet" href="./progress.css?v=20261117-stop" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -433,7 +433,10 @@
         <div class="progress-shell">
           <div class="progress-spinner" id="progressSpinner" aria-hidden="true"></div>
           <p class="progress-stage" id="progressStageText">Готовим…</p>
+          <video class="progress-video hidden" id="progressVideo" controls playsinline preload="metadata"></video>
           <p class="progress-hint" id="progressHintText"></p>
+          <button class="ghost-btn progress-block-btn progress-stop-btn hidden" id="progressStopBtn" type="button">❌ Остановить</button>
+          <p class="progress-stop-note hidden" id="progressStopNote" role="alert"></p>
           <button class="primary-btn progress-block-btn hidden" id="progressCloseBtn" type="button">Закрыть</button>
         </div>
       </div>
@@ -596,12 +599,12 @@
     <script src="./app.js?v=20261117-queue"></script>
     <script src="./studio.js?v=20260907-studio-upload-no-auth"></script>
     <script src="./boards.js?v=20261117-queue"></script>
-    <script src="./gen_transport.js?v=20261117-queue"></script>
+    <script src="./gen_transport.js?v=20261117-stop"></script>
     <script src="./constructor.js?v=20261117-queue"></script>
     <script src="./mj_constructor.js?v=20261117-queue"></script>
     <script src="./avatar_constructor.js?v=20261117-queue"></script>
     <script src="./photo_constructor.js?v=20261117-queue"></script>
     <script src="./enhance_constructor.js?v=20261117-queue"></script>
-    <script src="./progress.js?v=20261117-queue"></script>
+    <script src="./progress.js?v=20261117-stop"></script>
   </body>
 </html>

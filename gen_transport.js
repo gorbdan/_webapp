@@ -47,7 +47,7 @@ function genTransportReady() {
 
 function genErrorText(code, result) {
   const first = result && Array.isArray(result.messages) ? String(result.messages[0] || "").trim() : "";
-  if (code === "not_started" && first) return first;
+  if ((code === "not_started" || code === "not_accepted") && first) return first;
   if (code === "too_many") return "Уже идёт 5 генераций. Дождись, пока одна закончится.";
   return "Не получилось, попробуй ещё раз.";
 }

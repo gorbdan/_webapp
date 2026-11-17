@@ -18,6 +18,8 @@ const PROGRESS_POLL_MS = 4000;
 let progressJobId = "";
 let progressTimer = null;
 let progressStopped = false;
+let progressProduct = "";
+let progressCancelling = false;
 
 function progressParams() {
   const params = new URLSearchParams(window.location.search);
@@ -32,7 +34,12 @@ function progressSetSpinnerState(state) {
   el.classList.toggle("progress-spinner--error", state === "error");
 }
 
-function progressRenderIdle(stageText, hintText, { final = false, state = "loading" } = {}) {
+// «Остановить» есть только у видео (фото/аватар — общая очередь, отмены нет).
+function progressRenderIdle(stageText, hintText, { final = false, state = "loading", canStop = false, videoUrl = "" } = {}) {
+  const stopBtn = document.getElementById("progressStopBtn");
+  if (stopBtn) stopBtn.classList.toggle("hidden", !canStop);
+  if (!canStop || final) progressSetStopNote("");
+  progressSetVideo(videoUrl);
   const stageEl = document.getElementById("progressStageText");
   const hintEl = document.getElementById("progressHintText");
   const closeBtn = document.getElementById("progressCloseBtn");
@@ -40,6 +47,31 @@ function progressRenderIdle(stageText, hintText, { final = false, state = "loadi
   if (hintEl) hintEl.textContent = hintText;
   progressSetSpinnerState(state);
   if (closeBtn) closeBtn.classList.toggle("hidden", !final);
+}
+
+function progressSetStopNote(text) {
+  const el = document.getElementById("progressStopNote");
+  if (!el) return;
+  el.textContent = text || "";
+  el.classList.toggle("hidden", !text);
+}
+
+// Плеер готового видео. Ссылка провайдера живёт недолго — показываем сразу;
+// если плеер не смог загрузиться, прячем его (видео и так пришло в чат).
+function progressSetVideo(url) {
+  const el = document.getElementById("progressVideo");
+  if (!el) return;
+  if (!url) {
+    if (el.getAttribute("src")) {
+      el.pause();
+      el.removeAttribute("src");
+      el.load();
+    }
+    el.classList.add("hidden");
+    return;
+  }
+  if (el.getAttribute("src") !== url) el.setAttribute("src", url);
+  el.classList.remove("hidden");
 }
 
 async function progressFetch(jobId) {
@@ -89,9 +121,14 @@ async function progressTick() {
     return;
   }
 
+  if (progressCancelling) return; // идёт запрос отмены — не перетираем экран
+
   if (data.status === "done") {
     progressStopPolling();
-    progressRenderIdle("Готово! 🎉", "Открой чат — результат уже там.", { final: true, state: "done" });
+    const url = progressProduct === "video" && typeof data.result_url === "string" ? data.result_url : "";
+    progressRenderIdle("Готово! 🎉",
+      url ? "Видео также пришло в чат. Ссылка живёт недолго, сохрани ролик." : "Открой чат — результат уже там.",
+      { final: true, state: "done", videoUrl: url });
     return;
   }
   if (data.status === "error") {
@@ -99,13 +136,45 @@ async function progressTick() {
     progressRenderIdle("Не получилось 😔", "Открой чат — там подробности (и возврат изюминок, если списались).", { final: true, state: "error" });
     return;
   }
-  progressRenderIdle(String(data.stage || "Готовим…"), "Можно закрыть — результат всё равно придёт в чат.", { final: false, state: "loading" });
+  progressRenderIdle(String(data.stage || "Готовим…"), "Можно закрыть — результат всё равно придёт в чат.",
+    { final: false, state: "loading", canStop: progressProduct === "video" });
+}
+
+// «❌ Остановить» (только видео): тихое действие cancel_generation через
+// очередь. done = отмена запрошена, изюминки вернёт бот; not_accepted =
+// уже завершилось, причина — текстом бота под кнопкой.
+async function progressCancel() {
+  if (progressCancelling || progressProduct !== "video") return;
+  const btn = document.getElementById("progressStopBtn");
+  progressCancelling = true;
+  progressSetStopNote("");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Останавливаем…"; }
+
+  let out;
+  try {
+    out = await genSubmitAndWait(JSON.stringify({ action: "cancel_generation", product: "video" }));
+  } catch (e) {
+    console.error("cancel failed", e);
+    out = { kind: "rejected", text: "Не получилось остановить, попробуй ещё раз." };
+  }
+  progressCancelling = false;
+  if (btn) { btn.disabled = false; btn.textContent = "❌ Остановить"; }
+
+  if (out.kind === "launched") {
+    progressStopPolling();
+    progressRenderIdle("Остановлено", "Изюминки вернутся на баланс.", { final: true, state: "error" });
+    return;
+  }
+  if (out.kind === "timeout") progressSetStopNote("Бот занят, попробуй через минуту.");
+  else if (out.kind === "fallback") progressSetStopNote("Остановить не получилось. Попробуй в чате.");
+  else progressSetStopNote(out.text || "Не получилось остановить, попробуй ещё раз.");
 }
 
 let progressCloseBound = false;
 function progressBindClose() {
   if (progressCloseBound) return;
   progressCloseBound = true;
+  document.getElementById("progressStopBtn")?.addEventListener("click", progressCancel);
   document.getElementById("progressCloseBtn")?.addEventListener("click", () => {
     if (tg) tg.close();
   });
@@ -114,9 +183,11 @@ function progressBindClose() {
 // Запуск опроса по job_id. Вызывается и из deep-link (progressInit), и
 // изнутри вебаппа (gen_transport: «Создать» → прогресс без закрытия).
 // Повторный вызов (вторая генерация подряд) сбрасывает прошлый опрос.
-function progressStart(jobId) {
+function progressStart(jobId, product) {
   progressStopPolling();
   progressStopped = false;
+  progressCancelling = false;
+  progressProduct = String(product || "").trim().toLowerCase();
   switchTab("progress");
 
   progressBindClose();
@@ -127,7 +198,8 @@ function progressStart(jobId) {
     return;
   }
 
-  progressRenderIdle("Готовим…", "Можно закрыть — результат всё равно придёт в чат.", { final: false, state: "loading" });
+  progressRenderIdle("Готовим…", "Можно закрыть — результат всё равно придёт в чат.",
+    { final: false, state: "loading", canStop: progressProduct === "video" });
   progressTick();
   progressTimer = setInterval(progressTick, PROGRESS_POLL_MS);
 }
@@ -142,9 +214,9 @@ function progressShowStarted() {
 }
 
 function progressInit() {
-  const { tab, jobId } = progressParams();
+  const { tab, jobId, product } = progressParams();
   if (tab !== "progress") return;
-  progressStart(jobId);
+  progressStart(jobId, product);
 }
 
 try {
