@@ -65,7 +65,7 @@ function renderMjContinueBtn() {
   const hint = document.getElementById("mjContinueHint");
   if (!btn) return;
   const empty = mjState.description.trim().length === 0;
-  btn.disabled = empty;
+  mjGen.decorate(empty);
   if (hint) {
     hint.textContent = empty ? "Опиши, что хочешь сгенерировать" : "";
     hint.classList.toggle("hidden", !empty);
@@ -166,11 +166,7 @@ function buildMjStartGenerationPayload() {
   return JSON.stringify(payload);
 }
 
-document.getElementById("mjContinueBtn")?.addEventListener("click", () => {
-  if (!tg) {
-    showToast("Открой Midjourney внутри Telegram, чтобы продолжить.");
-    return;
-  }
+function mjSendViaChat() {
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
     sendGenerationPayloadViaAnswerWebAppQuery(buildMjStartGenerationPayload());
     return;
@@ -182,7 +178,16 @@ document.getElementById("mjContinueBtn")?.addEventListener("click", () => {
     console.error("mj constructor sendData failed", e);
     showToast("Не получилось отправить настройки. Попробуй ещё раз.");
   }
+}
+
+const mjGen = genBindConstructor({
+  btnId: "mjContinueBtn",
+  errId: "mjSubmitError",
+  buildPayload: buildMjStartGenerationPayload,
+  sendViaChat: mjSendViaChat,
+  noTgToast: "Открой Midjourney внутри Telegram, чтобы продолжить.",
 });
+mjGen.rerender = renderMjContinueBtn;
 
 (function initMjCostHint() {
   const el = document.getElementById("mjCostHint");

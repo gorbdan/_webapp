@@ -95,3 +95,106 @@ async function genSubmitAndWait(payloadText) {
   }
   return { kind: "timeout" };
 }
+
+// ── Общие обёртки для экранов ─────────────────────────────────────────
+
+// Кнопка «Создать» конструктора: тот же поток, что у видео (макет одобрен
+// 2026-11-16) — «⏳ Отправляем…», плашка ошибки под кнопкой, прогресс внутри
+// вебаппа, откат на прежний путь (sendViaChat) если схема недоступна.
+//   btnId/errId — id кнопки и плашки ошибки; buildPayload() -> JSON-строка;
+//   sendViaChat() — прежний путь (sendData/answerWebAppQuery);
+//   newLabel() — подпись при новой схеме (видео добавляет цену).
+// Возвращает ctl: экран зовёт ctl.decorate(empty) из своего renderXContinueBtn
+// вместо ручной установки disabled/подписи.
+function genBindConstructor({ btnId, errId, buildPayload, sendViaChat, newLabel, noTgToast }) {
+  const ctl = { transport: false, submitting: false, rerender: null };
+  const btn = () => document.getElementById(btnId);
+  const setError = (text) => {
+    const el = document.getElementById(errId);
+    if (!el) return;
+    el.textContent = text || "";
+    el.classList.toggle("hidden", !text);
+  };
+
+  ctl.decorate = (empty) => {
+    const b = btn();
+    if (!b) return;
+    b.disabled = Boolean(empty) || ctl.submitting;
+    if (!ctl.submitting) {
+      b.textContent = ctl.transport
+        ? (typeof newLabel === "function" ? newLabel() : "🚀 Создать")
+        : "🚀 Продолжить в чат";
+    }
+  };
+
+  async function run() {
+    const b = btn();
+    ctl.submitting = true;
+    setError("");
+    if (b) {
+      b.disabled = true;
+      b.textContent = "⏳ Отправляем…";
+    }
+    let outcome;
+    try {
+      outcome = await genSubmitAndWait(buildPayload());
+    } catch (e) {
+      console.error("gen submit crashed", e);
+      outcome = { kind: "fallback" };
+    }
+    ctl.submitting = false;
+
+    if (outcome.kind === "fallback") {
+      ctl.transport = false; // схема недоступна — дальше подпись и путь по-старому
+      if (ctl.rerender) ctl.rerender();
+      sendViaChat();
+      return;
+    }
+    if (ctl.rerender) ctl.rerender();
+    if (outcome.kind === "launched") {
+      const progressId = outcome.result && outcome.result.progress_id;
+      if (progressId) progressStart(progressId, outcome.result.product);
+      else progressShowStarted();
+    } else if (outcome.kind === "timeout") {
+      setError("Бот занят, попробуй через минуту.");
+    } else {
+      setError(outcome.text || "Не получилось, попробуй ещё раз.");
+    }
+  }
+
+  btn()?.addEventListener("click", () => {
+    if (!tg) {
+      showToast(noTgToast || "Открой экран внутри Telegram, чтобы продолжить.");
+      return;
+    }
+    if (ctl.submitting) return;
+    if (ctl.transport) run();
+    else sendViaChat();
+  });
+
+  genTransportReady().then((ok) => {
+    ctl.transport = ok;
+    if (ctl.rerender) ctl.rerender();
+  });
+  return ctl;
+}
+
+// Мгновенное действие (смена аватара, выбор доски, пополнение): без экрана
+// прогресса и без закрытия вебаппа. Бот отвечает result.instant=true; текст для
+// тоста — result.messages[0]. fallback() — прежний путь через sendData.
+// Возвращает true, только если действие применено через очередь.
+//   closeAfter — действие отвечает в чате (счёт, анализ доски): после «ок»
+//   вебапп закрывается, как раньше.
+async function genInstant(payload, { okText = "Готово", fallback, closeAfter = false } = {}) {
+  if (!tg || !(await genTransportReady())) { fallback(); return false; }
+  const out = await genSubmitAndWait(JSON.stringify(payload));
+  if (out.kind === "fallback") { fallback(); return false; }
+  if (out.kind === "launched") {
+    const msgs = out.result && Array.isArray(out.result.messages) ? out.result.messages : [];
+    showToast(String(msgs[0] || okText));
+    if (closeAfter) setTimeout(() => tg.close(), 900);
+    return true; // применено через очередь, вебапп остаётся открытым
+  }
+  showToast(out.kind === "timeout" ? "Бот занят, попробуй через минуту." : (out.text || "Не получилось, попробуй ещё раз."));
+  return false;
+}

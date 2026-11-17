@@ -82,9 +82,18 @@ async function progressComplete(db, body) {
   if (!id) return json({ ok: false, error: "bad_request" }, 400);
   const status = body?.status === "error" ? "error" : "done";
   const stage = String(body?.stage || "").slice(0, 200) || (status === "error" ? "Не получилось" : "Готово!");
-  const res = await db.prepare(
-    "UPDATE generation_progress SET status = ?, stage = ?, progress_pct = ?, updated_at = ? WHERE id = ?",
-  ).bind(status, stage, status === "done" ? 100 : 0, nowIso(), id).run();
+  // Превью результата (только видео): https-ссылка провайдера, живёт недолго.
+  // Кладём внутрь meta (JSON), поэтому миграция схемы D1 не нужна.
+  const resultUrl = String(body?.result_url || "").trim();
+  const validUrl = status === "done" && /^https:\/\/[^\s]{4,2000}$/.test(resultUrl) ? resultUrl : "";
+  const res = validUrl
+    ? await db.prepare(
+      "UPDATE generation_progress SET status = ?, stage = ?, progress_pct = ?, updated_at = ?, " +
+      "meta = json_set(CASE WHEN json_valid(meta) THEN meta ELSE '{}' END, '$.result_url', ?) WHERE id = ?",
+    ).bind(status, stage, 100, nowIso(), validUrl, id).run()
+    : await db.prepare(
+      "UPDATE generation_progress SET status = ?, stage = ?, progress_pct = ?, updated_at = ? WHERE id = ?",
+    ).bind(status, stage, status === "done" ? 100 : 0, nowIso(), id).run();
   if (!res?.meta?.changes) return json({ ok: false, error: "not_found" }, 404);
   return json({ ok: true });
 }
@@ -105,6 +114,7 @@ async function progressGet(db, userId, body) {
     stage: row.stage,
     product: row.product,
     progress_pct: row.progress_pct,
+    result_url: typeof meta.result_url === "string" ? meta.result_url : "",
     meta,
     updated_at: row.updated_at,
   });

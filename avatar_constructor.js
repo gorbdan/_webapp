@@ -44,22 +44,33 @@ function avParseExistingFromUrl() {
   }
 }
 
+let avExisting = [];
+
 function avSwitchActive(kind) {
   if (!tg) {
     showToast("Открой Аватар внутри Telegram, чтобы переключить.");
     return;
   }
-  if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
-    sendGenerationPayloadViaAnswerWebAppQuery(JSON.stringify({ action: "saa", at: kind }));
-    return;
-  }
-  try {
-    tg.sendData(JSON.stringify({ action: "saa", at: kind }));
-    setTimeout(() => tg.close(), 500);
-  } catch (e) {
-    console.error("avatar constructor switch-active sendData failed", e);
-    showToast("Не получилось переключить аватар. Попробуй ещё раз.");
-  }
+  const legacy = () => {
+    if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
+      sendGenerationPayloadViaAnswerWebAppQuery(JSON.stringify({ action: "saa", at: kind }));
+      return;
+    }
+    try {
+      tg.sendData(JSON.stringify({ action: "saa", at: kind }));
+      setTimeout(() => tg.close(), 500);
+    } catch (e) {
+      console.error("avatar constructor switch-active sendData failed", e);
+      showToast("Не получилось переключить аватар. Попробуй ещё раз.");
+    }
+  };
+  // Через HTTP-очередь вебапп не закрывается: бот молча применяет, тост «Готово»
+  // показываем сами и сразу перерисовываем «активен» в списке.
+  genInstant({ action: "saa", at: kind }, { okText: "Аватар переключён", fallback: legacy }).then((applied) => {
+    if (!applied) return;
+    avExisting = avExisting.map((a) => ({ ...a, active: a.kind === kind }));
+    renderAvExisting(avExisting);
+  });
 }
 
 function renderAvExisting(avatars) {
@@ -162,7 +173,7 @@ function renderAvContinueBtn() {
   const hint = document.getElementById("avContinueHint");
   if (!btn) return;
   const empty = avState.refs.length === 0;
-  btn.disabled = empty;
+  avGen.decorate(empty);
   if (hint) {
     hint.textContent = empty ? "Добавь хотя бы одно фото" : "";
     hint.classList.toggle("hidden", !empty);
@@ -246,11 +257,7 @@ function buildAvStartGenerationPayload() {
   });
 }
 
-document.getElementById("avContinueBtn")?.addEventListener("click", () => {
-  if (!tg) {
-    showToast("Открой Аватар внутри Telegram, чтобы продолжить.");
-    return;
-  }
+function avSendViaChat() {
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
     sendGenerationPayloadViaAnswerWebAppQuery(buildAvStartGenerationPayload());
     return;
@@ -262,7 +269,16 @@ document.getElementById("avContinueBtn")?.addEventListener("click", () => {
     console.error("avatar constructor sendData failed", e);
     showToast("Не получилось отправить настройки. Попробуй ещё раз.");
   }
+}
+
+const avGen = genBindConstructor({
+  btnId: "avContinueBtn",
+  errId: "avSubmitError",
+  buildPayload: buildAvStartGenerationPayload,
+  sendViaChat: avSendViaChat,
+  noTgToast: "Открой Аватар внутри Telegram, чтобы продолжить.",
 });
+avGen.rerender = renderAvContinueBtn;
 
 (function observeAvPriceStrip() {
   const strip = document.getElementById("avPriceStrip");
@@ -290,4 +306,5 @@ avApplyPrefill(avParsePrefillFromUrl());
 renderAvKindSeg();
 renderAvRefs();
 renderAvContinueBtn();
-renderAvExisting(avParseExistingFromUrl());
+avExisting = avParseExistingFromUrl();
+renderAvExisting(avExisting);

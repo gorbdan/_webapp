@@ -72,7 +72,7 @@ function renderPcContinueBtn() {
   const hint = document.getElementById("pcContinueHint");
   if (!btn) return;
   const empty = pcState.description.trim().length === 0;
-  btn.disabled = empty;
+  pcGen.decorate(empty);
   if (hint) {
     hint.textContent = empty ? "Напиши, что сгенерировать" : "";
     hint.classList.toggle("hidden", !empty);
@@ -175,11 +175,7 @@ function buildPcStartGenerationPayload() {
   return JSON.stringify(payload);
 }
 
-document.getElementById("pcContinueBtn")?.addEventListener("click", () => {
-  if (!tg) {
-    showToast("Открой Фото внутри Telegram, чтобы продолжить.");
-    return;
-  }
+function pcSendViaChat() {
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
     sendGenerationPayloadViaAnswerWebAppQuery(buildPcStartGenerationPayload());
     return;
@@ -191,7 +187,16 @@ document.getElementById("pcContinueBtn")?.addEventListener("click", () => {
     console.error("photo constructor sendData failed", e);
     showToast("Не получилось отправить настройки. Попробуй ещё раз.");
   }
+}
+
+const pcGen = genBindConstructor({
+  btnId: "pcContinueBtn",
+  errId: "pcSubmitError",
+  buildPayload: buildPcStartGenerationPayload,
+  sendViaChat: pcSendViaChat,
+  noTgToast: "Открой Фото внутри Telegram, чтобы продолжить.",
 });
+pcGen.rerender = renderPcContinueBtn;
 
 (function observePcPriceStrip() {
   const strip = document.getElementById("pcPriceStrip");
