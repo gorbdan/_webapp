@@ -102,15 +102,24 @@ async function progressTick() {
   progressRenderIdle(String(data.stage || "Готовим…"), "Можно закрыть — результат всё равно придёт в чат.", { final: false, state: "loading" });
 }
 
-function progressInit() {
-  const { tab, jobId } = progressParams();
-  if (tab !== "progress") return;
-  switchTab("progress");
-
-  const closeBtn = document.getElementById("progressCloseBtn");
-  closeBtn?.addEventListener("click", () => {
+let progressCloseBound = false;
+function progressBindClose() {
+  if (progressCloseBound) return;
+  progressCloseBound = true;
+  document.getElementById("progressCloseBtn")?.addEventListener("click", () => {
     if (tg) tg.close();
   });
+}
+
+// Запуск опроса по job_id. Вызывается и из deep-link (progressInit), и
+// изнутри вебаппа (gen_transport: «Создать» → прогресс без закрытия).
+// Повторный вызов (вторая генерация подряд) сбрасывает прошлый опрос.
+function progressStart(jobId) {
+  progressStopPolling();
+  progressStopped = false;
+  switchTab("progress");
+
+  progressBindClose();
 
   progressJobId = String(jobId || "").trim();
   if (!progressJobId) {
@@ -121,6 +130,21 @@ function progressInit() {
   progressRenderIdle("Готовим…", "Можно закрыть — результат всё равно придёт в чат.", { final: false, state: "loading" });
   progressTick();
   progressTimer = setInterval(progressTick, PROGRESS_POLL_MS);
+}
+
+// Генерация запущена, но записи прогресса нет (GEN_PROGRESS_ENABLED выключен
+// на боте): честно говорим, что запущено, без вечного «Готовим…».
+function progressShowStarted() {
+  progressStopPolling();
+  switchTab("progress");
+  progressRenderIdle("Запущено 🚀", "Результат придёт в чат — вебапп можно закрыть.", { final: true, state: "done" });
+  progressBindClose();
+}
+
+function progressInit() {
+  const { tab, jobId } = progressParams();
+  if (tab !== "progress") return;
+  progressStart(jobId);
 }
 
 try {
