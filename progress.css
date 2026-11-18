@@ -67,3 +67,22 @@
   width: 100%;
   margin-top: 10px;
 }
+
+.progress-stop-btn {
+  color: var(--brand, #b21f4a);
+  border-color: var(--brand, #b21f4a);
+}
+
+.progress-stop-note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.progress-video {
+  width: 100%;
+  max-height: 60vh;
+  border-radius: 12px;
+  background: #000;
+}
