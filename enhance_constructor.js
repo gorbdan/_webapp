@@ -49,7 +49,7 @@ function renderEcContinueBtn() {
   const hint = document.getElementById("ecContinueHint");
   if (!btn) return;
   const empty = ecState.refs.length === 0;
-  btn.disabled = empty;
+  ecGen.decorate(empty);
   if (hint) {
     hint.textContent = empty ? "Добавь фото, которое нужно улучшить" : "";
     hint.classList.toggle("hidden", !empty);
@@ -96,12 +96,7 @@ function buildEcStartGenerationPayload() {
   });
 }
 
-document.getElementById("ecContinueBtn")?.addEventListener("click", () => {
-  if (!tg) {
-    showToast("Открой «Улучшить фото» внутри Telegram, чтобы продолжить.");
-    return;
-  }
-  if (!ecState.refs.length) return;
+function ecSendViaChat() {
   if (typeof isOpenedViaInlineButton === "function" && isOpenedViaInlineButton()) {
     sendGenerationPayloadViaAnswerWebAppQuery(buildEcStartGenerationPayload());
     return;
@@ -113,7 +108,16 @@ document.getElementById("ecContinueBtn")?.addEventListener("click", () => {
     console.error("enhance constructor sendData failed", e);
     showToast("Не получилось отправить фото. Попробуй ещё раз.");
   }
+}
+
+const ecGen = genBindConstructor({
+  btnId: "ecContinueBtn",
+  errId: "ecSubmitError",
+  buildPayload: buildEcStartGenerationPayload,
+  sendViaChat: ecSendViaChat,
+  noTgToast: "Открой «Улучшить фото» внутри Telegram, чтобы продолжить.",
 });
+ecGen.rerender = renderEcContinueBtn;
 
 (function observeEcPriceStrip() {
   const strip = document.getElementById("ecPriceStrip");

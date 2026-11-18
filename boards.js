@@ -620,17 +620,21 @@ function activateBoardAndContinue(id) {
   }
   setActiveBoardId(id);
   renderBoardBanner();
-  if (isOpenedViaInlineButton()) {
-    sendGenerationPayloadViaAnswerWebAppQuery(buildBoardActivatePayload(board));
-    return;
-  }
-  try {
-    tg.sendData(buildBoardActivatePayload(board));
-    setTimeout(() => tg.close(), 900);
-  } catch (e) {
-    console.error("board activate sendData failed", e);
-    showToast("Не получилось подключить доску. Попробуй ещё раз.");
-  }
+  const legacy = () => {
+    if (isOpenedViaInlineButton()) {
+      sendGenerationPayloadViaAnswerWebAppQuery(buildBoardActivatePayload(board));
+      return;
+    }
+    try {
+      tg.sendData(buildBoardActivatePayload(board));
+      setTimeout(() => tg.close(), 900);
+    } catch (e) {
+      console.error("board activate sendData failed", e);
+      showToast("Не получилось подключить доску. Попробуй ещё раз.");
+    }
+  };
+  // Тихое мгновенное действие через HTTP-очередь: вебапп не закрывается.
+  genInstant(JSON.parse(buildBoardActivatePayload(board)), { okText: "Доска подключена", fallback: legacy });
 }
 
 // Full: тот же вход/гварды, что у activateBoardAndContinue, но другой
@@ -646,17 +650,21 @@ function analyzeBoardStyleAndContinue(id) {
   setActiveBoardId(id);
   saveBoardsState();
   renderBoardBanner();
-  if (isOpenedViaInlineButton()) {
-    sendGenerationPayloadViaAnswerWebAppQuery(buildBoardStyleAnalyzePayload(board));
-    return;
-  }
-  try {
-    tg.sendData(buildBoardStyleAnalyzePayload(board));
-    setTimeout(() => tg.close(), 900);
-  } catch (e) {
-    console.error("board style analyze sendData failed", e);
-    showToast("Не получилось отправить доску на анализ. Попробуй ещё раз.");
-  }
+  const legacy = () => {
+    if (isOpenedViaInlineButton()) {
+      sendGenerationPayloadViaAnswerWebAppQuery(buildBoardStyleAnalyzePayload(board));
+      return;
+    }
+    try {
+      tg.sendData(buildBoardStyleAnalyzePayload(board));
+      setTimeout(() => tg.close(), 900);
+    } catch (e) {
+      console.error("board style analyze sendData failed", e);
+      showToast("Не получилось отправить доску на анализ. Попробуй ещё раз.");
+    }
+  };
+  // Результат анализа бот присылает в чат — после «принято» закрываем, как раньше.
+  genInstant(JSON.parse(buildBoardStyleAnalyzePayload(board)), { okText: "Анализ запущен, результат в чате", fallback: legacy, closeAfter: true });
 }
 
 // ── Экран 4: инфо-строка в карточке стиля (используется из app.js) ─────

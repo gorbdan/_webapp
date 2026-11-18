@@ -1133,8 +1133,15 @@ document.getElementById("packages").addEventListener("click", (e) => {
     showToast("Открой библиотеку внутри Telegram, чтобы купить изюминки.");
     return;
   }
-  tg.sendData(JSON.stringify({ action: "topup", v: APP_VERSION }));
-  setTimeout(() => tg.close(), 600);
+  // Счёт на оплату бот присылает в чат — после «принято» закрываем, как раньше.
+  genInstant({ action: "topup", v: APP_VERSION }, {
+    okText: "Счёт в чате",
+    closeAfter: true,
+    fallback: () => {
+      tg.sendData(JSON.stringify({ action: "topup", v: APP_VERSION }));
+      setTimeout(() => tg.close(), 600);
+    },
+  });
 });
 
 // Дефолт Mini App — «Создать» (единая навигация, Full, docs/specs/

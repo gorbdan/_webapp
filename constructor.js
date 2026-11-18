@@ -395,13 +395,7 @@ function renderVcContinueBtn() {
   const hasDescription = vcState.description.trim().length > 0;
   const photoRequired = VC_PHOTO_REQUIRED_MODELS.has(vcState.model);
   const empty = photoRequired ? !hasPhoto : !hasDescription && !hasPhoto;
-  btn.disabled = empty || vcSubmitting;
-  if (!vcSubmitting) {
-    const price = vcGenTransport ? vcCalcPrice() : null;
-    btn.textContent = vcGenTransport
-      ? (price === null ? "🚀 Создать" : `🚀 Создать · ≈${price} 🍇`)
-      : "🚀 Продолжить в чат";
-  }
+  vcGen.decorate(empty);
   if (hint) {
     hint.textContent = empty
       ? (photoRequired ? "Эта модель работает только от фото — добавь хотя бы одно" : "Добавь описание или фото")
@@ -504,16 +498,6 @@ function buildStartGenerationPayload() {
 // задание уходит боту по HTTP-очереди (gen_transport.js), прогресс показываем
 // тут же. Если схема недоступна (бот не на связи / 404 / 5xx) — прежний путь
 // через sendData, юзер ничего не замечает кроме старой подписи кнопки.
-let vcGenTransport = false; // выставляет genTransportReady() после загрузки
-let vcSubmitting = false;
-
-function vcSetSubmitError(text) {
-  const el = document.getElementById("vcSubmitError");
-  if (!el) return;
-  el.textContent = text || "";
-  el.classList.toggle("hidden", !text);
-}
-
 function vcSendViaChat() {
   // sendData работает только с reply-клавиатуры/Menu Button — с инлайн-
   // кнопки (в т.ч. «✏️ Изменить» на карточке подтверждения) обязателен
@@ -531,55 +515,18 @@ function vcSendViaChat() {
   }
 }
 
-async function vcSubmitViaQueue() {
-  const btn = document.getElementById("vcContinueBtn");
-  vcSubmitting = true;
-  vcSetSubmitError("");
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "⏳ Отправляем…";
-  }
-  let outcome;
-  try {
-    outcome = await genSubmitAndWait(buildStartGenerationPayload());
-  } catch (e) {
-    console.error("constructor gen submit crashed", e);
-    outcome = { kind: "fallback" };
-  }
-  vcSubmitting = false;
-  renderVcContinueBtn();
-
-  if (outcome.kind === "fallback") {
-    vcGenTransport = false; // схема недоступна — дальше подпись и путь по-старому
-    renderVcContinueBtn();
-    vcSendViaChat();
-  } else if (outcome.kind === "launched") {
-    const progressId = outcome.result && outcome.result.progress_id;
-    if (progressId) progressStart(progressId);
-    else progressShowStarted();
-  } else if (outcome.kind === "timeout") {
-    vcSetSubmitError("Бот занят, попробуй через минуту.");
-  } else {
-    vcSetSubmitError(outcome.text || "Не получилось, попробуй ещё раз.");
-  }
-}
-
-document.getElementById("vcContinueBtn")?.addEventListener("click", () => {
-  if (!tg) {
-    showToast("Открой Конструктор внутри Telegram, чтобы продолжить.");
-    return;
-  }
-  if (vcSubmitting) return;
-  if (vcGenTransport) vcSubmitViaQueue();
-  else vcSendViaChat();
+const vcGen = genBindConstructor({
+  btnId: "vcContinueBtn",
+  errId: "vcSubmitError",
+  buildPayload: buildStartGenerationPayload,
+  sendViaChat: vcSendViaChat,
+  newLabel: () => {
+    const price = vcCalcPrice();
+    return price === null ? "🚀 Создать" : `🚀 Создать · ≈${price} 🍇`;
+  },
+  noTgToast: "Открой Конструктор внутри Telegram, чтобы продолжить.",
 });
-
-if (typeof genTransportReady === "function") {
-  genTransportReady().then((ok) => {
-    vcGenTransport = ok;
-    renderVcContinueBtn();
-  });
-}
+vcGen.rerender = renderVcContinueBtn;
 
 // ── Инициализация ────────────────────────────────────────────────────
 
