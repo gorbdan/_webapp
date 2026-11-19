@@ -9,13 +9,16 @@
 //     kind: "launched" { result }   бот запустил генерацию
 //           "rejected" { text }     бот отказал / сбой — показать text, поля не сбрасывать
 //           "timeout"               за 20 с ответа нет
-//           "fallback"              схема недоступна — отправить по-старому (sendData)
+//           "fallback" { reason }   схема недоступна — отправить по-старому (sendData);
+//                                   reason: no_init_data | http_<код> | bad_json | network | not_ok:<error>
+//           (401/403 — НЕ fallback: "rejected" «Открой вебапп заново из меню бота»)
 //
 // Общие утилиты (tg, waitForInitData) — из app.js/studio.js.
 
 const GEN_API = "/api/gen/";
 const GEN_POLL_MS = 1500;
 const GEN_WAIT_MS = 20000;
+const GEN_FALLBACK_NOTE_MS = 2500; // временно: показать причину отката перед sendData
 
 let _genReadyPromise = null;
 
@@ -25,8 +28,9 @@ async function _genPost(action, body) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json().catch(() => ({}));
-  return { httpStatus: res.status, data };
+  let badJson = false;
+  const data = await res.json().catch(() => { badJson = true; return {}; });
+  return { httpStatus: res.status, data, badJson };
 }
 
 // Один раз за сессию. Любая ошибка/404/5xx = схема недоступна (кнопка по-старому).
@@ -61,22 +65,31 @@ async function genSubmitAndWait(payloadText) {
   }
 
   const initData = await waitForInitData();
-  if (!initData) return { kind: "fallback" }; // нет initData — старый путь надёжнее
+  if (!initData) return { kind: "fallback", reason: "no_init_data" }; // нет initData — старый путь надёжнее
 
   let jobId;
   try {
-    const { httpStatus, data } = await _genPost("submit", { init_data: initData, payload });
+    const { httpStatus, data, badJson } = await _genPost("submit", { init_data: initData, payload });
     if (httpStatus === 429 || (data && data.error === "too_many")) {
       return { kind: "rejected", text: genErrorText("too_many") };
     }
+    // initData не принят (устарел >24 ч / не тот BOT_TOKEN): sendData не спасёт
+    // и скроет причину — просим открыть вебапп заново.
+    if (httpStatus === 401 || httpStatus === 403) {
+      console.error(`gen submit auth failed: http_${httpStatus}`, data && data.debug_reason);
+      return { kind: "rejected", reason: `http_${httpStatus}`, text: "Сессия устарела. Открой вебапп заново из меню бота." };
+    }
     if (!data || !data.ok || !data.job_id) {
       // 404/5xx/бот не на связи/любой сбой самой схемы — откат на sendData
-      return { kind: "fallback" };
+      const reason = badJson ? "bad_json"
+        : httpStatus >= 400 ? `http_${httpStatus}${data && data.error ? ":" + data.error : ""}`
+        : `not_ok:${(data && data.error) || "unknown"}`;
+      return { kind: "fallback", reason };
     }
     jobId = data.job_id;
   } catch (e) {
     console.error("gen submit failed", e);
-    return { kind: "fallback" };
+    return { kind: "fallback", reason: "network" };
   }
 
   const deadline = Date.now() + GEN_WAIT_MS;
@@ -147,6 +160,15 @@ function genBindConstructor({ btnId, errId, buildPayload, sendViaChat, newLabel,
     if (outcome.kind === "fallback") {
       ctl.transport = false; // схема недоступна — дальше подпись и путь по-старому
       if (ctl.rerender) ctl.rerender();
+      const reason = outcome.reason || "unknown";
+      console.error("gen fallback to sendData:", reason);
+      // ВРЕМЕННО (бриф 2026-11-19): показать причину отката, пока её ищем.
+      // sendViaChat закрывает вебапп, поэтому ждём GEN_FALLBACK_NOTE_MS.
+      // Убрать: поставить GEN_FALLBACK_NOTE_MS = 0.
+      if (GEN_FALLBACK_NOTE_MS > 0) {
+        setError(`Отправлено через чат: ${reason}`);
+        await new Promise((r) => setTimeout(r, GEN_FALLBACK_NOTE_MS));
+      }
       sendViaChat();
       return;
     }
@@ -188,7 +210,7 @@ function genBindConstructor({ btnId, errId, buildPayload, sendViaChat, newLabel,
 async function genInstant(payload, { okText = "Готово", fallback, closeAfter = false } = {}) {
   if (!tg || !(await genTransportReady())) { fallback(); return false; }
   const out = await genSubmitAndWait(JSON.stringify(payload));
-  if (out.kind === "fallback") { fallback(); return false; }
+  if (out.kind === "fallback") { console.error("gen instant fallback:", out.reason); fallback(); return false; }
   if (out.kind === "launched") {
     const msgs = out.result && Array.isArray(out.result.messages) ? out.result.messages : [];
     showToast(String(msgs[0] || okText));
